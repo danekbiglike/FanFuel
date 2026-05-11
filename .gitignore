@@ -1,0 +1,40 @@
+# Среда и секреты
+.env
+.env.*
+!.env.example
+SECRETS.md
+SERVER_ACCESS.md
+docs/SERVER_ACCESS.md
+
+# Node.js / frontend
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.turbo/
+.vite/
+*.tsbuildinfo
+
+# Go
+bin/
+*.test
+*.out
+vendor/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Логи и временные файлы
+*.log
+tmp/
+temp/
+
+# Docker / runtime
+postgres-data/
+redis-data/
+storage-data/
+

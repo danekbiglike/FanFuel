@@ -1,0 +1,17 @@
+{
+  "errors.generic": "Something went wrong.",
+  "errors.network": "Could not connect to the server.",
+  "errors.permissionDenied": "You do not have permission for this action.",
+  "errors.invalidCredentials": "Invalid email or password.",
+  "errors.forbidden": "You do not have permission for this action.",
+  "errors.notFound": "The requested resource was not found.",
+  "errors.conflict": "This resource already exists.",
+  "errors.validationFailed": "Please check the form fields.",
+  "errors.internal": "Internal service error.",
+  "errors.methodNotAllowed": "Request method is not supported.",
+  "errors.rateLimited": "Too many attempts. Try again later.",
+  "errors.unauthorized": "Please sign in first.",
+  "errors.invalidJson": "Invalid request format.",
+  "errors.idempotencyKeyRequired": "Please submit the form again.",
+  "errors.idempotencyKeyConflict": "The repeated submission differs from the first one."
+}

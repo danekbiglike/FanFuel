@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FanFuel</title>
+    <script>
+      (function () {
+        try {
+          var key = "fanfuel_theme_preference";
+          var cookie = "fanfuel_theme_preference";
+          var preference = window.localStorage.getItem(key);
+          if (!/^(system|light|dark)$/.test(preference || "")) {
+            var match = document.cookie
+              .split(";")
+              .map(function (item) {
+                return item.trim();
+              })
+              .find(function (item) {
+                return item.indexOf(cookie + "=") === 0;
+              });
+            preference = match ? decodeURIComponent(match.slice(cookie.length + 1)) : "system";
+          }
+          if (!/^(system|light|dark)$/.test(preference || "")) preference = "system";
+          var resolved =
+            preference === "system"
+              ? window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light"
+              : preference;
+          document.documentElement.dataset.theme = resolved;
+          document.documentElement.dataset.themePreference = preference;
+          document.documentElement.style.colorScheme = resolved;
+        } catch (error) {
+          document.documentElement.dataset.theme = "light";
+          document.documentElement.dataset.themePreference = "system";
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

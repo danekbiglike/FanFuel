@@ -1,0 +1,52 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8080}
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
+      WS_BASE_URL: ${WS_BASE_URL:-ws://localhost:8081}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-ru}
+      NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-ru}
+      NEXT_PUBLIC_DEFAULT_CURRENCY: ${NEXT_PUBLIC_DEFAULT_CURRENCY:-RUB}
+      NEXT_PUBLIC_WIDGET_BASE_URL: ${NEXT_PUBLIC_WIDGET_BASE_URL:-http://localhost:5173}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8080}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-ru}
+      VITE_DEFAULT_LOCALE: ${VITE_DEFAULT_LOCALE:-ru}
+      VITE_DEFAULT_CURRENCY: ${VITE_DEFAULT_CURRENCY:-RUB}
+    ports:
+      - "${ADMIN_PORT:-3001}:3001"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  widget:
+    build:
+      context: .
+      dockerfile: apps/widget/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      WS_BASE_URL: ${WS_BASE_URL:-ws://localhost:8081}
+      VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-ws://localhost:8081}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-ru}
+      VITE_DEFAULT_LOCALE: ${VITE_DEFAULT_LOCALE:-ru}
+    ports:
+      - "${WIDGET_PORT:-5173}:5173"
+    depends_on:
+      ws:
+        condition: service_healthy

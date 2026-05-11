@@ -1,0 +1,17 @@
+{
+  "errors.generic": "Что-то пошло не так.",
+  "errors.network": "Не удалось подключиться к серверу.",
+  "errors.permissionDenied": "Недостаточно прав для действия.",
+  "errors.invalidCredentials": "Неверный email или пароль.",
+  "errors.forbidden": "Недостаточно прав для действия.",
+  "errors.notFound": "Запрошенный ресурс не найден.",
+  "errors.conflict": "Такой ресурс уже существует.",
+  "errors.validationFailed": "Проверьте поля формы.",
+  "errors.internal": "Внутренняя ошибка сервиса.",
+  "errors.methodNotAllowed": "Метод запроса не поддерживается.",
+  "errors.rateLimited": "Слишком много попыток. Попробуйте позже.",
+  "errors.unauthorized": "Нужно войти в аккаунт.",
+  "errors.invalidJson": "Некорректный формат запроса.",
+  "errors.idempotencyKeyRequired": "Повторите отправку формы.",
+  "errors.idempotencyKeyConflict": "Повторная отправка отличается от первой."
+}

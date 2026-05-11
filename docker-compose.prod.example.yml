@@ -1,0 +1,81 @@
+name: fanfuel
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      API_PORT: 8080
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_ADDR: ${REDIS_ADDR}
+      JWT_SECRET: ${JWT_SECRET}
+      ACCESS_TOKEN_TTL_MINUTES: ${ACCESS_TOKEN_TTL_MINUTES}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  ws:
+    build:
+      context: .
+      dockerfile: services/ws/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      WS_PORT: 8081
+      REDIS_ADDR: ${REDIS_ADDR}
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      WORKER_PORT: 8082
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_ADDR: ${REDIS_ADDR}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  redis-data:

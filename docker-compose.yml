@@ -1,0 +1,123 @@
+name: fanfuel
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fanfuel}
+      POSTGRES_USER: ${POSTGRES_USER:-fanfuel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fanfuel_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:-fanfuel}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:-fanfuel_dev_secret}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      API_PORT: 8080
+      DATABASE_URL: postgres://${POSTGRES_USER:-fanfuel}:${POSTGRES_PASSWORD:-fanfuel_dev_password}@postgres:5432/${POSTGRES_DB:-fanfuel}?sslmode=disable
+      REDIS_ADDR: redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_me}
+      ACCESS_TOKEN_TTL_MINUTES: ${ACCESS_TOKEN_TTL_MINUTES:-60}
+      ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-admin@example.local}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:5173}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ws:
+    build:
+      context: .
+      dockerfile: services/ws/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      WS_PORT: 8081
+      DATABASE_URL: postgres://${POSTGRES_USER:-fanfuel}:${POSTGRES_PASSWORD:-fanfuel_dev_password}@postgres:5432/${POSTGRES_DB:-fanfuel}?sslmode=disable
+      REDIS_ADDR: redis:6379
+    ports:
+      - "${WS_PORT:-8081}:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      WORKER_PORT: 8082
+      DATABASE_URL: postgres://${POSTGRES_USER:-fanfuel}:${POSTGRES_PASSWORD:-fanfuel_dev_password}@postgres:5432/${POSTGRES_DB:-fanfuel}?sslmode=disable
+      REDIS_ADDR: redis:6379
+    ports:
+      - "${WORKER_PORT:-8082}:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:
