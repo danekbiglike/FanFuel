@@ -26,6 +26,8 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 - `minio`: `http://localhost:9000`;
 - `minio console`: `http://localhost:9001`.
 
+В Docker Compose web-контейнер ходит к Go API по внутреннему адресу `http://api:8080` через `FANFUEL_INTERNAL_API_BASE_URL`. При запуске `npm run dev:web` на хосте можно использовать значение из `.env.example`: `http://localhost:8080`.
+
 ## Docker Compose
 
 Файлы:
@@ -105,25 +107,32 @@ sh infra/scripts/migrate.sh docker-compose.yml
 
 ## Seed data
 
-В `v0.0` добавлены placeholder scripts:
+Для локальной разработки есть идемпотентные seed scripts:
 
 - `infra/scripts/seed-dev.sh`;
 - `infra/scripts/seed-dev.ps1`.
 
-Полные seed данные появятся после доменной схемы `v0.1-v0.3`.
+После применения миграций они создают dev-only продавцов и опубликованные marketplace-товары через реальные таблицы `users`, `seller_profiles`, `product_categories` и `products`.
 
-Планируемые seed данные:
+Запуск:
 
-- admin user;
-- test buyer;
-- test creator;
-- test seller lite;
-- test seller pro;
-- categories;
-- products;
-- donation goal;
-- mock orders;
-- mock disputes.
+```bash
+sh infra/scripts/seed-dev.sh docker-compose.yml
+```
+
+На Windows:
+
+```powershell
+.\infra\scripts\seed-dev.ps1 -ComposeFile docker-compose.yml
+```
+
+Текущий seed-набор:
+
+- test seller lite/pro;
+- active marketplace categories из миграции;
+- published mock products для OBS-паков, дизайна, цифровых услуг и coaching.
+
+Mock orders, disputes, payouts и реальные платёжные сценарии seed-скрипт не создаёт.
 
 Seed не должен содержать реальные персональные данные.
 

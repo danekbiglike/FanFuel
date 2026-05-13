@@ -36,7 +36,7 @@ func (s *Store) ListCategories(ctx context.Context, includeRestricted bool) (*Pr
 
 func (s *Store) ListPublicProducts(ctx context.Context, categorySlug string, query string, sort string, limit int, offset int) (*ProductListResponse, error) {
 	limit, offset = normalizeListLimitOffset(limit, offset)
-	categorySlug = normalizeSlug(categorySlug)
+	categorySlug = normalizeOptionalSlug(categorySlug)
 	query = strings.TrimSpace(query)
 
 	conditions := []string{"p.status = 'published'", "p.deleted_at IS NULL", "c.status = 'active'"}

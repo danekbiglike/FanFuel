@@ -351,7 +351,7 @@ export function AppTopBar() {
 
   return (
     <header className={topbarClassName}>
-      <a className="ff-brand" href="/marketplace" aria-label={common.projectName}>
+      <a className="ff-brand" href="/" aria-label={common.projectName}>
         <span>FF</span>
         <strong>{common.projectName}</strong>
       </a>

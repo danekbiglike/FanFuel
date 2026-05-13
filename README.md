@@ -121,6 +121,7 @@ cd services && go test ./...
 ## Документация
 
 - [ROADMAP.md](ROADMAP.md)
+- [docs/roadmap/README.md](docs/roadmap/README.md)
 - [docs/PRODUCT_SPEC.md](docs/PRODUCT_SPEC.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/DOMAIN_MODEL.md](docs/DOMAIN_MODEL.md)
@@ -144,6 +145,7 @@ cd services && go test ./...
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 - [docs/SECURITY.md](docs/SECURITY.md)
 - [docs/TASKS.md](docs/TASKS.md)
+- [docs/tasks/README.md](docs/tasks/README.md)
 - [docs/UX_PLAN.md](docs/UX_PLAN.md)
 - [docs/TESTING.md](docs/TESTING.md)
 - [AGENTS.md](AGENTS.md)
@@ -152,8 +154,8 @@ cd services && go test ./...
 
 После обязательного чтения документов из `AGENTS.md` для большинства задач достаточно держать рядом короткий маршрут:
 
-1. Проверить актуальный статус в `docs/HANDOFF.md`, `ROADMAP.md` и верхнем блоке `docs/TASKS.md`.
-2. Взять одну задачу из блока `Активный фокус` в `docs/TASKS.md`.
+1. Проверить актуальный статус в `docs/HANDOFF.md`, `ROADMAP.md`, `docs/roadmap/current-focus.md` и верхнем блоке `docs/TASKS.md`.
+2. Взять одну задачу из блока `Активный фокус` в `docs/TASKS.md` или `docs/tasks/active-focus.md`, затем открыть только её файл в `docs/tasks/.../<TASK-ID>.md`.
 3. Для UI-задач дополнительно свериться с `docs/UI_UX_TRACKER.md`, `docs/PAGE_SPECS.md`, `docs/UX_IMPLEMENTATION_STATUS.md` и `docs/DO_NOT_BUILD_YET.md`.
 4. Для API, БД, платежей, выплат, safe deal и безопасности свериться с `docs/API_PLAN.md`, `docs/DOMAIN_MODEL.md`, `docs/PAYMENTS.md` и `docs/SECURITY.md`.
 5. После работы обновить `docs/HANDOFF.md`; если изменение заметно для проекта, обновить `docs/CHANGELOG.md`.

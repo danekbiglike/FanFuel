@@ -4,12 +4,21 @@ interface MoneyInput {
   amountMinor: number;
   currency: CurrencyCode;
   locale?: Locale;
+  trimZeroFraction?: boolean;
 }
 
-export function formatMoney({ amountMinor, currency, locale = "ru" }: MoneyInput): string {
+export function formatMoney({
+  amountMinor,
+  currency,
+  locale = "ru",
+  trimZeroFraction = false
+}: MoneyInput): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency
+    currency,
+    ...(trimZeroFraction && amountMinor % 100 === 0
+      ? { maximumFractionDigits: 0, minimumFractionDigits: 0 }
+      : {})
   }).format(amountMinor / 100);
 }
 
@@ -28,4 +37,3 @@ export function formatDate(
 export function formatNumber(value: number, locale: Locale = "ru"): string {
   return new Intl.NumberFormat(locale).format(value);
 }
-

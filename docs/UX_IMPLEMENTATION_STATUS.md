@@ -13,25 +13,27 @@
 
 ## Реализовано
 
-| ID          | Что реализовано                      | Где                                                                              | Версия | Статус      | Комментарий                                                                                                                                                                                            |
-| ----------- | ------------------------------------ | -------------------------------------------------------------------------------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| UX-IMPL-001 | Главная FanFuel                      | `apps/web /`                                                                     | v0.2   | PARTIAL     | Есть landing, но нужен v0.3 role/marketplace update.                                                                                                                                                   |
-| UX-IMPL-002 | Вход                                 | `apps/web /auth/login`                                                           | v0.1   | PARTIAL     | Рабочая форма, нет reset/onboarding redirect.                                                                                                                                                          |
-| UX-IMPL-003 | Регистрация с role intent            | `apps/web /auth/register`                                                        | v0.1   | PARTIAL     | Role intent есть, отдельного выбора роли/onboarding нет.                                                                                                                                               |
-| UX-IMPL-004 | Публичная страница автора с донатами | `apps/web /creators/[slug]`                                                      | v0.2   | PARTIAL     | Есть донат, цели, история, top donors.                                                                                                                                                                 |
-| UX-IMPL-005 | OBS donation alert widget            | `apps/widget /?token=`                                                           | v0.2   | PARTIAL     | Есть reconnect/dedupe/theme, нет settings preview.                                                                                                                                                     |
-| UX-IMPL-006 | Базовая admin users panel            | `apps/admin /`                                                                   | v0.3   | PARTIAL     | Есть list/block/activate, confirmation и вкладка moderation товаров; filters/details позже.                                                                                                            |
-| UX-IMPL-007 | ThemeSwitcher и semantic tokens      | `packages/ui`, web/admin/widget                                                  | v0.2   | PARTIAL     | Работает, но нужны icon/tooltips/design review.                                                                                                                                                        |
-| UX-IMPL-008 | Marketplace MVP                      | `apps/web /marketplace`, `/marketplace/products/[slug]`, `/checkout/[productId]` | v0.3   | IMPLEMENTED | Каталог, карточка товара, checkout и mock safe deal.                                                                                                                                                   |
-| UX-IMPL-009 | Buyer order MVP                      | `apps/web /buyer`, `/buyer/orders/[id]`                                          | v0.3   | IMPLEMENTED | Список заказов, timeline, confirm delivery и review.                                                                                                                                                   |
-| UX-IMPL-010 | Seller marketplace MVP               | `apps/web /seller`, `/seller/products`, `/seller/products/new`, `/seller/orders` | v0.3   | IMPLEMENTED | Создание товара, модерация, товары и order actions.                                                                                                                                                    |
-| UX-IMPL-011 | Marketplace как главная              | `apps/web /`, `/marketplace`                                                     | v0.3   | IMPLEMENTED | `/` перенаправляет в marketplace, на marketplace добавлены buyer benefits.                                                                                                                             |
-| UX-IMPL-012 | Ролевые публичные лендинги           | `/for-buyers`, `/for-streamers`, `/for-sellers`                                  | v0.3   | IMPLEMENTED | Три страницы для покупателей, стримеров и продавцов с i18n и semantic tokens.                                                                                                                          |
-| UX-IMPL-013 | Authenticated topbar                 | `apps/web AppTopBar`                                                             | v0.3   | PARTIAL     | Для вошедшего пользователя добавлены поиск, actions и меню аккаунта; notification flow позже.                                                                                                          |
-| UX-IMPL-014 | Compact authenticated menu           | `apps/web AppTopBar`                                                             | v0.3   | PARTIAL     | Мобильный auth topbar держится в одну строку; меню разделено на категории, theme/language открываются overlay-dropdown.                                                                                |
-| UX-IMPL-015 | Guest topbar menu                    | `apps/web AppTopBar`                                                             | v0.3   | PARTIAL     | Для гостя добавлены topbar search и dropdown menu с входом, регистрацией, публичными разделами, темой и языком.                                                                                        |
-| UX-IMPL-016 | Topbar search polish                 | `apps/web AppTopBar`, `/marketplace`                                             | v0.3   | PARTIAL     | Search placeholder выбирается по фактической ширине поля, кнопка поиска выровнена по inset-отступам, form controls защищены от hydration warning из-за внешних injected attributes.                    |
-| UX-IMPL-017 | Mobile external dev auth             | `apps/web AppTopBar`, `/auth/login`, `/auth/register`, `/api/v1/*`               | v0.3   | PARTIAL     | Topbar search стал единым контролом с вросшей кнопкой submit; auth forms защищены от injected attributes; web API calls идут через same-origin proxy, чтобы телефон не обращался к своему `localhost`. |
+| ID          | Что реализовано                            | Где                                                                              | Версия | Статус      | Комментарий                                                                                                                                                                                            |
+| ----------- | ------------------------------------------ | -------------------------------------------------------------------------------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| UX-IMPL-001 | Главная FanFuel                            | `apps/web /`                                                                     | v0.2   | PARTIAL     | Есть landing, но нужен v0.3 role/marketplace update.                                                                                                                                                   |
+| UX-IMPL-002 | Вход                                       | `apps/web /auth/login`                                                           | v0.1   | PARTIAL     | Рабочая форма, нет reset/onboarding redirect.                                                                                                                                                          |
+| UX-IMPL-003 | Регистрация с role intent                  | `apps/web /auth/register`                                                        | v0.1   | PARTIAL     | Role intent есть, отдельного выбора роли/onboarding нет.                                                                                                                                               |
+| UX-IMPL-004 | Публичная страница автора с донатами       | `apps/web /creators/[slug]`                                                      | v0.2   | PARTIAL     | Есть донат, цели, история, top donors.                                                                                                                                                                 |
+| UX-IMPL-005 | OBS donation alert widget                  | `apps/widget /?token=`                                                           | v0.2   | PARTIAL     | Есть reconnect/dedupe/theme, нет settings preview.                                                                                                                                                     |
+| UX-IMPL-006 | Базовая admin users panel                  | `apps/admin /`                                                                   | v0.3   | PARTIAL     | Есть list/block/activate, confirmation и вкладка moderation товаров; filters/details позже.                                                                                                            |
+| UX-IMPL-007 | ThemeSwitcher и semantic tokens            | `packages/ui`, web/admin/widget                                                  | v0.2   | PARTIAL     | Работает, но нужны icon/tooltips/design review.                                                                                                                                                        |
+| UX-IMPL-008 | Marketplace MVP                            | `apps/web /marketplace`, `/marketplace/products/[slug]`, `/checkout/[productId]` | v0.3   | IMPLEMENTED | Каталог, карточка товара, checkout и mock safe deal.                                                                                                                                                   |
+| UX-IMPL-009 | Buyer order MVP                            | `apps/web /buyer`, `/buyer/orders/[id]`                                          | v0.3   | IMPLEMENTED | Список заказов, timeline, confirm delivery и review.                                                                                                                                                   |
+| UX-IMPL-010 | Seller marketplace MVP                     | `apps/web /seller`, `/seller/products`, `/seller/products/new`, `/seller/orders` | v0.3   | IMPLEMENTED | Создание товара, модерация, товары и order actions.                                                                                                                                                    |
+| UX-IMPL-011 | Marketplace как главная                    | `apps/web /`, `/marketplace`                                                     | v0.3   | IMPLEMENTED | `/` рендерит ту же marketplace-витрину без redirect, `/marketplace` остаётся прямым маршрутом каталога.                                                                                                |
+| UX-IMPL-012 | Ролевые публичные лендинги                 | `/for-buyers`, `/for-streamers`, `/for-sellers`                                  | v0.3   | IMPLEMENTED | Три страницы для покупателей, стримеров и продавцов с i18n и semantic tokens.                                                                                                                          |
+| UX-IMPL-013 | Authenticated topbar                       | `apps/web AppTopBar`                                                             | v0.3   | PARTIAL     | Для вошедшего пользователя добавлены поиск, actions и меню аккаунта; notification flow позже.                                                                                                          |
+| UX-IMPL-014 | Compact authenticated menu                 | `apps/web AppTopBar`                                                             | v0.3   | PARTIAL     | Мобильный auth topbar держится в одну строку; меню разделено на категории, theme/language открываются overlay-dropdown.                                                                                |
+| UX-IMPL-015 | Guest topbar menu                          | `apps/web AppTopBar`                                                             | v0.3   | PARTIAL     | Для гостя добавлены topbar search и dropdown menu с входом, регистрацией, публичными разделами, темой и языком.                                                                                        |
+| UX-IMPL-016 | Topbar search polish                       | `apps/web AppTopBar`, `/marketplace`                                             | v0.3   | PARTIAL     | Search placeholder выбирается по фактической ширине поля, кнопка поиска выровнена по inset-отступам, form controls защищены от hydration warning из-за внешних injected attributes.                    |
+| UX-IMPL-017 | Mobile external dev auth                   | `apps/web AppTopBar`, `/auth/login`, `/auth/register`, `/api/v1/*`               | v0.3   | PARTIAL     | Topbar search стал единым контролом с вросшей кнопкой submit; auth forms защищены от injected attributes; web API calls идут через same-origin proxy, чтобы телефон не обращался к своему `localhost`. |
+| UX-IMPL-018 | Главная маркетплейса вместо лендинга       | `apps/web /marketplace`                                                          | v0.3   | IMPLEMENTED | `/marketplace` стал мобильной главной маркетплейса: первый экран, поиск, объясняющие плашки, горизонтальные ленты товаров, подборки авторов, блоки категорий, блок доверия и нижняя лента товаров.     |
+| UX-IMPL-019 | Главная без redirect и мягкие empty states | `apps/web /`, `/marketplace`, `infra/scripts/seed-dev.*`                         | v0.3   | IMPLEMENTED | `/` рендерит ту же витрину без redirect; marketplace hero убрал внутренний поиск/CRM-фильтры и Apply CTA; empty state получил действия; dev seed создаёт опубликованные товары.                        |
 
 ## Реализовано частично
 
@@ -244,7 +246,7 @@
 
 ### Новая логика
 
-Корневой route `/` стал marketplace-first входом через redirect на `/marketplace`. Вход и регистрация после успешной авторизации ведут в marketplace, а `/auth/login` и `/auth/register` перенаправляют уже авторизованного пользователя. Topbar показывает auth-links только гостю и профиль только авторизованному пользователю.
+Корневой route `/` стал marketplace-first входом: сейчас он рендерит ту же витрину, что и `/marketplace`, без redirect. Вход и регистрация после успешной авторизации ведут в marketplace, а `/auth/login` и `/auth/register` перенаправляют уже авторизованного пользователя. Topbar показывает auth-links только гостю и профиль только авторизованному пользователю.
 
 ### Что нужно изменить
 
@@ -449,6 +451,77 @@ Topbar search визуально работает как один control: по�
 ### Комментарии для агента
 
 Hydration guard не должен использоваться как общий способ скрывать реальные SSR/client расхождения; здесь он ограничен контролами, куда браузер/расширение добавляет сторонний атрибут до React hydration.
+
+## CHANGE-2026-05-11-007: Главная маркетплейса как витрина товаров
+
+Статус: IMPLEMENTED
+Затрагивает: PAGE-MARKETPLACE, PAGE-HOME, FLOW-BUYER-HOME, FLOW-BUYER-SEARCH
+Версия: v0.3
+Приоритет: P0
+Автор записи: Codex
+
+### Новая логика
+
+Главные точки входа `/` и `/marketplace` больше не выглядят как текстовый лендинг: первый экран показывает короткий торговый hero без внутренней search-form, быстрые категории, объяснения Safe deal/промокодов/проверенных продавцов, витринную карточку товара и начало товарной ленты.
+
+### Что нужно изменить
+
+Провести screenshot QA на 320/390/768/1440 в light/dark и при пустом marketplace API проверить, что пустое состояние остаётся честным и не показывает фиктивные товары.
+
+### Что не нужно трогать
+
+Не создавать future routes `/creators`, creator store, promo pages, real safe deal page, real payment UI, payouts, disputes или risky categories без обновления статусов и review.
+
+### Какие страницы затрагивает
+
+PAGE-MARKETPLACE и корневой PAGE-HOME как один marketplace screen без redirect.
+
+### Какие компоненты затрагивает
+
+`ProductCard`, marketplace filters, product shelf pattern, category action blocks, trust cards.
+
+### Acceptance criteria
+
+- На первом экране видны покупка цифровых товаров, поддержка авторов, safe deal и следующие действия.
+- Товары в лентах берутся из API; при отсутствии товаров показывается empty state.
+- User-facing строки добавлены в `ru` и `en`.
+- Цвета используют semantic tokens и работают в light/dark.
+
+## CHANGE-2026-05-12-001: Главная marketplace без redirect и CRM-фильтров
+
+Статус: IMPLEMENTED
+Затрагивает: PAGE-HOME, PAGE-MARKETPLACE, FLOW-BUYER-HOME, FLOW-BUYER-SEARCH
+Версия: v0.3
+Приоритет: P0
+Автор записи: Codex
+
+### Новая логика
+
+Корневой route `/` рендерит тот же marketplace screen, что и `/marketplace`, без HTTP/client redirect. Внутренний hero-блок поиска на marketplace убран: поиск остаётся в topbar, а первый экран показывает CTA, быстрые категории, витринную карточку товара и компактный блок ролей.
+
+### Что нужно изменить
+
+Провести screenshot QA на 320/390/768/1440 в light/dark после запуска dev seed, отдельно проверить пустую БД без seed и отсутствие горизонтального overflow.
+
+### Что не нужно трогать
+
+Не добавлять fake products во frontend и не открывать risky categories без legal/payment review.
+
+### Какие страницы затрагивает
+
+PAGE-HOME и PAGE-MARKETPLACE.
+
+### Какие компоненты затрагивает
+
+`AppTopBar`, marketplace hero, product shelves, empty state, dev seed scripts.
+
+### Acceptance criteria
+
+- `/` открывает marketplace-витрину без смены URL.
+- На первом экране нет кнопки "Применить", нет внутренней кнопки "Искать" и нет hero CTA, выглядящих как переход на отдельные страницы.
+- `LEGAL_REVIEW_REQUIRED` не выводится в публичном marketplace UI.
+- Empty state предлагает "Стать продавцом" и "Все категории".
+- Dev seed scripts создают опубликованные товары идемпотентно.
 
 ## Шаблон записи
 

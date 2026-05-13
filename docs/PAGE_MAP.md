@@ -4,27 +4,27 @@
 
 ## Текущие реализованные routes
 
-| Приложение    | Route                          | Назначение                                       | Статус       |
-| ------------- | ------------------------------ | ------------------------------------------------ | ------------ |
-| `apps/web`    | `/`                            | Redirect на marketplace как главную точку входа  | IMPLEMENTED  |
-| `apps/web`    | `/for-buyers`                  | Ролевой лендинг для покупателей                  | IMPLEMENTED  |
-| `apps/web`    | `/for-streamers`               | Ролевой лендинг для стримеров                    | IMPLEMENTED  |
-| `apps/web`    | `/for-sellers`                 | Ролевой лендинг для продавцов                    | IMPLEMENTED  |
-| `apps/web`    | `/auth/login`                  | Вход                                             | PARTIAL      |
-| `apps/web`    | `/auth/register`               | Регистрация                                      | PARTIAL      |
-| `apps/web`    | `/me/profile`                  | Профиль, временный mini studio и seller settings | NEEDS_REWORK |
-| `apps/web`    | `/creators/[slug]`             | Публичная страница автора с донат-формой         | PARTIAL      |
-| `apps/web`    | `/marketplace`                 | Маркетплейс товаров                              | IMPLEMENTED  |
-| `apps/web`    | `/marketplace/products/[slug]` | Карточка товара                                  | IMPLEMENTED  |
-| `apps/web`    | `/checkout/[productId]`        | Checkout товара через mock safe deal             | IMPLEMENTED  |
-| `apps/web`    | `/buyer`                       | Кабинет покупателя                               | IMPLEMENTED  |
-| `apps/web`    | `/buyer/orders/[id]`           | Страница заказа покупателя                       | IMPLEMENTED  |
-| `apps/web`    | `/seller`                      | Кабинет продавца                                 | IMPLEMENTED  |
-| `apps/web`    | `/seller/products`             | Товары продавца                                  | IMPLEMENTED  |
-| `apps/web`    | `/seller/products/new`         | Создание товара                                  | IMPLEMENTED  |
-| `apps/web`    | `/seller/orders`               | Заказы продавца                                  | IMPLEMENTED  |
-| `apps/admin`  | `/`                            | Admin users/product moderation panel             | PARTIAL      |
-| `apps/widget` | `/?token=...`                  | OBS donation alert widget                        | PARTIAL      |
+| Приложение    | Route                          | Назначение                                                | Статус       |
+| ------------- | ------------------------------ | --------------------------------------------------------- | ------------ |
+| `apps/web`    | `/`                            | Та же главная витрина, что и `/marketplace`, без redirect | IMPLEMENTED  |
+| `apps/web`    | `/for-buyers`                  | Ролевой лендинг для покупателей                           | IMPLEMENTED  |
+| `apps/web`    | `/for-streamers`               | Ролевой лендинг для стримеров                             | IMPLEMENTED  |
+| `apps/web`    | `/for-sellers`                 | Ролевой лендинг для продавцов                             | IMPLEMENTED  |
+| `apps/web`    | `/auth/login`                  | Вход                                                      | PARTIAL      |
+| `apps/web`    | `/auth/register`               | Регистрация                                               | PARTIAL      |
+| `apps/web`    | `/me/profile`                  | Профиль, временный mini studio и seller settings          | NEEDS_REWORK |
+| `apps/web`    | `/creators/[slug]`             | Публичная страница автора с донат-формой                  | PARTIAL      |
+| `apps/web`    | `/marketplace`                 | Маркетплейс товаров                                       | IMPLEMENTED  |
+| `apps/web`    | `/marketplace/products/[slug]` | Карточка товара                                           | IMPLEMENTED  |
+| `apps/web`    | `/checkout/[productId]`        | Checkout товара через mock safe deal                      | IMPLEMENTED  |
+| `apps/web`    | `/buyer`                       | Кабинет покупателя                                        | IMPLEMENTED  |
+| `apps/web`    | `/buyer/orders/[id]`           | Страница заказа покупателя                                | IMPLEMENTED  |
+| `apps/web`    | `/seller`                      | Кабинет продавца                                          | IMPLEMENTED  |
+| `apps/web`    | `/seller/products`             | Товары продавца                                           | IMPLEMENTED  |
+| `apps/web`    | `/seller/products/new`         | Создание товара                                           | IMPLEMENTED  |
+| `apps/web`    | `/seller/orders`               | Заказы продавца                                           | IMPLEMENTED  |
+| `apps/admin`  | `/`                            | Admin users/product moderation panel                      | PARTIAL      |
+| `apps/widget` | `/?token=...`                  | OBS donation alert widget                                 | PARTIAL      |
 
 ## Public Pages
 

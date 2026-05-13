@@ -33,6 +33,14 @@ func normalizeSlug(value string) string {
 	return normalized
 }
 
+func normalizeOptionalSlug(value string) string {
+	if strings.TrimSpace(value) == "" {
+		return ""
+	}
+
+	return normalizeSlug(value)
+}
+
 func randomSuffix(length int) string {
 	const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
 	var builder strings.Builder

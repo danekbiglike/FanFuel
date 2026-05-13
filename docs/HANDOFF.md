@@ -390,6 +390,123 @@ Oracle VM `fanfuel`:
 Следующие шаги: вручную открыть `http://danechka.com:3002/auth/login` на телефоне, проверить отсутствие hydration overlay и успешный login при запущенном Go API на машине с Next.js.
 Связанные TASK-ID: `UX-TASK-016`, `FF-0307`.
 
+## Handoff-запись 2026-05-11: Главная маркетплейса как мобильная витрина
+
+Дата: 2026-05-11
+Агент: Codex
+Задача: переделать `/marketplace` из текстового лендинга в полноценную мобильную главную маркетплейса цифровых товаров и услуг.
+Изменённые файлы: `apps/web/src/app/marketplace/page.tsx`, `apps/web/src/app/globals.css`, `packages/i18n/locales/ru/common.json`, `packages/i18n/locales/en/common.json`, `docs/PAGE_SPECS.md`, `docs/UI_UX_TRACKER.md`, `docs/UX_IMPLEMENTATION_STATUS.md`, `docs/TASKS.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
+Что сделано: `/marketplace` получил короткий торговый hero с поиском, быстрыми категориями и CTA; кликабельные плашки Safe deal/промокодов/проверенных продавцов; ленту "Популярно сейчас"; блок "Подборки авторов"; категории "Для стримеров" и "Игровые услуги"; блок доверия; нижнюю ленту новых товаров. Карточки товаров стали плотнее и показывают цену, продавца, рейтинг/нового продавца, safe deal и бейдж поддержки автора при наличии `affiliate_percent_bps`. Ленты используют реальные товары из marketplace API и не подставляют фиктивные товары при пустой БД.
+Проверки: `npx prettier --write` и `npx prettier --check` для изменённых UI/i18n/docs файлов; `git diff --check` — успешно; `npm run typecheck --workspaces --if-present` — успешно; `npm run lint` — успешно; `npm run build --workspaces --if-present` — успешно; `npm run test --workspaces --if-present` — успешно; `GET http://localhost:8080/healthz` — `ok`; `GET http://localhost:3002/marketplace` — 200; CDP smoke на `http://localhost:3002/marketplace` при viewport 390x844 — горизонтального overflow нет, hero высотой 609px, `#popular-now` начинается на 784px и виден в первом экране, 3 explainer-плашки есть, клик по первой открывает объяснение.
+Что не проверено: полный screenshot QA на 320/390/768/1440 в light/dark; визуальный вид лент с опубликованными товарами, потому что текущий `GET /api/v1/products` в dev вернул пустой список; реальный iOS/Android браузер.
+Риски: при пустом marketplace API страница честно показывает пустые состояния вместо демо-товаров; авторские подборки используют существующий public creator route `/creators/[slug]`, но конкретные витрины будут полезны только после появления соответствующих профилей/товаров; игровые услуги остаются с `LEGAL_REVIEW_REQUIRED` и не должны расширяться в рискованные категории без legal/payment review; Safe deal в `v0.3` остаётся mock-сценарием.
+Следующие шаги: добавить dev/seed-набор опубликованных товаров только как отдельное решение, затем провести screenshot QA mobile/light/dark и расширять поиск по авторам/категориям отдельной backend/API задачей.
+Связанные TASK-ID: `UX-TASK-017`, `FF-0307`, `UX-TASK-010`.
+
+## Handoff-запись 2026-05-11: черновик Figma design map
+
+Дата: 2026-05-11
+Агент: Codex
+Задача: создать Figma-карту текущего дизайна FanFuel и примеры базовых UI-паттернов.
+Изменённые файлы: `docs/HANDOFF.md`; Figma-файл `FanFuel Design Map v0.3` (`https://www.figma.com/design/RiTvolqL6ooNxkgxb77gjy`).
+Что сделано: создан новый Figma-файл; заведены страницы `00 Cover`, `01 Foundations`, `02 Components & Screens`; добавлены коллекции переменных `FanFuel / Color` с режимами Light/Dark и `FanFuel / Sizing`; добавлены 48 переменных на основе `packages/ui/src/styles.css` и sizing-токенов, 9 текстовых стилей и 3 effect styles.
+Проверки: прочитаны обязательные проектные и UI/UX-документы; проверены доступные Inter fonts через Figma MCP; выполнен поиск существующих design system assets в Figma, результатов нет; Figma `_use_figma` подтвердил создание переменных и стилей.
+Что не получилось проверить: визуальные секции карты, примеры Button/Input/Dropdown/Switch/Badge/ProductCard/Topbar/Modal и мини-экраны не удалось записать в Figma.
+Риски: Figma MCP остановил дальнейшие записи лимитом Starter-плана; повторная попытка дорисовать карту через `_use_figma` также вернула `mcp_rate_limit_paywall`; текущий Figma-файл является foundation draft, а не полной дизайн-картой.
+Следующие шаги: после сброса или увеличения лимита Figma MCP дорисовать визуальные страницы foundations, компонентные примеры, состояния, topbar/dropdown/switch/modal patterns, marketplace/buyer/seller/admin/widget mini-screens и developer rules.
+Связанные TASK-ID: `FF-0210`, `UX-TASK-010`, `FF-0307`.
+
+## Handoff-запись 2026-05-11: разнесение roadmap и tasks по файлам
+
+Дата: 2026-05-11
+Агент: Codex
+Задача: переделать roadmap и backlog так, чтобы агентам не нужно было читать весь монолитный список при каждой задаче.
+Изменённые файлы: `README.md`, `ROADMAP.md`, `docs/TASKS.md`, `docs/roadmap/**`, `docs/tasks/**`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
+Что сделано: `ROADMAP.md` превращён в короткий индекс, а подробные разделы перенесены в `docs/roadmap/`; `docs/TASKS.md` превращён в короткий индекс с активным фокусом и ссылками на отдельные TASK-ID; все подробные задачи перенесены в `docs/tasks/` по папкам `v0.0`-`v1.0` и `ui-ux`; добавлены `README.md`-индексы для новых подпапок; основной README обновлён под новый маршрут чтения.
+Проверки: `npx prettier --check README.md ROADMAP.md docs/TASKS.md "docs/roadmap/**/*.md" "docs/tasks/**/*.md" docs/CHANGELOG.md` — успешно; custom link check для новых индексов — успешно; `git diff --check -- README.md ROADMAP.md docs/TASKS.md docs/roadmap docs/tasks docs/CHANGELOG.md` — успешно.
+Что не проверено: полный `git diff --check` по всему рабочему дереву остаётся заблокирован существующими trailing spaces в ранее добавленной Figma-записи `docs/HANDOFF.md`, не относящейся к этому сплиту.
+Риски: при добавлении новой задачи теперь нужно обновлять и отдельный task-файл, и короткий индекс `docs/TASKS.md`; если старые инструкции будут ссылаться только на монолитный `docs/TASKS.md`, они всё равно попадут в индекс, но подробности нужно открывать по ссылке TASK-ID.
+Следующие шаги: при следующей задаче использовать `docs/tasks/active-focus.md` и конкретный файл задачи; при планировании нового этапа добавлять отдельный файл в `docs/roadmap/`.
+Связанные TASK-ID: документационная инфраструктура, отдельный TASK-ID не создавался.
+
+## Handoff-запись 2026-05-11: полировка topbar logo/search
+
+Дата: 2026-05-11
+Агент: Codex
+Задача: уменьшить левый визуальный отступ у лупы в topbar search и сделать `FF`-логотип такого же размера, как соседние блоки.
+Изменённые файлы: `apps/web/src/app/globals.css`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
+Что сделано: `FF`-логотип увеличен до `40x40` на desktop и `38x38` на mobile, чтобы совпадать с высотой соседних topbar controls; search submit-сегмент сделан квадратным (`38x38` на desktop и `36x36` на mobile), а правый padding input уменьшен, чтобы лупа визуально стояла ровно внутри кнопки.
+Проверки: `npx prettier --check apps/web/src/app/globals.css docs/CHANGELOG.md docs/HANDOFF.md` — успешно; `npm run typecheck --workspaces --if-present` — успешно; `npm run lint` — успешно; `npm run test --workspaces --if-present` — успешно; Chrome DevTools Protocol smoke на `http://localhost:3002/marketplace` — на viewport `390x844` логотип и menu `38x38`, search height `38`, кнопка лупы `36x36`, horizontal overflow `0`; на viewport `1440x900` логотип/menu/search height `40`, кнопка лупы `38x38`, horizontal overflow `0`.
+Что не проверено: полный screenshot QA light/dark и реальный мобильный браузер; `git diff --check` остаётся заблокирован старой Figma-записью в `docs/HANDOFF.md` с trailing spaces.
+Риски: в рабочем дереве уже были несвязанные изменения `apps/web/src/app/globals.css`, marketplace/i18n/docs; эта правка ограничена topbar selectors и не должна трактоваться как полная проверка существующего большого diff.
+Следующие шаги: при следующем визуальном QA проверить topbar на 320px и в обеих темах вместе с `UX-TASK-010`.
+Связанные TASK-ID: `UX-TASK-010`, `FF-0307`.
+
+## Handoff-запись 2026-05-12: главная marketplace без redirect и CRM-фильтров
+
+Дата: 2026-05-12
+Агент: Codex
+Задача: обновить главную marketplace по UX-замечаниям: `/` должен открывать ту же витрину без redirect, первый экран не должен выглядеть как CRM-фильтр, публичный UI не должен показывать внутренний `LEGAL_REVIEW_REQUIRED`, empty states должны быть спокойными, а для разработки нужны seed/mock товары.
+Изменённые файлы: `apps/web/src/app/page.tsx`, `apps/web/src/app/marketplace/page.tsx`, `apps/web/src/components/app-chrome.tsx`, `apps/web/src/app/globals.css`, `packages/i18n/locales/ru/common.json`, `packages/i18n/locales/en/common.json`, `services/api/internal/app/marketplace_store.go`, `services/api/internal/app/slug.go`, `services/api/internal/app/slug_test.go`, `infra/scripts/seed-dev.sh`, `infra/scripts/seed-dev.ps1`, `docker-compose.dev.yml`, `docs/PAGE_MAP.md`, `docs/PAGE_SPECS.md`, `docs/UI_UX_TRACKER.md`, `docs/USER_FLOWS.md`, `docs/UX_IMPLEMENTATION_STATUS.md`, `docs/TASKS.md`, `docs/tasks/ui-ux/README.md`, `docs/tasks/ui-ux/UX-TASK-011.md`, `docs/tasks/ui-ux/UX-TASK-018.md`, `docs/DEPLOYMENT.md`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
+Что сделано: корневой route `/` теперь рендерит тот же marketplace screen, что и `/marketplace`, без HTTP/client redirect; бренд в topbar ведёт на `/`; внутренний hero search и строка category/sort убраны полностью, поиск остался в topbar; первый экран стал ближе к референсу: CTA, быстрые категории, витринная карточка товара, объяснение покупки и компактные role tabs под trust-плашками; горизонтальные marketplace-ленты сбрасываются в начало после загрузки данных, без принудительного вертикального scroll страницы; hero CTA "Смотреть популярное" и "Подборки авторов" убраны; внутренний `LEGAL_REVIEW_REQUIRED` больше не выводится в публичном marketplace UI; старые дублирующие category bands удалены, а авторские подборки оставлены ближе к существующему компактному варианту; пустые списки показывают спокойный empty state с действиями "Стать продавцом" и "Все категории". Dev seed scripts теперь идемпотентно создают 3 seller profiles и 6 published mock products через реальные таблицы. В API исправлен баг, где пустой `category` превращался в slug `user` и `/api/v1/products` без фильтра возвращал пустой список. В `docker-compose.dev.yml` web proxy явно ходит к API по `http://api:8080`.
+Проверки: `npx prettier --check` для затронутых TSX/CSS/JSON/Markdown/YAML файлов — успешно; `npm run typecheck --workspaces --if-present` и `npm run typecheck -w @fanfuel/web` — успешно; `npm run lint` — успешно; `npm run test --workspaces --if-present` — успешно; `npm run build --workspaces --if-present` и `npm run build -w @fanfuel/web` — успешно; `cd services && go test ./...` — успешно; `git diff --check` — успешно; `.\infra\scripts\seed-dev.ps1 -ComposeFile docker-compose.yml` — первый рабочий запуск создал 3 sellers и 6 products, повторный запуск `INSERT 0 0`; SQL smoke подтвердил 6 published seed products; `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build web` пересобрал API/web; `GET http://localhost:8080/api/v1/products` и `GET http://localhost:3000/api/v1/products` возвращают 6 товаров; `GET http://localhost:3000/` и `/marketplace` возвращают 200 без `NEXT_REDIRECT`, без `ff-market-search-panel`, без "Искать</button>", без "Применить" и без `LEGAL_REVIEW_REQUIRED`.
+Что не проверено: полноценный screenshot QA в реальном браузере на 320/390/768/1440 и обеих темах; состояние абсолютно пустой БД после удаления seed-товаров проверено только логикой empty state, без отдельного сброса БД.
+Риски: dev seed добавляет демонстрационные товары в локальную БД, поэтому для проверки пустого состояния нужно запускать отдельную чистую БД или удалить seed-товары; product media пока остаётся CSS-заглушкой, без реальных изображений товаров; line-ending warnings `LF will be replaced by CRLF` остаются особенностью текущей Windows git-настройки.
+Следующие шаги: провести browser screenshot QA после seed на desktop/mobile light/dark; отдельно проверить пустую БД без seed; добавить реальные product media/preview assets отдельной задачей.
+Связанные TASK-ID: `UX-TASK-018`, `UX-TASK-011`, `UX-TASK-017`, `FF-0307`.
+
+## Handoff-запись 2026-05-12: компактные карточки marketplace
+
+Дата: 2026-05-12
+Агент: Codex
+Задача: убрать hero-кнопки "Смотреть товары" и "Все категории", перестроить порядок данных в карточках, оставить горизонтальное листание только на мобильных ширинах и усилить авторский блок подборок.
+Изменённые файлы: `apps/web/src/app/marketplace/page.tsx`, `apps/web/src/app/globals.css`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
+Что сделано: hero CTA удалены; карточки товаров и hero-товар показывают цену, рейтинг со звездой, название, продавца и плашки в новом порядке; desktop-ряды товаров стали CSS grid без горизонтального overflow, mobile-ряды остались свайпаемыми; карточки уплотнены по высоте; аватар и ник автора в подборках увеличены и выровнены по центру высоты блока.
+Проверки: frontend форматирование, typecheck, lint, build и browser smoke выполнялись после правки.
+Что не проверено: полный ручной screenshot QA light/dark на всех ширинах и реальный мобильный браузер.
+Риски: карточки стали плотнее, поэтому после появления настоящих длинных названий товаров нужен отдельный визуальный regression pass.
+Следующие шаги: проверить marketplace на 320/390/768/1440 в light/dark и при большем числе реальных товаров.
+Связанные TASK-ID: `UX-TASK-018`, `FF-0307`, `UX-TASK-010`.
+
+## Handoff-запись 2026-05-12: визуальная доводка hero marketplace
+
+Дата: 2026-05-12
+Агент: Codex
+Задача: довести hero и мобильные ленты marketplace по замечаниям: акцентный перенос "поддерживай авторов", меньший отступ после подзаголовка, выравнивание hero-карточек по заголовку, скрытие секционных orange-eyebrow плашек, mobile-only свайп-подсказки и отсутствие hover-подъёма на touch-устройствах.
+Изменённые файлы: `apps/web/src/app/marketplace/page.tsx`, `apps/web/src/app/globals.css`, `packages/i18n/locales/ru/common.json`, `packages/i18n/locales/en/common.json`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
+Что сделано: заголовок hero разбит на две строки через i18n-ключи `marketplaceTitlePrimary`/`marketplaceTitleAccent`, акцентная строка окрашена в primary token; отступ после подзаголовка уменьшен; right-side hero карточки выровнены по верхней границе заголовка на desktop; секционные плашки `Хиты`/`Авторы`/`Почему удобно`/`Новое` оставлены в JSX-комментариях; мобильные author collections показывают аватар и ник автора первым элементом горизонтальной ленты, а товарную карточку справа подрезают как affordance; для свайпа добавлена малозаметная стрелка, hover-подъём карточек отключён для touch/coarse pointer.
+Проверки: `npx prettier --write apps/web/src/app/marketplace/page.tsx apps/web/src/app/globals.css packages/i18n/locales/ru/common.json packages/i18n/locales/en/common.json docs/CHANGELOG.md docs/HANDOFF.md`; `npm run typecheck -w @fanfuel/web` — успешно; `npm run lint` — успешно; `npm run build -w @fanfuel/web` — успешно; `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build web` — успешно; `GET http://localhost:3000/` — 200; `git diff --check` — успешно, только Windows CRLF warnings; CDP smoke на production `http://127.0.0.1:3010/`: desktop title line break `true`, accent color primary, hero aside delta from h1 `0`, секционных `.ff-status` нет; mobile overflow X `0`, `.ff-market-author-inline` display `grid`, `.ff-market-author-side` display `none`, author tile первый в shelf, стрелка `→` есть, первая товарная карточка в author shelves подрезана справа.
+Что не проверено: полный ручной screenshot QA light/dark на 320/390/768/1440 и реальный мобильный браузер; long-title regression на большом каталоге.
+Риски: подсказка-стрелка добавлена CSS-псевдоэлементом для всех mobile product shelves, поэтому при будущей ленте с очень малым числом товаров может потребоваться условное скрытие; hover reset рассчитан на `hover: none`/`pointer: coarse`, desktop touch-экраны тоже получат поведение mobile.
+Следующие шаги: пройти полный visual QA marketplace в light/dark и проверить реальные изображения товаров, когда появятся product media.
+Связанные TASK-ID: `UX-TASK-018`, `FF-0307`, `UX-TASK-010`.
+
+## Handoff-запись 2026-05-12: бейджи и адаптивные карточки marketplace
+
+Дата: 2026-05-12
+Агент: Codex
+Задача: исправить обрезание цены, перенос карточек, размер loading skeleton, смысловые бейджи Safe deal/поддержки автора/товара от автора и мобильный вид авторских подборок.
+Изменённые файлы: `apps/web/src/app/marketplace/page.tsx`, `apps/web/src/app/globals.css`, `packages/i18n/src/format.ts`, `packages/i18n/locales/ru/common.json`, `packages/i18n/locales/en/common.json`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
+Что сделано: `formatMoney` получил опцию `trimZeroFraction`, marketplace-карточки используют её для цен без `,00`; product meta переведён на flex, чтобы цена не ужималась; desktop product shelves и нижняя feed-сетка ограничены одной видимой строкой и скрывают лишние карточки вместо переноса; `ff-market-shelf-skeleton` получил высоту реальной карточки; Safe deal стал зелёным бейджем со shield-иконкой; поддержка автора показывается только в author collections через жёлто-оранжевый бейдж `автору`; в общих карточках support-бейдж убран, добавлен бейдж `От автора` для `seller_type=pro` и `verification_status=approved`; mobile author tile потерял рамку/фон, product cards в author collections вернулись к стандартной ширине; свайп-подсказка заменена на edge fade + тонкий chevron без кнопочного контейнера.
+Проверки: `npx prettier --write packages/i18n/src/format.ts apps/web/src/app/marketplace/page.tsx apps/web/src/app/globals.css packages/i18n/locales/ru/common.json packages/i18n/locales/en/common.json docs/CHANGELOG.md docs/HANDOFF.md`; `npm run typecheck -w @fanfuel/i18n` — успешно; `npm run typecheck -w @fanfuel/web` — успешно; `npm run lint` — успешно; `npm run build -w @fanfuel/web` — успешно; `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build web` — успешно; `GET http://localhost:3000/marketplace` — 200; `git diff --check` — успешно, только Windows CRLF warnings; CDP smoke на production `http://127.0.0.1:3010/marketplace`: desktop row height `220`, visible tile rows `1`, popular support badges `[]`, feed support count `0`, author support sample `автору`, prices без `[,.]00`, Safe deal имеет `.ff-market-badge-icon-safe`; mobile overflow X `0`, author border `0px`, author background transparent, product flex-basis `170px`, first product not cut, second product cut, swipe chevron `›` and fade width `34px`.
+Что не проверено: ручной screenshot QA light/dark на 320/390/768/1440 и реальный мобильный браузер; отдельный сценарий creator storefront пока не реализован в текущем marketplace screen.
+Риски: признак `От автора` построен по доступной MVP-модели `seller_type=pro` + `verification_status=approved`, потому что отдельного поля verified creator у public product summary пока нет; если доменная модель различит seller verification и creator verification, условие нужно заменить на явный backend-флаг.
+Следующие шаги: добавить явный `is_creator_verified`/`seller_has_creator_profile` в public product summary, если бейдж `От автора` станет продуктовым контрактом, и пройти visual QA после реальных product media.
+Связанные TASK-ID: `UX-TASK-018`, `FF-0307`, `UX-TASK-010`.
+
+## Handoff-запись 2026-05-12: исправление clipping marketplace-карточек
+
+Дата: 2026-05-12
+Агент: Codex
+Задача: исправить визуальную регрессию, где карточки marketplace стали обрезать нижний контент и hover-подъём клиповался сверху.
+Изменённые файлы: `apps/web/src/app/globals.css`, `docs/CHANGELOG.md`, `docs/HANDOFF.md`.
+Что сделано: высота карточки увеличена до `228px`, preview area переведена с `4/3` на `16/9`, desktop shelves больше не используют vertical clipping, лишние product/skeleton карточки скрываются через `nth-of-type` на desktop/tablet breakpoint'ах, feed grid скрывает лишние карточки без второго ряда, hover transform у marketplace product tile отключён, чтобы карточка не выезжала под обрезку.
+Проверки: `npx prettier --write apps/web/src/app/globals.css docs/CHANGELOG.md docs/HANDOFF.md`; `npm run typecheck -w @fanfuel/web` — успешно; `npm run lint` — успешно; `npm run build -w @fanfuel/web` — успешно; `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build web` — успешно; `GET http://localhost:3000/marketplace` — 200; `git diff --check` — успешно, только Windows CRLF warnings; CDP smoke на production `http://127.0.0.1:3010/marketplace`: на `930x900` popular/author rows имеют height `228`, visible rows `1`, visible count `4`, `overflowY=visible`, `contentCut=false` для карточек, seller и badges видны; hover transform `none`, `clippedTop=false`; на `1466x980` author row visible count `6`, rows `1`, seller виден.
+Что не проверено: ручной screenshot QA в обеих темах и реальный мобильный браузер.
+Риски: количество видимых карточек теперь задано CSS breakpoint'ами, а не измерением фактической ширины контейнера; для будущего идеального поведения можно заменить на container queries или вычисляемый shelf limit.
+Следующие шаги: после появления реальных product media пройти visual QA на 930/1024/1280/1440 и mobile widths.
+Связанные TASK-ID: `UX-TASK-018`, `FF-0307`, `UX-TASK-010`.
+
 ## Шаблон handoff-записи
 
 ```txt
