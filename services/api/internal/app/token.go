@@ -13,7 +13,15 @@ type TokenService struct {
 }
 
 type accessClaims struct {
-	Roles []Role `json:"roles"`
+	Roles    []Role `json:"roles"`
+	TokenUse string `json:"token_use,omitempty"`
+	jwt.RegisteredClaims
+}
+
+type registrationClaims struct {
+	Email       string `json:"email"`
+	ChallengeID string `json:"challenge_id"`
+	TokenUse    string `json:"token_use"`
 	jwt.RegisteredClaims
 }
 
@@ -29,7 +37,8 @@ func (s TokenService) CreateAccessToken(user CurrentUser) (string, time.Time, er
 	expiresAt := now.Add(s.ttl)
 
 	claims := accessClaims{
-		Roles: user.Roles,
+		Roles:    user.Roles,
+		TokenUse: "access",
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   user.User.ID,
 			Issuer:    "fanfuel-api",
@@ -60,8 +69,51 @@ func (s TokenService) ParseAccessToken(rawToken string) (*accessClaims, error) {
 	}
 
 	claims, ok := token.Claims.(*accessClaims)
-	if !ok || !token.Valid {
+	if !ok || !token.Valid || (claims.TokenUse != "" && claims.TokenUse != "access") {
 		return nil, errors.New("invalid token")
+	}
+
+	return claims, nil
+}
+
+func (s TokenService) CreateRegistrationToken(email string, challengeID string) (string, time.Time, error) {
+	now := time.Now().UTC()
+	expiresAt := now.Add(15 * time.Minute)
+	claims := registrationClaims{
+		Email:       email,
+		ChallengeID: challengeID,
+		TokenUse:    "registration",
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   challengeID,
+			Issuer:    "fanfuel-api",
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	value, err := token.SignedString(s.secret)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	return value, expiresAt, nil
+}
+
+func (s TokenService) ParseRegistrationToken(rawToken string) (*registrationClaims, error) {
+	token, err := jwt.ParseWithClaims(rawToken, &registrationClaims{}, func(token *jwt.Token) (any, error) {
+		if token.Method != jwt.SigningMethodHS256 {
+			return nil, errors.New("unexpected signing method")
+		}
+		return s.secret, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*registrationClaims)
+	if !ok || !token.Valid || claims.TokenUse != "registration" || claims.Email == "" || claims.ChallengeID == "" {
+		return nil, errors.New("invalid registration token")
 	}
 
 	return claims, nil

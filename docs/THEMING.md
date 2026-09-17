@@ -14,7 +14,8 @@ Default: `system`.
 
 ```html
 <html data-theme="light">
-<html data-theme="dark">
+  <html data-theme="dark"></html>
+</html>
 ```
 
 Дополнительно выставляется `data-theme-preference="system|light|dark"` для диагностики и будущих сценариев.
@@ -29,6 +30,37 @@ Default: `system`.
 - page-specific случайные hex-цвета;
 - `bg-white`, `text-black`, `text-white`, если проект позже подключит Tailwind;
 - отдельная тема только для одной страницы.
+
+## Skin presets
+
+`v0.3.5` планирует skin presets как слой поверх `light`/`dark`, а не замену темы. Первым baseline-пресетом становится `aurora`: он обновляет текущий оранжево-тёмный визуальный образ в сторону deep navy/graphite, violet/cyan, emerald support и редкого warm-акцента.
+
+```ts
+type SkinPreset = "base" | "aurora" | string;
+```
+
+Правила:
+
+- theme отвечает за `light`/`dark`, skin отвечает только за безопасные token overrides;
+- skin не может менять DOM structure, route, layout slots или i18n keys;
+- skin config хранится как schema-validated preset/reference, а не arbitrary CSS;
+- у skin должны быть light/dark значения или наследование base tokens;
+- переключение skin не должно менять бизнес-статусы, payment/deal colors semantics или доступность.
+- skin не может возвращать orange/black как dominant primary без отдельного design/brand ADR;
+- glass/material tokens разрешены только для allowlisted компонентов: topbar, search, tabs, modal/drawer, hero preview, sticky checkout, widget preview.
+
+## Aurora token contract
+
+Aurora добавляет семантические роли, которые должны быть доступны в `light` и `dark`:
+
+- `--color-primary`: violet brand action.
+- `--color-secondary`: cyan interactive/realtime accent.
+- `--color-accent`: emerald support/community action.
+- `--color-warm`: amber/orange for hit/warning/popular, not primary CTA.
+- `--surface-glass`, `--surface-glass-strong`, `--border-glass`, `--shadow-glass`, `--blur-glass`.
+- `--gradient-brand`, `--gradient-support`.
+
+Эти токены описывают роли. Компонентам запрещено напрямую сравнивать цветовые значения или строить логику на том, какой именно hex у текущего skin.
 
 ## Гость
 
@@ -140,6 +172,7 @@ Payload:
 2. Описать назначение в `docs/DESIGN_SYSTEM.md`.
 3. Использовать токен через `var(--color-*)`.
 4. Проверить контраст в обеих темах.
+5. Если токен относится к glass/gradient, проверить читаемость на плотном и пустом фоне, а также `prefers-reduced-motion`.
 
 ## Как тестировать
 
@@ -150,4 +183,4 @@ Payload:
 - Проверить mobile top bar.
 - Проверить keyboard navigation ThemeSwitcher.
 - Проверить authenticated sync через `/api/v1/me/preferences`.
-
+- Для `aurora` отдельно проверить, что warm/orange не доминирует в логотипе, primary CTA, hero accent и бейджах одновременно.

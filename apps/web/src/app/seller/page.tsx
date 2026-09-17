@@ -33,7 +33,10 @@ export default function SellerDashboardPage() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const revenue = useMemo(() => formatSellerTotals(orders.filter((item) => item.order.status === "completed")), [orders]);
+  const revenue = useMemo(
+    () => formatSellerTotals(orders.filter((item) => item.order.status === "completed")),
+    [orders]
+  );
   const pendingProducts = products.filter((item) => item.status === "pending_moderation").length;
 
   return (
@@ -50,7 +53,7 @@ export default function SellerDashboardPage() {
           <EmptyState>
             <strong>{dictionary.common.checkoutLoginRequiredTitle}</strong>
             <span>{dictionary.common.checkoutLoginRequiredText}</span>
-            <a className="ff-button ff-button-primary" href="/auth/login">
+            <a className="ff-button ff-button-primary" href="/auth">
               {dictionary.common.navLogin}
             </a>
           </EmptyState>
@@ -126,7 +129,10 @@ export default function SellerDashboardPage() {
                           <strong>{item.product.title}</strong>
                           <p className="ff-meta">{orderStatusLabel(item.order.status)}</p>
                         </div>
-                        <a className="ff-button ff-button-secondary ff-button-sm" href="/seller/orders">
+                        <a
+                          className="ff-button ff-button-secondary ff-button-sm"
+                          href="/seller/orders"
+                        >
                           {dictionary.common.navSellerOrders}
                         </a>
                       </article>
@@ -152,7 +158,9 @@ function orderStatusLabel(status: OrderDetail["order"]["status"]): string {
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;
@@ -161,7 +169,10 @@ function getErrorText(error: unknown): string {
 function formatSellerTotals(items: OrderDetail[]): string {
   const totals = new Map<CurrencyCode, number>();
   items.forEach((item) => {
-    totals.set(item.deal.currency, (totals.get(item.deal.currency) ?? 0) + item.deal.seller_amount_minor);
+    totals.set(
+      item.deal.currency,
+      (totals.get(item.deal.currency) ?? 0) + item.deal.seller_amount_minor
+    );
   });
 
   if (totals.size === 0) {

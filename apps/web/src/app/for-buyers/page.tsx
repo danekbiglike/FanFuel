@@ -7,7 +7,7 @@ const config: PublicLandingConfig = {
   primaryActionKey: "openMarketplace",
   primaryHref: "/marketplace",
   secondaryActionKey: "navRegister",
-  secondaryHref: "/auth/register",
+  secondaryHref: "/auth",
   previewLabelKey: "forBuyersPreviewLabel",
   previewTitleKey: "forBuyersPreviewTitle",
   previewLeadKey: "forBuyersPreviewLead",

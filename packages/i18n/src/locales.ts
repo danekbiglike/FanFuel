@@ -11,4 +11,3 @@ export function resolveLocale(locale?: string | null): Locale {
 
   return defaultLocale;
 }
-

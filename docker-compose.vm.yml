@@ -1,0 +1,50 @@
+# Применяется после docker-compose.yml и docker-compose.dev.yml.
+# Все *_PORT в .env привязаны к 127.0.0.1; nginx VM приложения принимает edge на 80/443.
+# Доступ из LAN ограничивается UFW и infra/scripts/vm-firewall.sh.
+services:
+  postgres:
+    restart: unless-stopped
+  redis:
+    restart: unless-stopped
+  minio:
+    image: quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
+    restart: unless-stopped
+  api:
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+  ws:
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+  worker:
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+  web:
+    restart: unless-stopped
+    build:
+      dockerfile: infra/docker/frontend.vm.Dockerfile
+      target: web
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-https://fanfuel.ru}
+        NEXT_PUBLIC_WIDGET_BASE_URL: ${NEXT_PUBLIC_WIDGET_BASE_URL:-https://fanfuel.ru/widget/}
+    environment:
+      NODE_ENV: production
+      APP_ENV: production
+  widget:
+    restart: unless-stopped
+    build:
+      dockerfile: infra/docker/frontend.vm.Dockerfile
+      target: widget
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://fanfuel.ru}
+        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-wss://fanfuel.ru}
+  admin:
+    restart: unless-stopped
+    build:
+      dockerfile: infra/docker/frontend.vm.Dockerfile
+      target: admin
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://fanfuel.ru}
+        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-wss://fanfuel.ru}

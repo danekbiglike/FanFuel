@@ -13,5 +13,11 @@
   "errors.unauthorized": "Please sign in first.",
   "errors.invalidJson": "Invalid request format.",
   "errors.idempotencyKeyRequired": "Please submit the form again.",
-  "errors.idempotencyKeyConflict": "The repeated submission differs from the first one."
+  "errors.idempotencyKeyConflict": "The repeated submission differs from the first one.",
+  "errors.verificationCodeInvalid": "The verification code is incorrect.",
+  "errors.verificationCodeExpired": "The code has expired. Request a new one.",
+  "errors.verificationAttemptsExhausted": "No attempts remain. Request a new code.",
+  "errors.verificationResendLimited": "You can request another code shortly.",
+  "errors.verificationTokenInvalid": "Verification has expired. Start registration again.",
+  "errors.emailDeliveryFailed": "We could not send the email. Try again later."
 }

@@ -2,16 +2,20 @@ import ruCommon from "../locales/ru/common.json";
 import ruErrors from "../locales/ru/errors.json";
 import enCommon from "../locales/en/common.json";
 import enErrors from "../locales/en/errors.json";
+import ruEmails from "../locales/ru/emails.json";
+import enEmails from "../locales/en/emails.json";
 import type { Locale } from "@fanfuel/types";
 
 export const dictionaries = {
   ru: {
     common: ruCommon,
-    errors: ruErrors
+    errors: ruErrors,
+    emails: ruEmails
   },
   en: {
     common: enCommon,
-    errors: enErrors
+    errors: enErrors,
+    emails: enEmails
   }
 } as const;
 
@@ -25,4 +29,3 @@ export function translate(locale: Locale, namespace: keyof Dictionary, key: stri
   const dictionary = dictionaries[locale][namespace] as Record<string, string>;
   return dictionary[key] ?? key;
 }
-

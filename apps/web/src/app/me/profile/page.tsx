@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { formatDate, formatMoney } from "@fanfuel/i18n";
-import { Button, EmptyState, Skeleton } from "@fanfuel/ui";
+import { Button, EmptyState, Skeleton, Select } from "@fanfuel/ui";
 import { AppTopBar, ThemeSettingsPanel } from "../../../components/app-chrome";
 import type { CurrencyCode, CurrentUser, DonationGoal, UserRole, Widget } from "@fanfuel/types";
 import {
@@ -164,7 +164,9 @@ export default function ProfilePage() {
     setError("");
 
     try {
-      const widget = await createStudioWidget(token, { name: dictionary.common.studioWidgetsTitle });
+      const widget = await createStudioWidget(token, {
+        name: dictionary.common.studioWidgetsTitle
+      });
       setWidgets((current) => [widget, ...current]);
       setLatestWidgetLink(buildWidgetLink(widget));
       setMessage(dictionary.common.successSaved);
@@ -213,7 +215,7 @@ export default function ProfilePage() {
         <section className="ff-page-with-topbar ff-form-page">
           <div className="ff-panel ff-stack">
             <div className="ff-message ff-error">{error}</div>
-            <a className="ff-button ff-button-primary" href="/auth/login">
+            <a className="ff-button ff-button-primary" href="/auth">
               {dictionary.common.navLogin}
             </a>
           </div>
@@ -239,7 +241,8 @@ export default function ProfilePage() {
                 ))}
               </div>
               <p className="ff-meta">
-                {dictionary.common.registeredAt}: {formatDate(currentUser.user.created_at, { locale: appLocale })}
+                {dictionary.common.registeredAt}:{" "}
+                {formatDate(currentUser.user.created_at, { locale: appLocale })}
               </p>
               <div className="ff-actions">
                 <a className="ff-button ff-button-secondary" href="/marketplace">
@@ -265,7 +268,11 @@ export default function ProfilePage() {
             <form className="ff-panel ff-form" onSubmit={handleProfileSubmit}>
               <label className="ff-field">
                 <span>{dictionary.common.displayName}</span>
-                <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} required />
+                <input
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                  required
+                />
               </label>
               <label className="ff-field">
                 <span>{dictionary.common.slug}</span>
@@ -277,7 +284,11 @@ export default function ProfilePage() {
               </label>
               <div className="ff-actions">
                 <Button type="submit">{dictionary.common.save}</Button>
-                <button className="ff-button ff-button-secondary" type="button" onClick={handleLogout}>
+                <button
+                  className="ff-button ff-button-secondary"
+                  type="button"
+                  onClick={handleLogout}
+                >
                   {dictionary.common.logoutAction}
                 </button>
               </div>
@@ -289,7 +300,10 @@ export default function ProfilePage() {
                   <h2>{dictionary.common.creatorProfileTitle}</h2>
                   <label className="ff-field">
                     <span>{dictionary.common.creatorTitle}</span>
-                    <input value={creatorTitle} onChange={(event) => setCreatorTitle(event.target.value)} />
+                    <input
+                      value={creatorTitle}
+                      onChange={(event) => setCreatorTitle(event.target.value)}
+                    />
                   </label>
                   <label className="ff-field">
                     <span>{dictionary.common.creatorDescription}</span>
@@ -300,11 +314,14 @@ export default function ProfilePage() {
                   </label>
                   <label className="ff-field">
                     <span>{dictionary.common.creatorStatus}</span>
-                    <select value={creatorStatus} onChange={(event) => setCreatorStatus(event.target.value)}>
+                    <Select
+                      value={creatorStatus}
+                      onChange={(event) => setCreatorStatus(event.target.value)}
+                    >
                       <option value="draft">{dictionary.common.statusDraft}</option>
                       <option value="published">{dictionary.common.statusPublished}</option>
                       <option value="hidden">{dictionary.common.statusHidden}</option>
-                    </select>
+                    </Select>
                   </label>
                   <div className="ff-actions">
                     <Button type="submit">{dictionary.common.save}</Button>
@@ -321,11 +338,18 @@ export default function ProfilePage() {
                   <h2>{dictionary.common.studioGoalsTitle}</h2>
                   <label className="ff-field">
                     <span>{dictionary.common.goalTitle}</span>
-                    <input value={goalTitle} onChange={(event) => setGoalTitle(event.target.value)} required />
+                    <input
+                      value={goalTitle}
+                      onChange={(event) => setGoalTitle(event.target.value)}
+                      required
+                    />
                   </label>
                   <label className="ff-field">
                     <span>{dictionary.common.creatorDescription}</span>
-                    <textarea value={goalDescription} onChange={(event) => setGoalDescription(event.target.value)} />
+                    <textarea
+                      value={goalDescription}
+                      onChange={(event) => setGoalDescription(event.target.value)}
+                    />
                   </label>
                   <div className="ff-two-columns">
                     <label className="ff-field">
@@ -339,14 +363,14 @@ export default function ProfilePage() {
                     </label>
                     <label className="ff-field">
                       <span>{dictionary.common.currency}</span>
-                      <select
+                      <Select
                         value={goalCurrency}
                         onChange={(event) => setGoalCurrency(event.target.value as CurrencyCode)}
                       >
                         <option value="RUB">RUB</option>
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
-                      </select>
+                      </Select>
                     </label>
                   </div>
                   <div className="ff-actions">
@@ -386,7 +410,11 @@ export default function ProfilePage() {
                 <section className="ff-panel ff-stack" aria-labelledby="widgets-title">
                   <h2 id="widgets-title">{dictionary.common.studioWidgetsTitle}</h2>
                   <div className="ff-actions">
-                    <button className="ff-button ff-button-primary" type="button" onClick={handleCreateWidget}>
+                    <button
+                      className="ff-button ff-button-primary"
+                      type="button"
+                      onClick={handleCreateWidget}
+                    >
                       {dictionary.common.widgetCreate}
                     </button>
                   </div>
@@ -428,18 +456,27 @@ export default function ProfilePage() {
                 <h2>{dictionary.common.sellerProfileTitle}</h2>
                 <label className="ff-field">
                   <span>{dictionary.common.displayName}</span>
-                  <input value={sellerDisplayName} onChange={(event) => setSellerDisplayName(event.target.value)} />
+                  <input
+                    value={sellerDisplayName}
+                    onChange={(event) => setSellerDisplayName(event.target.value)}
+                  />
                 </label>
                 <label className="ff-field">
                   <span>{dictionary.common.sellerDescription}</span>
-                  <textarea value={sellerDescription} onChange={(event) => setSellerDescription(event.target.value)} />
+                  <textarea
+                    value={sellerDescription}
+                    onChange={(event) => setSellerDescription(event.target.value)}
+                  />
                 </label>
                 <label className="ff-field">
                   <span>{dictionary.common.sellerType}</span>
-                  <select value={sellerType} onChange={(event) => setSellerType(event.target.value)}>
+                  <Select
+                    value={sellerType}
+                    onChange={(event) => setSellerType(event.target.value)}
+                  >
                     <option value="lite">{dictionary.common.sellerLite}</option>
                     <option value="pro">{dictionary.common.sellerPro}</option>
-                  </select>
+                  </Select>
                 </label>
                 <div className="ff-actions">
                   <Button type="submit">{dictionary.common.save}</Button>
@@ -461,7 +498,9 @@ export default function ProfilePage() {
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;

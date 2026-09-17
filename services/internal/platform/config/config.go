@@ -17,6 +17,11 @@ type ServiceConfig struct {
 	AccessTokenTTL      time.Duration
 	CORSAllowedOrigins  []string
 	AdminBootstrapEmail string
+	SMTPHost            string
+	SMTPPort            int
+	SMTPUser            string
+	SMTPPassword        string
+	MailFrom            string
 }
 
 func LoadServiceConfig(serviceName string, defaultPort string) ServiceConfig {
@@ -30,6 +35,11 @@ func LoadServiceConfig(serviceName string, defaultPort string) ServiceConfig {
 		AccessTokenTTL:      getEnvDurationMinutes("ACCESS_TOKEN_TTL_MINUTES", 60),
 		CORSAllowedOrigins:  getEnvList("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:5173"),
 		AdminBootstrapEmail: strings.ToLower(getEnv("ADMIN_BOOTSTRAP_EMAIL", "")),
+		SMTPHost:            getEnv("SMTP_HOST", ""),
+		SMTPPort:            getEnvInt("SMTP_PORT", 587),
+		SMTPUser:            getEnv("SMTP_USER", ""),
+		SMTPPassword:        getEnv("SMTP_PASSWORD", ""),
+		MailFrom:            getEnv("MAIL_FROM", "no-reply@example.local"),
 	}
 }
 
@@ -56,6 +66,16 @@ func getEnvDurationMinutes(key string, fallbackMinutes int) time.Duration {
 	}
 
 	return time.Duration(minutes) * time.Minute
+}
+
+func getEnvInt(key string, fallback int) int {
+	raw := getEnv(key, strconv.Itoa(fallback))
+	value, err := strconv.Atoi(raw)
+	if err != nil || value <= 0 {
+		return fallback
+	}
+
+	return value
 }
 
 func getEnvList(key string, fallback string) []string {

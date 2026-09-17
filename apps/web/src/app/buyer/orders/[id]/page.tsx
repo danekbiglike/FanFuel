@@ -3,10 +3,16 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { formatMoney } from "@fanfuel/i18n";
-import { Alert, Badge, DealTimeline, EmptyState, Skeleton } from "@fanfuel/ui";
+import { Alert, Badge, DealTimeline, EmptyState, Skeleton, Select } from "@fanfuel/ui";
 import type { OrderDetail } from "@fanfuel/types";
 import { AppTopBar } from "../../../../components/app-chrome";
-import { ApiError, confirmBuyerOrder, getOrder, getStoredToken, reviewBuyerOrder } from "../../../../lib/api";
+import {
+  ApiError,
+  confirmBuyerOrder,
+  getOrder,
+  getStoredToken,
+  reviewBuyerOrder
+} from "../../../../lib/api";
 import { appLocale, dictionary } from "../../../../lib/i18n";
 
 export default function BuyerOrderPage() {
@@ -87,7 +93,7 @@ export default function BuyerOrderPage() {
           <EmptyState>
             <strong>{dictionary.common.checkoutLoginRequiredTitle}</strong>
             <span>{dictionary.common.checkoutLoginRequiredText}</span>
-            <a className="ff-button ff-button-primary" href="/auth/login">
+            <a className="ff-button ff-button-primary" href="/auth">
               {dictionary.common.navLogin}
             </a>
           </EmptyState>
@@ -103,7 +109,9 @@ export default function BuyerOrderPage() {
           <div className="ff-product-detail">
             <article className="ff-product-main" aria-labelledby="order-title">
               <div className="ff-product-card-head">
-                <Badge tone={orderTone(order.order.status)}>{orderStatusLabel(order.order.status)}</Badge>
+                <Badge tone={orderTone(order.order.status)}>
+                  {orderStatusLabel(order.order.status)}
+                </Badge>
                 <Badge tone="held">{dealStatusLabel(order.deal.status)}</Badge>
                 <Badge tone={order.payment.status === "succeeded" ? "success" : "warning"}>
                   {paymentStatusLabel(order.payment.status)}
@@ -141,19 +149,30 @@ export default function BuyerOrderPage() {
                   <h2>{dictionary.common.reviewTitle}</h2>
                   <label className="ff-field">
                     <span>{dictionary.common.reviewRating}</span>
-                    <select value={rating} onChange={(event) => setRating(Number(event.target.value))}>
+                    <Select
+                      value={rating}
+                      onChange={(event) => setRating(Number(event.target.value))}
+                    >
                       {[5, 4, 3, 2, 1].map((value) => (
                         <option key={value} value={value}>
                           {value}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </label>
                   <label className="ff-field">
                     <span>{dictionary.common.reviewText}</span>
-                    <textarea value={reviewText} onChange={(event) => setReviewText(event.target.value)} maxLength={1000} />
+                    <textarea
+                      value={reviewText}
+                      onChange={(event) => setReviewText(event.target.value)}
+                      maxLength={1000}
+                    />
                   </label>
-                  <button className="ff-button ff-button-primary" type="submit" disabled={isSubmitting}>
+                  <button
+                    className="ff-button ff-button-primary"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? dictionary.common.loading : dictionary.common.reviewSubmit}
                   </button>
                 </form>
@@ -165,7 +184,9 @@ export default function BuyerOrderPage() {
                   <strong>
                     {dictionary.common.productRatingLabel}: {order.review.rating}/5
                   </strong>
-                  <p className="ff-meta">{order.review.text || dictionary.common.productReviewNoText}</p>
+                  <p className="ff-meta">
+                    {order.review.text || dictionary.common.productReviewNoText}
+                  </p>
                 </section>
               ) : null}
             </article>
@@ -184,7 +205,9 @@ export default function BuyerOrderPage() {
                 </div>
                 <div>
                   <span className="ff-meta">{dictionary.common.productSeller}</span>
-                  <strong>{order.product.seller?.display_name ?? dictionary.common.roleSeller}</strong>
+                  <strong>
+                    {order.product.seller?.display_name ?? dictionary.common.roleSeller}
+                  </strong>
                 </div>
                 <Alert tone="info">{dictionary.common.safeDealMockText}</Alert>
                 <a className="ff-button ff-button-secondary" href="/buyer">
@@ -239,7 +262,9 @@ function orderTone(status: OrderDetail["order"]["status"]) {
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;

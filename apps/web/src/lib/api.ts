@@ -1,11 +1,14 @@
 import type {
   ApiErrorResponse,
+  AuthIdentifyResponse,
   AuthResponse,
   CurrentUser,
   CreateDonationResponse,
   DonationGoal,
   DonationGoalListResponse,
   DonationListResponse,
+  EmailVerificationStartResponse,
+  EmailVerificationVerifyResponse,
   OrderDetail,
   OrderListResponse,
   Payment,
@@ -55,27 +58,67 @@ export function clearStoredToken() {
   window.dispatchEvent(new Event("fanfuel-auth-changed"));
 }
 
-export async function register(payload: {
-  email: string;
-  password: string;
-  display_name: string;
-  role_intent: string;
-}): Promise<AuthResponse> {
+export async function register(
+  payload: {
+    registration_token: string;
+    password: string;
+  },
+  signal?: AbortSignal
+): Promise<AuthResponse> {
   return apiFetch<AuthResponse>("/api/v1/auth/register", {
+    signal,
     method: "POST",
     body: JSON.stringify(payload)
   });
 }
 
-export async function login(payload: { email: string; password: string }): Promise<AuthResponse> {
+export async function identifyAuthEmail(
+  payload: { email: string },
+  signal?: AbortSignal
+): Promise<AuthIdentifyResponse> {
+  return apiFetch<AuthIdentifyResponse>("/api/v1/auth/identify", {
+    signal,
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function startEmailVerification(
+  payload: { email: string; locale: string },
+  signal?: AbortSignal
+): Promise<EmailVerificationStartResponse> {
+  return apiFetch<EmailVerificationStartResponse>("/api/v1/auth/email-verification/start", {
+    signal,
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function verifyEmail(
+  payload: { challenge_id: string; code: string },
+  signal?: AbortSignal
+): Promise<EmailVerificationVerifyResponse> {
+  return apiFetch<EmailVerificationVerifyResponse>("/api/v1/auth/email-verification/verify", {
+    signal,
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function login(
+  payload: { email: string; password: string },
+  signal?: AbortSignal
+): Promise<AuthResponse> {
   return apiFetch<AuthResponse>("/api/v1/auth/login", {
+    signal,
     method: "POST",
     body: JSON.stringify(payload)
   });
 }
 
-export async function getMe(token: string): Promise<CurrentUser> {
+export async function getMe(token: string, signal?: AbortSignal): Promise<CurrentUser> {
   return apiFetch<CurrentUser>("/api/v1/auth/me", {
+    signal,
     headers: authHeaders(token)
   });
 }
@@ -114,6 +157,17 @@ export async function updateCreatorProfile(
 ): Promise<CurrentUser> {
   return apiFetch<CurrentUser>("/api/v1/studio/profile", {
     method: "PATCH",
+    headers: authHeaders(token),
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function createCreatorDraft(
+  token: string,
+  payload: { title: string; description: string }
+): Promise<CurrentUser> {
+  return apiFetch<CurrentUser>("/api/v1/studio/onboarding", {
+    method: "POST",
     headers: authHeaders(token),
     body: JSON.stringify(payload)
   });

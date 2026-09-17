@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { formatMoney } from "@fanfuel/i18n";
-import { Button, EmptyState, Skeleton } from "@fanfuel/ui";
+import { Button, EmptyState, Skeleton, Select } from "@fanfuel/ui";
 import { AppTopBar } from "../../../components/app-chrome";
 import type {
   CreateDonationResponse,
@@ -47,7 +47,11 @@ export default function CreatorPage() {
   const [selectedGoalID, setSelectedGoalID] = useState("");
 
   useEffect(() => {
-    Promise.all([getPublicCreator(params.slug), getPublicGoals(params.slug), getPublicDonations(params.slug)])
+    Promise.all([
+      getPublicCreator(params.slug),
+      getPublicGoals(params.slug),
+      getPublicDonations(params.slug)
+    ])
       .then(([creatorResponse, goalsResponse, donationResponse]) => {
         setCreator(creatorResponse);
         setGoals(goalsResponse.items);
@@ -136,7 +140,9 @@ export default function CreatorPage() {
         <AppTopBar />
         <section className="ff-page-with-topbar ff-form-page">
           <div className="ff-panel ff-stack">
-            <div className="ff-message ff-error">{error || dictionary.common.publicProfileMissing}</div>
+            <div className="ff-message ff-error">
+              {error || dictionary.common.publicProfileMissing}
+            </div>
             <a className="ff-button ff-button-secondary" href="/">
               {dictionary.common.projectName}
             </a>
@@ -154,11 +160,17 @@ export default function CreatorPage() {
           <div className="ff-profile-main">
             <div className="ff-creator-hero">
               <div className="ff-avatar" aria-hidden="true">
-                {(creator.profile.display_name || creator.creator.creator_slug).slice(0, 2).toUpperCase()}
+                {(creator.profile.display_name || creator.creator.creator_slug)
+                  .slice(0, 2)
+                  .toUpperCase()}
               </div>
               <div className="ff-status">{dictionary.common.creatorPage}</div>
               <h1 id="creator-title">{creator.creator.title || creator.profile.display_name}</h1>
-              <p>{creator.creator.description || creator.profile.bio || dictionary.common.notAvailable}</p>
+              <p>
+                {creator.creator.description ||
+                  creator.profile.bio ||
+                  dictionary.common.notAvailable}
+              </p>
               <div className="ff-roles">
                 <span className="ff-chip">{dictionary.common.roleStreamer}</span>
                 <span className="ff-chip">{statusLabel(creator.creator.status)}</span>
@@ -190,17 +202,24 @@ export default function CreatorPage() {
                 </label>
                 <label className="ff-field">
                   <span>{dictionary.common.currency}</span>
-                  <select value={currency} onChange={(event) => setCurrency(event.target.value as CurrencyCode)}>
+                  <Select
+                    value={currency}
+                    onChange={(event) => setCurrency(event.target.value as CurrencyCode)}
+                  >
                     <option value="RUB">RUB</option>
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>
-                  </select>
+                  </Select>
                 </label>
               </div>
 
               <label className="ff-field">
                 <span>{dictionary.common.donationName}</span>
-                <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={80} />
+                <input
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                  maxLength={80}
+                />
               </label>
 
               <label className="ff-field">
@@ -214,7 +233,10 @@ export default function CreatorPage() {
 
               <label className="ff-field">
                 <span>{dictionary.common.donationGoal}</span>
-                <select value={selectedGoalID} onChange={(event) => setSelectedGoalID(event.target.value)}>
+                <Select
+                  value={selectedGoalID}
+                  onChange={(event) => setSelectedGoalID(event.target.value)}
+                >
                   <option value="">{dictionary.common.donationGoalNone}</option>
                   {goals
                     .filter((goal) => goal.currency === currency)
@@ -223,7 +245,7 @@ export default function CreatorPage() {
                         {goal.title}
                       </option>
                     ))}
-                </select>
+                </Select>
               </label>
 
               <label className="ff-check">
@@ -246,14 +268,17 @@ export default function CreatorPage() {
                     onClick={handleMockPayment}
                     disabled={isCompletingPayment}
                   >
-                    {isCompletingPayment ? dictionary.common.loading : dictionary.common.completeMockPayment}
+                    {isCompletingPayment
+                      ? dictionary.common.loading
+                      : dictionary.common.completeMockPayment}
                   </button>
                 ) : null}
               </div>
 
               {donationResult ? (
                 <p className="ff-meta">
-                  {dictionary.common.paymentStatus}: {paymentStatusLabel(donationResult.payment.status)}
+                  {dictionary.common.paymentStatus}:{" "}
+                  {paymentStatusLabel(donationResult.payment.status)}
                 </p>
               ) : null}
               <div className={error ? "ff-message ff-error" : "ff-message"}>{error || message}</div>
@@ -286,14 +311,26 @@ function SupportGoals({ goals }: { goals: DonationGoal[] }) {
     <section className="ff-panel ff-stack" aria-labelledby="goals-title">
       <h2 id="goals-title">{dictionary.common.goalsTitle}</h2>
       {goals.map((goal) => {
-        const progress = Math.min(100, Math.round((goal.current_amount_minor / goal.target_amount_minor) * 100));
+        const progress = Math.min(
+          100,
+          Math.round((goal.current_amount_minor / goal.target_amount_minor) * 100)
+        );
         return (
           <article className="ff-goal" key={goal.id}>
             <div>
               <strong>{goal.title}</strong>
               <p className="ff-meta">
-                {formatMoney({ amountMinor: goal.current_amount_minor, currency: goal.currency, locale: appLocale })} /{" "}
-                {formatMoney({ amountMinor: goal.target_amount_minor, currency: goal.currency, locale: appLocale })}
+                {formatMoney({
+                  amountMinor: goal.current_amount_minor,
+                  currency: goal.currency,
+                  locale: appLocale
+                })}{" "}
+                /{" "}
+                {formatMoney({
+                  amountMinor: goal.target_amount_minor,
+                  currency: goal.currency,
+                  locale: appLocale
+                })}
               </p>
             </div>
             <div className="ff-progress" aria-label={dictionary.common.goalProgress}>
@@ -306,7 +343,13 @@ function SupportGoals({ goals }: { goals: DonationGoal[] }) {
   );
 }
 
-function DonationHistory({ donations, topDonors }: { donations: Donation[]; topDonors: TopDonor[] }) {
+function DonationHistory({
+  donations,
+  topDonors
+}: {
+  donations: Donation[];
+  topDonors: TopDonor[];
+}) {
   return (
     <section className="ff-panel ff-stack" aria-labelledby="donations-title">
       <h2 id="donations-title">{dictionary.common.donationHistory}</h2>
@@ -321,7 +364,13 @@ function DonationHistory({ donations, topDonors }: { donations: Donation[]; topD
             <strong>{donation.public_name || dictionary.common.anonymousDonor}</strong>
             <p className="ff-meta">{donation.message || statusDonationLabel(donation.status)}</p>
           </div>
-          <strong>{formatMoney({ amountMinor: donation.amount_minor, currency: donation.currency, locale: appLocale })}</strong>
+          <strong>
+            {formatMoney({
+              amountMinor: donation.amount_minor,
+              currency: donation.currency,
+              locale: appLocale
+            })}
+          </strong>
         </article>
       ))}
 
@@ -332,7 +381,11 @@ function DonationHistory({ donations, topDonors }: { donations: Donation[]; topD
             {topDonors.map((donor) => (
               <span className="ff-chip" key={`${donor.display_name}-${donor.currency}`}>
                 {donor.display_name} -{" "}
-                {formatMoney({ amountMinor: donor.total_amount_minor, currency: donor.currency, locale: appLocale })}
+                {formatMoney({
+                  amountMinor: donor.total_amount_minor,
+                  currency: donor.currency,
+                  locale: appLocale
+                })}
               </span>
             ))}
           </div>
@@ -385,7 +438,9 @@ function statusDonationLabel(status: string): string {
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;

@@ -18,13 +18,23 @@ export interface ThemeSwitcherProps {
   compact?: boolean;
 }
 
-const options: Array<{ value: ThemePreference; icon: string; labelKey: keyof ThemeSwitcherLabels }> = [
+const options: Array<{
+  value: ThemePreference;
+  icon: string;
+  labelKey: keyof ThemeSwitcherLabels;
+}> = [
   { value: "system", icon: "OS", labelKey: "themeSystem" },
   { value: "light", icon: "LT", labelKey: "themeLight" },
   { value: "dark", icon: "DK", labelKey: "themeDark" }
 ];
 
-export function ThemeSwitcher({ preference, labels, onChange, className = "", compact = false }: ThemeSwitcherProps) {
+export function ThemeSwitcher({
+  preference,
+  labels,
+  onChange,
+  className = "",
+  compact = false
+}: ThemeSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false);
   const current = options.find((option) => option.value === preference) ?? options[0];
 

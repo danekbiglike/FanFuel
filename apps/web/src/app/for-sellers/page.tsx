@@ -5,7 +5,7 @@ const config: PublicLandingConfig = {
   titleKey: "forSellersTitle",
   leadKey: "forSellersLead",
   primaryActionKey: "forSellersPrimaryAction",
-  primaryHref: "/auth/register",
+  primaryHref: "/auth",
   secondaryActionKey: "openMarketplace",
   secondaryHref: "/marketplace",
   previewLabelKey: "forSellersPreviewLabel",

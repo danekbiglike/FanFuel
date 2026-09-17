@@ -12,15 +12,15 @@
 
 ## Верхний уровень
 
-| Зона | Назначение | Пример routes | Статус |
-|---|---|---|---|
-| Public | Объяснение продукта, marketplace, creator pages | `/`, `/marketplace`, `/creators/[slug]` | PARTIAL/PLANNED |
-| Auth | Вход, регистрация, onboarding | `/auth/login`, `/auth/register`, `/onboarding` | PARTIAL/PLANNED |
-| Buyer | Покупки и заказы | `/buyer`, `/buyer/orders/[id]` | PLANNED |
-| Studio | Кабинет стримера | `/studio`, `/studio/widgets` | PLANNED/PARTIAL |
-| Seller | Кабинет продавца | `/seller`, `/seller/products` | PLANNED |
-| Admin | Операционная панель | `/admin`, `/admin/users` | PARTIAL/PLANNED |
-| Widget | OBS/browser source | `apps/widget /?token=` | PARTIAL |
+| Зона   | Назначение                                      | Пример routes                                  | Статус          |
+| ------ | ----------------------------------------------- | ---------------------------------------------- | --------------- |
+| Public | Объяснение продукта, marketplace, creator pages | `/`, `/marketplace`, `/creators/[slug]`        | PARTIAL/PLANNED |
+| Auth   | Вход, регистрация, onboarding                   | `/auth/login`, `/auth/register`, `/onboarding` | PARTIAL/PLANNED |
+| Buyer  | Покупки и заказы                                | `/buyer`, `/buyer/orders/[id]`                 | PLANNED         |
+| Studio | Кабинет стримера                                | `/studio`, `/studio/widgets`                   | PLANNED/PARTIAL |
+| Seller | Кабинет продавца                                | `/seller`, `/seller/products`                  | PLANNED         |
+| Admin  | Операционная панель                             | `/admin`, `/admin/users`                       | PARTIAL/PLANNED |
+| Widget | OBS/browser source                              | `apps/widget /?token=`                         | PARTIAL         |
 
 ## Public Navigation
 

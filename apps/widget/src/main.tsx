@@ -3,7 +3,12 @@ import { createRoot } from "react-dom/client";
 import { formatMoney } from "@fanfuel/i18n";
 import type { CurrencyCode } from "@fanfuel/types";
 import type { RealtimeEvent } from "@fanfuel/sdk";
-import { applyThemePreference, getStoredThemePreference, isThemePreference, type ThemePreference } from "@fanfuel/ui";
+import {
+  applyThemePreference,
+  getStoredThemePreference,
+  isThemePreference,
+  type ThemePreference
+} from "@fanfuel/ui";
 import { appLocale, dictionary } from "./i18n";
 import "./styles.css";
 
@@ -46,7 +51,9 @@ function WidgetApp() {
       });
 
       socket.addEventListener("message", (event) => {
-        const realtimeEvent = JSON.parse(event.data as string) as RealtimeEvent<DonationAlertPayload>;
+        const realtimeEvent = JSON.parse(
+          event.data as string
+        ) as RealtimeEvent<DonationAlertPayload>;
         if (seenEvents.current.has(realtimeEvent.event_id)) {
           return;
         }
@@ -81,13 +88,20 @@ function WidgetApp() {
 
   return (
     <main className="widget-shell" aria-live="polite">
-      <section className={alert ? "widget-alert widget-alert-live" : "widget-alert"} aria-labelledby="widget-title">
+      <section
+        className={alert ? "widget-alert widget-alert-live" : "widget-alert"}
+        aria-labelledby="widget-title"
+      >
         <span>{connectionLabel}</span>
         {alert ? (
           <>
             <h1 id="widget-title">{alert.display_name || dictionary.common.anonymousDonor}</h1>
             <strong>
-              {formatMoney({ amountMinor: alert.amount_minor, currency: alert.currency, locale: appLocale })}
+              {formatMoney({
+                amountMinor: alert.amount_minor,
+                currency: alert.currency,
+                locale: appLocale
+              })}
             </strong>
             {alert.message ? <p>{alert.message}</p> : null}
           </>
@@ -112,7 +126,9 @@ function applyWidgetTheme() {
     return;
   }
 
-  const preference: ThemePreference = isThemePreference(themeParam) ? themeParam : getStoredThemePreference();
+  const preference: ThemePreference = isThemePreference(themeParam)
+    ? themeParam
+    : getStoredThemePreference();
   root.dataset.widgetTheme = "panel";
   applyThemePreference(preference, root);
 }

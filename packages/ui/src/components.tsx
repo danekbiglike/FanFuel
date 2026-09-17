@@ -3,11 +3,19 @@ import type {
   HTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
-  SelectHTMLAttributes,
   TextareaHTMLAttributes
 } from "react";
 
-type Tone = "neutral" | "success" | "warning" | "danger" | "info" | "held" | "payout" | "refunded" | "disputed";
+type Tone =
+  | "neutral"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "held"
+  | "payout"
+  | "refunded"
+  | "disputed";
 
 function cx(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(" ");
@@ -20,7 +28,12 @@ export function IconButton({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; children: ReactNode }) {
   return (
-    <button className={cx("ff-icon-button", className)} aria-label={label} type={props.type ?? "button"} {...props}>
+    <button
+      className={cx("ff-icon-button", className)}
+      aria-label={label}
+      type={props.type ?? "button"}
+      {...props}
+    >
       {children}
     </button>
   );
@@ -30,19 +43,20 @@ export function Input({ className = "", ...props }: InputHTMLAttributes<HTMLInpu
   return <input className={cx("ff-input", className)} {...props} />;
 }
 
-export function Textarea({ className = "", ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function Textarea({
+  className = "",
+  ...props
+}: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea className={cx("ff-textarea", className)} {...props} />;
 }
 
-export function Select({ className = "", children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select className={cx("ff-select", className)} {...props}>
-      {children}
-    </select>
-  );
-}
+export { Select } from "./select";
 
-export function Checkbox({ label, className = "", ...props }: InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
+export function Checkbox({
+  label,
+  className = "",
+  ...props
+}: InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
   return (
     <label className={cx("ff-check-control", className)}>
       <input type="checkbox" {...props} />
@@ -51,7 +65,11 @@ export function Checkbox({ label, className = "", ...props }: InputHTMLAttribute
   );
 }
 
-export function Radio({ label, className = "", ...props }: InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
+export function Radio({
+  label,
+  className = "",
+  ...props
+}: InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
   return (
     <label className={cx("ff-check-control", className)}>
       <input type="radio" {...props} />
@@ -60,7 +78,11 @@ export function Radio({ label, className = "", ...props }: InputHTMLAttributes<H
   );
 }
 
-export function Switch({ label, className = "", ...props }: InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
+export function Switch({
+  label,
+  className = "",
+  ...props
+}: InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
   return (
     <label className={cx("ff-switch", className)}>
       <input type="checkbox" role="switch" {...props} />
@@ -78,7 +100,11 @@ export function Tabs({ children, className = "", ...props }: HTMLAttributes<HTML
   );
 }
 
-export function Badge({ tone = "neutral", className = "", children }: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
+export function Badge({
+  tone = "neutral",
+  className = "",
+  children
+}: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
   return <span className={cx("ff-badge", `ff-badge-${tone}`, className)}>{children}</span>;
 }
 
@@ -128,7 +154,11 @@ export function Dropdown({ children, className = "", ...props }: HTMLAttributes<
   );
 }
 
-export function Tooltip({ children, content, className = "" }: HTMLAttributes<HTMLSpanElement> & { content: ReactNode }) {
+export function Tooltip({
+  children,
+  content,
+  className = ""
+}: HTMLAttributes<HTMLSpanElement> & { content: ReactNode }) {
   return (
     <span className={cx("ff-tooltip", className)}>
       {children}
@@ -137,9 +167,16 @@ export function Tooltip({ children, content, className = "" }: HTMLAttributes<HT
   );
 }
 
-export function Alert({ tone = "info", className = "", children }: HTMLAttributes<HTMLDivElement> & { tone?: Tone }) {
+export function Alert({
+  tone = "info",
+  className = "",
+  children
+}: HTMLAttributes<HTMLDivElement> & { tone?: Tone }) {
   return (
-    <div className={cx("ff-alert", `ff-alert-${tone}`, className)} role={tone === "danger" ? "alert" : "status"}>
+    <div
+      className={cx("ff-alert", `ff-alert-${tone}`, className)}
+      role={tone === "danger" ? "alert" : "status"}
+    >
       {children}
     </div>
   );
@@ -189,7 +226,15 @@ export function Breadcrumbs({ children, className = "", ...props }: HTMLAttribut
   );
 }
 
-export function StatCard({ label, value, meta }: { label: ReactNode; value: ReactNode; meta?: ReactNode }) {
+export function StatCard({
+  label,
+  value,
+  meta
+}: {
+  label: ReactNode;
+  value: ReactNode;
+  meta?: ReactNode;
+}) {
   return (
     <article className="ff-stat-card">
       <span>{label}</span>
@@ -223,7 +268,11 @@ export function GoalCard({ children, className = "", ...props }: HTMLAttributes<
   );
 }
 
-export function OrderStatusCard({ children, className = "", ...props }: HTMLAttributes<HTMLElement>) {
+export function OrderStatusCard({
+  children,
+  className = "",
+  ...props
+}: HTMLAttributes<HTMLElement>) {
   return (
     <article className={cx("ff-order-status-card", className)} {...props}>
       {children}
@@ -231,7 +280,11 @@ export function OrderStatusCard({ children, className = "", ...props }: HTMLAttr
   );
 }
 
-export function DealTimeline({ children, className = "", ...props }: HTMLAttributes<HTMLOListElement>) {
+export function DealTimeline({
+  children,
+  className = "",
+  ...props
+}: HTMLAttributes<HTMLOListElement>) {
   return (
     <ol className={cx("ff-deal-timeline", className)} {...props}>
       {children}
@@ -239,7 +292,11 @@ export function DealTimeline({ children, className = "", ...props }: HTMLAttribu
   );
 }
 
-export function WidgetPreviewContainer({ children, className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
+export function WidgetPreviewContainer({
+  children,
+  className = "",
+  ...props
+}: HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cx("ff-widget-preview", className)} {...props}>
       {children}
@@ -247,7 +304,11 @@ export function WidgetPreviewContainer({ children, className = "", ...props }: H
   );
 }
 
-export function DashboardPanel({ children, className = "", ...props }: HTMLAttributes<HTMLElement>) {
+export function DashboardPanel({
+  children,
+  className = "",
+  ...props
+}: HTMLAttributes<HTMLElement>) {
   return (
     <section className={cx("ff-dashboard-panel", className)} {...props}>
       {children}

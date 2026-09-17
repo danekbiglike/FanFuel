@@ -38,3 +38,21 @@ func TestTokenServiceCreatesAndParsesAccessToken(t *testing.T) {
 		t.Fatalf("unexpected roles: %#v", claims.Roles)
 	}
 }
+
+func TestRegistrationTokenCannotBeUsedAsAccessToken(t *testing.T) {
+	service := NewTokenService("test_secret", time.Minute)
+	token, _, err := service.CreateRegistrationToken("user@example.com", "00000000-0000-4000-8000-000000000001")
+	if err != nil {
+		t.Fatalf("create registration token: %v", err)
+	}
+	claims, err := service.ParseRegistrationToken(token)
+	if err != nil {
+		t.Fatalf("parse registration token: %v", err)
+	}
+	if claims.Email != "user@example.com" || claims.ChallengeID == "" {
+		t.Fatalf("unexpected registration claims: %#v", claims)
+	}
+	if _, err := service.ParseAccessToken(token); err == nil {
+		t.Fatal("registration token must not parse as access token")
+	}
+}

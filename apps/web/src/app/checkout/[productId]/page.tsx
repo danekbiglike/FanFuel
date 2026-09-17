@@ -91,7 +91,7 @@ export default function CheckoutPage() {
           <EmptyState>
             <strong>{dictionary.common.checkoutLoginRequiredTitle}</strong>
             <span>{dictionary.common.checkoutLoginRequiredText}</span>
-            <a className="ff-button ff-button-primary" href="/auth/login">
+            <a className="ff-button ff-button-primary" href="/auth">
               {dictionary.common.navLogin}
             </a>
           </EmptyState>
@@ -115,7 +115,11 @@ export default function CheckoutPage() {
                   <p className="ff-meta">{product.seller?.display_name}</p>
                 </div>
                 <strong>
-                  {formatMoney({ amountMinor: product.price_amount_minor, currency: product.currency, locale: appLocale })}
+                  {formatMoney({
+                    amountMinor: product.price_amount_minor,
+                    currency: product.currency,
+                    locale: appLocale
+                  })}
                 </strong>
               </div>
               <Alert tone="info">{dictionary.common.safeDealMockText}</Alert>
@@ -136,7 +140,10 @@ export default function CheckoutPage() {
                 >
                   {isSubmitting ? dictionary.common.loading : dictionary.common.checkoutCreateOrder}
                 </button>
-                <a className="ff-button ff-button-secondary" href={`/marketplace/products/${product.id}`}>
+                <a
+                  className="ff-button ff-button-secondary"
+                  href={`/marketplace/products/${product.id}`}
+                >
                   {dictionary.common.marketplaceBack}
                 </a>
               </div>
@@ -159,7 +166,9 @@ export default function CheckoutPage() {
                     disabled={isCompleting}
                     onClick={() => void handleMockPayment()}
                   >
-                    {isCompleting ? dictionary.common.loading : dictionary.common.completeMockPayment}
+                    {isCompleting
+                      ? dictionary.common.loading
+                      : dictionary.common.completeMockPayment}
                   </button>
                 ) : null}
                 <a className="ff-button ff-button-primary" href={`/buyer/orders/${order.order.id}`}>
@@ -191,7 +200,9 @@ function paymentStatusLabel(status: string): string {
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;

@@ -12,24 +12,31 @@ import (
 )
 
 type App struct {
-	cfg         config.ServiceConfig
-	store       *Store
-	tokens      TokenService
-	authLimiter *rateLimiter
-	publisher   events.Publisher
+	cfg          config.ServiceConfig
+	store        *Store
+	tokens       TokenService
+	authLimiter  *rateLimiter
+	publisher    events.Publisher
+	emailSender  EmailSender
+	verification emailVerificationService
 }
 
 func New(cfg config.ServiceConfig, db *pgxpool.Pool) (*App, error) {
 	if cfg.Environment == "production" && cfg.JWTSecret == "dev_jwt_secret_change_me" {
 		return nil, errors.New("JWT_SECRET must be configured in production")
 	}
+	if cfg.Environment == "production" && strings.TrimSpace(cfg.SMTPHost) == "" {
+		return nil, errors.New("SMTP_HOST must be configured in production")
+	}
 
 	return &App{
-		cfg:         cfg,
-		store:       NewStore(db, cfg.AdminBootstrapEmail, cfg.Environment != "production", NewMockPaymentProvider()),
-		tokens:      NewTokenService(cfg.JWTSecret, cfg.AccessTokenTTL),
-		authLimiter: newRateLimiter(20, time.Minute),
-		publisher:   events.NewRedisPublisher(cfg.RedisAddress),
+		cfg:          cfg,
+		store:        NewStore(db, cfg.AdminBootstrapEmail, cfg.Environment != "production", NewMockPaymentProvider()),
+		tokens:       NewTokenService(cfg.JWTSecret, cfg.AccessTokenTTL),
+		authLimiter:  newRateLimiter(20, time.Minute),
+		publisher:    events.NewRedisPublisher(cfg.RedisAddress),
+		emailSender:  newEmailSender(cfg),
+		verification: newEmailVerificationService(cfg.JWTSecret),
 	}, nil
 }
 
@@ -37,6 +44,9 @@ func (a *App) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/v1/foundation", method(http.MethodGet, a.handleFoundation))
 	mux.HandleFunc("/api/v1/auth/register", method(http.MethodPost, a.handleRegister))
 	mux.HandleFunc("/api/v1/auth/login", method(http.MethodPost, a.handleLogin))
+	mux.HandleFunc("/api/v1/auth/identify", method(http.MethodPost, a.handleIdentify))
+	mux.HandleFunc("/api/v1/auth/email-verification/start", method(http.MethodPost, a.handleStartEmailVerification))
+	mux.HandleFunc("/api/v1/auth/email-verification/verify", method(http.MethodPost, a.handleVerifyEmail))
 	mux.HandleFunc("/api/v1/auth/logout", method(http.MethodPost, a.handleLogout))
 	mux.HandleFunc("/api/v1/auth/me", method(http.MethodGet, a.handleMe))
 	mux.HandleFunc("/api/v1/me/profile", method(http.MethodPatch, a.handleUpdateProfile))
@@ -45,6 +55,7 @@ func (a *App) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/v1/products", method(http.MethodGet, a.handleProducts))
 	mux.HandleFunc("/api/v1/products/", method(http.MethodGet, a.handleProductRoutes))
 	mux.HandleFunc("/api/v1/studio/profile", method(http.MethodPatch, a.handleUpdateCreatorProfile))
+	mux.HandleFunc("/api/v1/studio/onboarding", method(http.MethodPost, a.handleCreatorOnboarding))
 	mux.HandleFunc("/api/v1/seller/profile", method(http.MethodPatch, a.handleUpdateSellerProfile))
 	mux.HandleFunc("/api/v1/seller/products", a.handleSellerProducts)
 	mux.HandleFunc("/api/v1/seller/products/", a.handleSellerProductRoutes)

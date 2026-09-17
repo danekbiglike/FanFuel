@@ -12,11 +12,25 @@ func normalizeEmail(email string) (string, bool) {
 		return "", false
 	}
 
-	if _, err := mail.ParseAddress(normalized); err != nil {
+	parsed, err := mail.ParseAddress(normalized)
+	if err != nil || !strings.EqualFold(parsed.Address, normalized) || len(normalized) > 254 {
 		return "", false
 	}
 
 	return normalized, true
+}
+
+func maskEmail(email string) string {
+	local, domain, ok := strings.Cut(email, "@")
+	if !ok || local == "" || domain == "" {
+		return "***"
+	}
+	visible := []rune(local)
+	prefix := string(visible[0])
+	if len(visible) > 1 {
+		prefix += string(visible[1])
+	}
+	return prefix + "***@" + domain
 }
 
 func normalizeLocale(locale string) string {
@@ -62,7 +76,7 @@ func validDisplayName(value string) bool {
 
 func validPassword(value string) bool {
 	length := utf8.RuneCountInString(value)
-	return length >= 8 && length <= 128
+	return length >= 8 && len([]byte(value)) <= 72
 }
 
 func validStatus(value string) bool {

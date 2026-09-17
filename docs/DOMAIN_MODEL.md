@@ -19,6 +19,8 @@
 
 `v0.3` реализует Marketplace MVP в миграции `000005_marketplace_mvp`: `ProductCategory`, `Product`, `ProductMedia`, `Order`, `Deal`, `DealEvent`, `Review` и связь `idempotency_keys.order_id`. Refunds, payouts, wallets, balance ledger, disputes и real provider integrations остаются planned/review.
 
+`v0.3.5` планирует промежуточный слой Universal Profile + Studio Skins: `DesignSkinPreset`, `Favorite`, `UserCollection`, `CollectionItem`, `StreamSession`, `CreatorMetricSnapshot`, `CreatorActivityEvent`, `CreatorChannelIntegration`, `CreatorDonationSettings`, `WidgetPreset`, `WidgetGroup`, `WidgetAlertRule`, расширение `CreatorStore`/`StoreItem` live-only правилами и статусы паузы/архива для creator/seller страниц. Production payments, payouts, ledger, refunds и disputes в этот слой не входят.
+
 ## Базовые типы статусов
 
 ### User status
@@ -134,6 +136,33 @@
 - блокировка пользователя должна блокировать опасные действия во всех ролях;
 - удаление должно быть soft delete с учётом legal retention.
 
+## EmailVerificationChallenge
+
+Назначение: одноразовое подтверждение нового email до создания аккаунта.
+
+Основные поля:
+
+- `id` UUID;
+- `email` — нормализованный email;
+- `purpose` — в текущей версии только `registration`;
+- `locale`;
+- `code_digest` — HMAC digest, raw code не хранится;
+- `attempt_count`, `max_attempts`;
+- `expires_at`, `resend_available_at`;
+- `verified_at`, `completed_at`, `invalidated_at`;
+- `created_at`, `updated_at`.
+
+Правила:
+
+- активен только challenge без `verified_at`, `completed_at`, `invalidated_at`, с будущим `expires_at` и не исчерпанными попытками;
+- создание нового challenge инвалидирует предыдущие активные challenge этого email/purpose;
+- успешная проверка заполняет `verified_at` и выдаёт короткоживущий registration token;
+- завершение регистрации блокирует строку challenge и атомарно заполняет `completed_at`;
+- raw code, registration token и SMTP credentials не хранятся и не логируются;
+- истёкшие строки подлежат фоновому cleanup после появления worker job.
+
+Индексы: `lower(email), purpose, created_at DESC`; `expires_at` для cleanup.
+
 ## UserPreferences
 
 Назначение: пользовательские настройки интерфейса, которые должны переживать вход с разных устройств.
@@ -167,6 +196,52 @@
 - для нового пользователя создаётся `system`;
 - если запись отсутствует у существующего пользователя, API создаёт её лениво;
 - guest theme хранится локально и не является источником истины после авторизации.
+
+## DesignSkinPreset
+
+Назначение: безопасный preset визуального скина для сайта, публичных страниц и Studio preview.
+
+Основные поля:
+
+- `id`;
+- `slug`;
+- `name_i18n_key`;
+- `description_i18n_key`;
+- `status`;
+- `token_overrides_json`;
+- `density`;
+- `radius_scale`;
+- `preview_file_id`;
+- `created_at`;
+- `updated_at`.
+
+Связи:
+
+- optional file reference for preview.
+
+Статусы:
+
+- `draft`;
+- `active`;
+- `archived`.
+
+Ограничения:
+
+- `slug` unique;
+- token overrides валидируются allowlist schema;
+- preset не может содержать произвольный CSS/HTML/JS;
+- должен поддерживать light/dark или явно наследовать base tokens.
+
+Индексы:
+
+- unique `slug`;
+- `status`.
+
+Бизнес-правила:
+
+- скин меняет только semantic tokens, плотность, радиусы, тени и preview assets;
+- скин не меняет layout slots, порядок контента, route structure или i18n keys;
+- пользовательские/авторские настройки скина должны проходить schema validation.
 
 ## Role
 
@@ -213,6 +288,7 @@
 - `user_id`;
 - `display_name`;
 - `slug`;
+- `name_confirmed_at` — внутренний маркер заполнения имени после регистрации;
 - `avatar_file_id`;
 - `bio`;
 - `created_at`;
@@ -240,6 +316,8 @@
 
 - slug нельзя менять часто без redirect policy;
 - display name не должен использоваться как уникальный идентификатор.
+- `name_confirmed_at` не входит в публичные profile responses; для текущего пользователя API возвращает его как `profile_name_confirmed_at`.
+- имя на платформе, публичный ник/название витрины и будущий username — отдельные значения; нельзя автоматически приравнивать их друг к другу.
 
 ## CreatorProfile
 
@@ -251,10 +329,13 @@
 - `user_id`;
 - `profile_id`;
 - `creator_slug`;
+- `status`;
 - `title`;
 - `description`;
 - `banner_file_id`;
+- `skin_preset_id`;
 - `theme_config_json`;
+- `live_status`;
 - `donations_enabled`;
 - `store_enabled`;
 - `partner_disclosure_enabled`;
@@ -267,20 +348,29 @@
 - one-to-one `creator_store`;
 - one-to-many `donation_goals`;
 - one-to-many `widgets`;
+- one-to-many `widget_groups`;
+- one-to-many `stream_sessions`;
+- one-to-many `activity_events`;
+- one-to-many `metric_snapshots`;
+- one-to-many `channel_integrations`;
+- one-to-one `donation_settings`;
 - one-to-many `affiliate_attributions`.
 
 Статусы:
 
 - `draft`;
 - `published`;
+- `paused`;
 - `hidden`;
+- `archived`;
 - `blocked`.
 
 Ограничения:
 
 - `creator_slug` unique;
 - theme config валидируется schema;
-- публичная страница недоступна при `blocked`.
+- `live_status` in `offline`, `live`, `paused`;
+- публичная страница недоступна при `blocked` и показывает временную недоступность при `paused`.
 
 Индексы:
 
@@ -291,7 +381,8 @@
 Бизнес-правила:
 
 - партнёрские товары должны иметь disclosure;
-- отключение donations не удаляет историю.
+- отключение donations не удаляет историю;
+- archived creator page не удаляет донаты, заказы, отзывы, файлы и audit log.
 
 ## SellerProfile
 
@@ -328,6 +419,7 @@
 - `draft`;
 - `active`;
 - `paused`;
+- `archived`;
 - `blocked`;
 - `rejected`.
 
@@ -348,7 +440,9 @@
 
 - Seller Lite быстрее стартует, но имеет higher hold и lower limits;
 - Seller Pro получает больше лимитов после verification;
-- налоговые предупреждения не заменяют юридическую консультацию.
+- налоговые предупреждения не заменяют юридическую консультацию;
+- archived seller page не удаляет товары, заказы, отзывы, платежи и audit log;
+- pause/archive должны блокироваться или требовать явного состояния, если есть активные обязательства по заказам.
 
 ## BuyerProfile
 
@@ -384,6 +478,41 @@
 
 - buyer profile создаётся автоматически при регистрации, если выбран buyer flow;
 - пользователь может позже добавить streamer/seller роли.
+
+## Favorite
+
+Назначение: избранное пользователя для товаров, авторов, продавцов и подборок.
+
+Основные поля:
+
+- `id`;
+- `user_id`;
+- `entity_type`;
+- `entity_id`;
+- `created_at`.
+
+Связи:
+
+- many-to-one `user`;
+- polymorphic reference by `entity_type`, `entity_id`.
+
+Статусы: не нужны.
+
+Ограничения:
+
+- `entity_type` in `product`, `creator_profile`, `seller_profile`, `user_collection`;
+- unique (`user_id`, `entity_type`, `entity_id`).
+
+Индексы:
+
+- `user_id`;
+- (`entity_type`, `entity_id`);
+- `created_at`.
+
+Бизнес-правила:
+
+- private/deleted сущности не должны показываться в public preview;
+- избранное принадлежит пользователю, а не buyer role.
 
 ## Product
 
@@ -538,13 +667,15 @@
 - `title`;
 - `description`;
 - `layout_config_json`;
+- `default_visibility_rule`;
 - `created_at`;
 - `updated_at`.
 
 Связи:
 
 - one-to-one `creator_profile`;
-- one-to-many `store_items`.
+- one-to-many `store_items`;
+- one-to-many `user_collections` through collection blocks.
 
 Статусы:
 
@@ -564,7 +695,8 @@
 Бизнес-правила:
 
 - hidden store не скрывает сам creator profile;
-- порядок и подборки хранятся отдельно от product.
+- порядок и подборки хранятся отдельно от product;
+- live-only блоки показываются только при `CreatorProfile.live_status=live`.
 
 ## StoreItem
 
@@ -575,8 +707,10 @@
 - `id`;
 - `creator_store_id`;
 - `product_id`;
+- `collection_id`;
 - `kind`;
 - `status`;
+- `visibility_rule`;
 - `custom_title`;
 - `custom_description`;
 - `sort_order`;
@@ -587,7 +721,8 @@
 Связи:
 
 - many-to-one `creator_store`;
-- many-to-one `product`.
+- optional many-to-one `product`;
+- optional many-to-one `user_collection`.
 
 Статусы:
 
@@ -598,7 +733,9 @@
 Ограничения:
 
 - unique (`creator_store_id`, `product_id`);
-- product должен быть published.
+- unique (`creator_store_id`, `collection_id`) when collection item;
+- product должен быть published;
+- `visibility_rule` in `always`, `live_only`, `offline_only`.
 
 Индексы:
 
@@ -609,7 +746,337 @@
 Бизнес-правила:
 
 - партнёрский товар должен показывать disclosure;
-- если product hidden, store item не должен продаваться.
+- если product hidden, store item не должен продаваться;
+- `live_only` item скрыт, пока автор offline или paused.
+
+## UserCollection
+
+Назначение: подборка товаров/авторов, которую может создать любой пользователь.
+
+Основные поля:
+
+- `id`;
+- `owner_user_id`;
+- `title`;
+- `description`;
+- `status`;
+- `visibility`;
+- `skin_preset_id`;
+- `created_at`;
+- `updated_at`;
+- `deleted_at`.
+
+Связи:
+
+- many-to-one `user`;
+- one-to-many `collection_items`;
+- optional many-to-one `design_skin_preset`.
+
+Статусы:
+
+- `draft`;
+- `published`;
+- `hidden`;
+- `archived`.
+
+Ограничения:
+
+- `visibility` in `private`, `public`, `unlisted`;
+- title required;
+- public collection items должны ссылаться только на public-safe сущности.
+
+Индексы:
+
+- `owner_user_id`;
+- `status`;
+- `visibility`;
+- `created_at`.
+
+Бизнес-правила:
+
+- создание подборок не требует роли автора;
+- public подборка может потребовать moderation позже;
+- archived collection не удаляет историю ссылок в orders/analytics.
+
+## CollectionItem
+
+Назначение: элемент пользовательской подборки.
+
+Основные поля:
+
+- `id`;
+- `collection_id`;
+- `entity_type`;
+- `entity_id`;
+- `custom_note`;
+- `sort_order`;
+- `created_at`;
+- `updated_at`.
+
+Связи:
+
+- many-to-one `user_collection`;
+- polymorphic reference by `entity_type`, `entity_id`.
+
+Статусы: наследуются от collection и target entity.
+
+Ограничения:
+
+- `entity_type` in `product`, `creator_profile`, `seller_profile`;
+- unique (`collection_id`, `entity_type`, `entity_id`).
+
+Индексы:
+
+- `collection_id`;
+- (`collection_id`, `sort_order`);
+- (`entity_type`, `entity_id`).
+
+Бизнес-правила:
+
+- hidden product/creator не показывается публично через подборку;
+- порядок элементов хранится отдельно от product sort.
+
+## StreamSession
+
+Назначение: состояние прямой трансляции автора для live-only витрин и realtime UI.
+
+Основные поля:
+
+- `id`;
+- `creator_profile_id`;
+- `status`;
+- `source`;
+- `external_stream_id`;
+- `started_at`;
+- `ended_at`;
+- `created_at`;
+- `updated_at`.
+
+Связи:
+
+- many-to-one `creator_profile`.
+
+Статусы:
+
+- `scheduled`;
+- `live`;
+- `paused`;
+- `ended`;
+- `cancelled`.
+
+Ограничения:
+
+- только одна active `live` session на creator profile;
+- external stream fields nullable для ручного MVP.
+
+Индексы:
+
+- `creator_profile_id`;
+- `status`;
+- `started_at`.
+
+Бизнес-правила:
+
+- `v0.3.5` может начать с ручного live-state;
+- внешние платформы требуют отдельной integration task;
+- live-state не должен давать права на редактирование витрины без auth.
+
+## CreatorMetricSnapshot
+
+Назначение: агрегированный снимок статистики автора для Studio charts.
+
+Основные поля:
+
+- `id`;
+- `creator_profile_id`;
+- `period_start`;
+- `period_end`;
+- `granularity`;
+- `source`;
+- `gross_amount_minor`;
+- `creator_amount_minor`;
+- `currency`;
+- `event_count`;
+- `snapshot_status`;
+- `created_at`;
+- `updated_at`.
+
+Связи:
+
+- many-to-one `creator_profile`.
+
+Статусы:
+
+- `complete`;
+- `partial`;
+- `recalculation_required`.
+
+Ограничения:
+
+- `granularity` in `hour`, `day`, `week`, `month`;
+- `source` in `donation`, `partner_product`, `store_purchase`, `all`;
+- amounts хранятся только в minor units;
+- currency required.
+
+Индексы:
+
+- `creator_profile_id`;
+- (`creator_profile_id`, `period_start`, `granularity`);
+- `source`;
+- `snapshot_status`.
+
+Бизнес-правила:
+
+- статистика Studio не является `Wallet`, `BalanceTransaction` или payout balance;
+- данные пересчитываются из source events и не создают финансовых движений;
+- fake metrics запрещены даже для пустого состояния.
+
+## CreatorActivityEvent
+
+Назначение: единая лента последних событий Studio.
+
+Основные поля:
+
+- `id`;
+- `creator_profile_id`;
+- `event_type`;
+- `source`;
+- `source_entity_type`;
+- `source_entity_id`;
+- `external_event_id`;
+- `payload_json`;
+- `visibility`;
+- `occurred_at`;
+- `created_at`.
+
+Связи:
+
+- many-to-one `creator_profile`;
+- optional source donation/order/channel integration by type/id.
+
+Статусы: отдельный status не нужен; видимость управляется `visibility`.
+
+Ограничения:
+
+- `event_type` in `donation`, `channel_subscription`, `partner_purchase`, `store_purchase`, `widget`, `system`;
+- `source` in `fanfuel`, `youtube`, `twitch`, `telegram`, `mock`, `manual`;
+- payload schema versioned;
+- unique (`source`, `external_event_id`) where external id exists.
+
+Индексы:
+
+- `creator_profile_id`;
+- (`creator_profile_id`, `occurred_at`);
+- `event_type`;
+- `source`;
+- (`source`, `external_event_id`).
+
+Бизнес-правила:
+
+- raw platform payload не показывается пользователю;
+- событие не должно раскрывать лишние персональные данные покупателя или подписчика;
+- feed должен уметь дедуплицировать bot/provider retries.
+
+## CreatorChannelIntegration
+
+Назначение: подключение внешнего канала автора для bot-backed событий подписок.
+
+Основные поля:
+
+- `id`;
+- `creator_profile_id`;
+- `platform`;
+- `status`;
+- `external_channel_id`;
+- `display_name`;
+- `bot_user_id`;
+- `scopes_json`;
+- `token_ref`;
+- `last_sync_at`;
+- `last_error_code`;
+- `created_at`;
+- `updated_at`;
+- `revoked_at`.
+
+Связи:
+
+- many-to-one `creator_profile`;
+- one-to-many `creator_activity_events`.
+
+Статусы:
+
+- `not_connected`;
+- `connecting`;
+- `active`;
+- `paused`;
+- `error`;
+- `revoked`.
+
+Ограничения:
+
+- `platform` in `youtube`, `twitch`, `telegram`;
+- token/secret хранится только как encrypted backend reference, не raw value;
+- unique (`creator_profile_id`, `platform`, `external_channel_id`).
+
+Индексы:
+
+- `creator_profile_id`;
+- `platform`;
+- `status`;
+- `last_sync_at`.
+
+Бизнес-правила:
+
+- подключение бота требует platform/security review перед production;
+- UI показывает только masked status и не видит platform secrets;
+- ingestion events должны иметь signature или trusted internal queue boundary.
+
+## CreatorDonationSettings
+
+Назначение: настройки донатов автора до публикации события в OBS и публичные списки.
+
+Основные поля:
+
+- `creator_profile_id`;
+- `currency`;
+- `amount_presets_json`;
+- `min_amount_minor`;
+- `max_amount_minor`;
+- `message_max_length`;
+- `link_policy`;
+- `audio_enabled`;
+- `audio_min_amount_minor`;
+- `audio_allowed_categories_json`;
+- `tts_enabled`;
+- `tts_min_amount_minor`;
+- `tts_allowed_categories_json`;
+- `moderation_mode`;
+- `spam_filter_config_json`;
+- `created_at`;
+- `updated_at`.
+
+Связи:
+
+- one-to-one `creator_profile`.
+
+Статусы: отдельный status не нужен.
+
+Ограничения:
+
+- primary key `creator_profile_id`;
+- amounts в minor units;
+- `moderation_mode` in `auto_approve`, `hold_for_review`, `blocked`;
+- message length задаётся конфигом и валидируется backend-ом.
+
+Индексы:
+
+- primary key `creator_profile_id`.
+
+Бизнес-правила:
+
+- held/moderated donation не создаёт OBS alert до разрешения;
+- settings не меняют `Payment.status` и не вызывают provider напрямую;
+- audio/TTS provider secrets не хранятся в этих настройках.
 
 ## PromoCode
 
@@ -912,6 +1379,51 @@
 - повторная доставка допускается, client должен dedupe по `event_id`;
 - alert text локализуется на клиенте, если это UI text.
 
+## WidgetPreset
+
+Назначение: описывает доступный тип/preset виджета в Studio catalog.
+
+Основные поля:
+
+- `key`;
+- `category`;
+- `name_i18n_key`;
+- `description_i18n_key`;
+- `status`;
+- `supported_event_types_json`;
+- `schema_version`;
+- `default_config_json`;
+- `created_at`;
+- `updated_at`.
+
+Связи:
+
+- referenced by widgets through `preset_key`.
+
+Статусы:
+
+- `active`;
+- `hidden`;
+- `deprecated`.
+
+Ограничения:
+
+- `category` in `alerts`, `statistics`, `fundraising`, `products`, `cyclic_promo`, `other`;
+- config schema versioned;
+- preset не может содержать произвольный JS/HTML/CSS.
+
+Индексы:
+
+- primary key `key`;
+- `category`;
+- `status`.
+
+Бизнес-правила:
+
+- presets управляют формой настроек и preview, но public widget URL остаётся read-only;
+- statistics widget читает агрегаты, а не приватные финансовые таблицы;
+- product widgets не раскрывают приватные order/customer data.
+
 ## Widget
 
 Назначение: OBS/browser source виджет автора.
@@ -920,7 +1432,10 @@
 
 - `id`;
 - `creator_profile_id`;
+- `widget_group_id`;
 - `type`;
+- `category`;
+- `preset_key`;
 - `status`;
 - `name`;
 - `config_json`;
@@ -931,7 +1446,10 @@
 
 Связи:
 
-- many-to-one creator.
+- many-to-one creator;
+- optional many-to-one `widget_group`;
+- optional reference to `widget_preset`;
+- one-to-many `widget_alert_rules`.
 
 Статусы:
 
@@ -942,12 +1460,15 @@
 Ограничения:
 
 - token хранить только hash;
+- `category` in `alerts`, `statistics`, `fundraising`, `products`, `cyclic_promo`, `other`;
 - config schema versioned.
 
 Индексы:
 
 - `creator_profile_id`;
-- `kind`;
+- `type`;
+- `category`;
+- `preset_key`;
 - `status`;
 - `expires_at`.
 
@@ -955,6 +1476,106 @@
 
 - widget token read-only;
 - token rotation сразу выдаёт новый token и делает старый недействительным в `v0.2`; grace period требует отдельного решения перед production.
+
+## WidgetGroup
+
+Назначение: группа OBS/browser source виджетов с общим read-only token и зонами размещения.
+
+Основные поля:
+
+- `id`;
+- `creator_profile_id`;
+- `status`;
+- `name`;
+- `layout_config_json`;
+- `token_hash`;
+- `expires_at`;
+- `created_at`;
+- `updated_at`.
+
+Связи:
+
+- many-to-one creator;
+- one-to-many widgets;
+- one-to-many widget alert rules.
+
+Статусы:
+
+- `active`;
+- `disabled`;
+- `revoked`.
+
+Ограничения:
+
+- token хранить только hash;
+- layout config schema versioned;
+- public group token read-only.
+
+Индексы:
+
+- `creator_profile_id`;
+- `status`;
+- `expires_at`.
+
+Бизнес-правила:
+
+- группа нужна для разных placement zones в OBS;
+- token показывается только при создании или ротации;
+- публичный URL группы не может менять настройки.
+
+## WidgetAlertRule
+
+Назначение: правило выбора алерта и ассетов для события доната или покупки.
+
+Основные поля:
+
+- `id`;
+- `creator_profile_id`;
+- `widget_id`;
+- `widget_group_id`;
+- `trigger_type`;
+- `trigger_config_json`;
+- `placement_zone`;
+- `asset_file_id`;
+- `animation_config_json`;
+- `priority`;
+- `status`;
+- `created_at`;
+- `updated_at`.
+
+Связи:
+
+- many-to-one creator;
+- optional many-to-one widget;
+- optional many-to-one widget group;
+- optional file reference for image/gif/animation asset.
+
+Статусы:
+
+- `active`;
+- `disabled`;
+- `archived`.
+
+Ограничения:
+
+- `trigger_type` in `donation_amount`, `product`, `product_group`, `collection`, `purchase_event`;
+- `placement_zone` in `center`, `top_right`, `top_left`, `bottom_right`, `bottom_left`, `custom`;
+- config schema versioned.
+
+Индексы:
+
+- `creator_profile_id`;
+- `widget_id`;
+- `widget_group_id`;
+- `trigger_type`;
+- `status`;
+- `priority`.
+
+Бизнес-правила:
+
+- более высокий priority выбирается первым при нескольких совпадениях;
+- purchase alert payload не должен раскрывать лишние персональные данные;
+- assets проходят file upload security rules.
 
 ## IdempotencyKey
 
@@ -1697,7 +2318,7 @@
 
 ## Начальная схема PostgreSQL
 
-Минимальный набор таблиц для `v0.0-v0.3`:
+Минимальный набор таблиц для `v0.0-v0.3` и planned `v0.3.5`:
 
 ```txt
 users
@@ -1706,18 +2327,30 @@ profiles
 creator_profiles
 seller_profiles
 buyer_profiles
+design_skin_presets
+favorites
+user_collections
+collection_items
 product_categories
 products
 product_media
 creator_stores
 store_items
+stream_sessions
+creator_metric_snapshots
+creator_activity_events
+creator_channel_integrations
+creator_donation_settings
 promo_codes
 affiliate_links
 affiliate_attributions
 donations
 donation_goals
 alerts
+widget_presets
 widgets
+widget_groups
+widget_alert_rules
 orders
 deals
 deal_events
@@ -1781,3 +2414,5 @@ file_access_logs
 - `provider_webhooks`: provider/provider_event_id unique.
 - `balance_transactions`: wallet/source/idempotency.
 - `audit_logs`: entity/action/created_at.
+
+UX-TASK-031: существующий CreatorProfile теперь также создаётся из публичной анкеты после авторизации через onboarding. Начальный статус draft, роль streamer выдаётся атомарно; публичная выдача только published. Новых сущностей/миграций нет.

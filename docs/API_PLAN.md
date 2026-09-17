@@ -117,16 +117,38 @@ Rate limits должны быть конфигурируемыми и учиты
 
 `v0.1` реализует JWT access token через `Authorization: Bearer <token>`. Refresh/password reset остаются planned.
 
+### POST `/api/v1/auth/identify`
+
+Назначение: первый шаг единой авторизации для email.
+
+Body: `email`.
+
+Ответ всегда `200`: `next_action` со значением `login` или `register`. Endpoint не возвращает user id, status, roles или profile data. Развилка осознанно раскрывает наличие аккаунта; применяются rate limits по IP и нормализованному email, см. ADR-0024.
+
+### POST `/api/v1/auth/email-verification/start`
+
+Назначение: отправить одноразовый код для подтверждения нового email.
+
+Body: `email`, optional `locale`.
+
+Ответ: `challenge_id`, `expires_at`, `resend_available_at`, masked `email`. Код живёт 10 минут, предыдущий активный challenge инвалидируется, повторная отправка ограничена 60 секундами. Если email уже занят, возвращается conflict; UI возвращает пользователя к первому шагу.
+
+### POST `/api/v1/auth/email-verification/verify`
+
+Назначение: проверить одноразовый код и выдать право завершить регистрацию.
+
+Body: `challenge_id`, `code`.
+
+Ответ: `registration_token`, `expires_at`. Не более 5 неверных попыток. Код хранится только как HMAC digest, challenge нельзя проверить повторно после успеха/expiry/лимита.
+
 ### POST `/api/v1/auth/register`
 
-Назначение: регистрация пользователя.
+Назначение: создать базовый аккаунт пользователя.
 
 Body:
 
-- `email`;
+- `registration_token`;
 - `password`;
-- `display_name`;
-- `role_intent`: `buyer`, `streamer`, `seller`;
 - optional `locale`;
 - optional `time_zone`.
 
@@ -136,6 +158,18 @@ Body:
 - `access_token`;
 - `token_type`;
 - `expires_at`.
+
+Правила:
+
+- email берётся только из проверенного registration token; переданный клиентом email не принимается;
+- challenge завершается в той же транзакции, что и создание пользователя; replay token не создаёт второй аккаунт;
+- `email_verified_at` заполняется при создании, status равен `active`;
+- публичная регистрация выдаёт только роль `buyer`;
+- поля `display_name` и `role_intent` больше не принимаются (ADR-0022);
+- профиль создаётся с временным `display_name` из local part email;
+- `profile_name_confirmed_at` в ответе `user` равен `null`;
+- следующий шаг — задать имя через `PATCH /api/v1/me/profile`, после чего backend заполняет `name_confirmed_at`;
+- имя задаётся сразу после подтверждённой регистрации как следующий обязательный шаг.
 
 ### POST `/api/v1/auth/login`
 
@@ -225,6 +259,19 @@ Body:
 
 Редактирование общего профиля.
 
+Body:
+
+- `display_name`;
+- `slug`;
+- `bio`.
+
+Правила:
+
+- auth required;
+- `display_name` 2–80 символов;
+- если `name_confirmed_at` пуст, успешное обновнение заполняет его — это завершает шаг `/auth/name`;
+- публичные nickname/store address и будущий username этим endpoint не резервируются.
+
 ### GET `/api/v1/creators/{creator_slug}`
 
 Публичная страница автора.
@@ -237,15 +284,244 @@ Body:
 
 Редактирование seller profile.
 
+### POST `/api/v1/me/creator-profile`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: включить режим автора для текущего пользователя или создать draft creator profile.
+
+Правила:
+
+- auth required;
+- не выдаёт admin/support/moderator роли;
+- повторный вызов идемпотентно возвращает существующий creator profile;
+- пользовательский текст onboarding идёт через i18n.
+
+### POST `/api/v1/me/seller-profile`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: включить режим продавца для текущего пользователя или создать draft seller profile.
+
+Правила:
+
+- auth required;
+- Seller Pro verification не запускается здесь;
+- налоговые/юридические предупреждения остаются `LEGAL_REVIEW_REQUIRED` до review.
+
+### POST `/api/v1/me/creator-profile/pause`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: временно приостановить публичную страницу автора.
+
+Правила:
+
+- owner only;
+- публичная страница показывает localized unavailable state;
+- донаты/витрина блокируются, история не удаляется;
+- действие пишется в audit log.
+
+### POST `/api/v1/me/creator-profile/resume`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: вернуть страницу автора из paused state.
+
+### POST `/api/v1/me/creator-profile/archive`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: архивировать страницу автора как soft delete.
+
+Правила:
+
+- owner only;
+- не удаляет donations, orders, reviews, payments и audit logs;
+- физическое удаление данных не входит в endpoint.
+
+### POST `/api/v1/me/seller-profile/pause`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: временно приостановить публичную страницу/режим продавца.
+
+Правила:
+
+- owner only;
+- нельзя ломать active orders;
+- если есть активные обязательства, endpoint возвращает blocked state с `i18n_key`.
+
+### POST `/api/v1/me/seller-profile/resume`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: вернуть seller profile из paused state.
+
+### POST `/api/v1/me/seller-profile/archive`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: архивировать страницу продавца как soft delete.
+
+Правила:
+
+- owner only;
+- не удаляет products, orders, reviews, payments и audit logs;
+- blocked active orders возвращают понятную ошибку.
+
+## Design skin endpoints
+
+### GET `/api/v1/design/skins`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: получить список активных безопасных skin presets.
+
+Правила:
+
+- public read;
+- возвращает только schema-validated presets;
+- preset содержит i18n keys и token override metadata, но не произвольный CSS/HTML.
+
 ## Creator endpoints
 
 ### GET `/api/v1/studio/overview`
 
 Обзор для стримера.
 
+### GET `/api/v1/studio/statistics`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: получить агрегированную статистику автора для графика Studio.
+
+Query:
+
+- `period`;
+- `granularity`: `hour`, `day`, `week`, `month`;
+- `source`: `all`, `donation`, `partner_product`, `store_purchase`;
+- optional `currency`.
+
+Правила:
+
+- auth required, creator owner only;
+- суммы возвращаются только в minor units;
+- endpoint не возвращает wallet balance, payout status или ledger movements;
+- пустой период возвращает пустые серии, а не fake metrics.
+
+### GET `/api/v1/studio/events`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: получить ленту последних событий Studio.
+
+Query:
+
+- `event_type`: `all`, `donation`, `channel_subscription`, `partner_purchase`, `store_purchase`, `widget`, `system`;
+- `source`: `fanfuel`, `youtube`, `twitch`, `telegram`, `mock`, `manual`;
+- `limit`;
+- `cursor`.
+
+Правила:
+
+- auth required, creator owner only;
+- raw bot/provider payload не возвращается;
+- события сортируются по `occurred_at desc`;
+- payload schema versioned и не содержит secrets.
+
+### GET `/api/v1/studio/channel-integrations`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: список подключений ботов YouTube, Twitch и Telegram для channel subscription events.
+
+Правила:
+
+- auth required, creator owner only;
+- возвращает masked status, platform, display name, last sync/error;
+- не возвращает access token, refresh token, bot secret или raw scopes.
+
+### POST `/api/v1/studio/channel-integrations/{platform}/connect`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: начать подключение канала к bot/integration слою.
+
+Правила:
+
+- `platform` in `youtube`, `twitch`, `telegram`;
+- OAuth/bot token storage только backend-side и encrypted reference;
+- production подключение требует platform/security review;
+- опасные повторные вызовы должны быть retry-safe.
+
+### POST `/api/v1/studio/channel-integrations/{integration_id}/pause`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: временно приостановить обработку событий интеграции.
+
+### POST `/api/v1/studio/channel-integrations/{integration_id}/resume`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: возобновить обработку событий интеграции.
+
+### POST `/api/v1/studio/channel-integrations/{integration_id}/revoke`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: отозвать подключение бота и прекратить ingestion событий.
+
+Правила:
+
+- revoke пишет audit log;
+- raw tokens удаляются/инвалидируются по выбранной storage policy;
+- прошлые `CreatorActivityEvent` не удаляются физически.
+
 ### GET `/api/v1/studio/donations`
 
 История донатов.
+
+### GET `/api/v1/studio/donation-settings`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: получить настройки донатов автора.
+
+Правила:
+
+- auth required, creator owner only;
+- возвращает amount presets, message limits, audio/TTS thresholds, moderation и spam-filter policy;
+- amounts в minor units.
+
+### PATCH `/api/v1/studio/donation-settings`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: обновить настройки донатов автора.
+
+Body:
+
+- optional `amount_presets`;
+- optional `min_amount_minor`;
+- optional `max_amount_minor`;
+- optional `message_max_length`;
+- optional `audio_enabled`;
+- optional `audio_min_amount_minor`;
+- optional `audio_allowed_categories`;
+- optional `tts_enabled`;
+- optional `tts_min_amount_minor`;
+- optional `tts_allowed_categories`;
+- optional `moderation_mode`;
+- optional `spam_filter_config`.
+
+Правила:
+
+- owner only;
+- validation errors имеют `i18n_key`;
+- настройки не меняют payment provider flow;
+- `moderation_mode` in `auto_approve`, `hold_for_review`, `blocked`.
 
 ### GET `/api/v1/studio/goals`
 
@@ -263,6 +539,22 @@ Body:
 
 Список виджетов.
 
+### GET `/api/v1/studio/widget-presets`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: список категорий и preset-типов виджетов для Studio catalog.
+
+Query:
+
+- optional `category`: `alerts`, `statistics`, `fundraising`, `products`, `cyclic_promo`, `other`.
+
+Правила:
+
+- возвращает i18n keys, supported event types и schema version;
+- не возвращает произвольный JS/HTML/CSS;
+- deprecated presets скрываются от новых виджетов, но старые виджеты продолжают работать по schema version.
+
 ### POST `/api/v1/studio/widgets`
 
 Создать widget config.
@@ -272,6 +564,142 @@ Body:
 Ротация widget token.
 
 Ответ `v0.2` при создании или ротации содержит token только один раз. Клиент строит OBS URL на базе widget app URL и `token`.
+
+### GET `/api/v1/studio/widget-groups`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: список групп виджетов автора.
+
+### POST `/api/v1/studio/widget-groups`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: создать группу виджетов с read-only token и layout zones.
+
+Правила:
+
+- token возвращается только один раз;
+- layout config валидируется schema;
+- public widget group URL read-only.
+
+### PATCH `/api/v1/studio/widget-groups/{group_id}`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: обновить имя, статус и layout zones группы.
+
+### POST `/api/v1/studio/widget-groups/{group_id}/rotate-token`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: ротировать read-only token группы.
+
+### GET `/api/v1/studio/widgets/{widget_id}/rules`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: получить правила выбора алертов для виджета.
+
+### POST `/api/v1/studio/widgets/{widget_id}/rules`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: создать правило для товара, группы товаров, подборки, purchase event или порога суммы доната.
+
+Правила:
+
+- trigger config валидируется schema;
+- priority определяет выбор при нескольких совпадениях;
+- upload assets идёт через signed file endpoints.
+
+### PATCH `/api/v1/studio/widgets/{widget_id}/rules/{rule_id}`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: обновить trigger, placement zone, asset или animation config.
+
+### GET `/api/v1/studio/products`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: список товаров, которые автор может добавить в витрину или подборку.
+
+Query:
+
+- `source`: `own`, `partner`, `all`;
+- optional `category`;
+- optional `status`;
+- `limit`;
+- `cursor`.
+
+Правила:
+
+- auth required, creator owner only;
+- возвращает только published/eligible товары;
+- hidden/rejected/private seller data не раскрываются;
+- партнёрские товары возвращают disclosure metadata.
+
+### POST `/api/v1/studio/products/{product_id}/select`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: добавить товар в candidate list витрины автора или сразу в store section.
+
+Правила:
+
+- product должен быть eligible;
+- duplicate select идемпотентен;
+- partner disclosure обязателен для партнёрских товаров.
+
+### DELETE `/api/v1/studio/products/{product_id}/select`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: убрать товар из candidate list витрины автора без удаления product/order history.
+
+### GET `/api/v1/studio/collections`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: список авторских подборок для витрины.
+
+Правила:
+
+- auth required, creator owner only;
+- может использовать `UserCollection`, но контекст применения creator/store фиксируется отдельно;
+- private user collection не становится public без явного действия.
+
+### POST `/api/v1/studio/collections`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: создать авторскую подборку для витрины.
+
+Body:
+
+- `title`;
+- optional `description`;
+- `visibility`;
+- optional `skin_preset_id`.
+
+### PATCH `/api/v1/studio/collections/{collection_id}`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: обновить название, описание, видимость, порядок или skin preset авторской подборки.
+
+### POST `/api/v1/studio/collections/{collection_id}/items`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: добавить товар, автора или продавца в авторскую подборку.
+
+### DELETE `/api/v1/studio/collections/{collection_id}/items/{item_id}`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: удалить элемент из авторской подборки.
 
 ### GET `/api/v1/studio/store`
 
@@ -289,9 +717,81 @@ Body:
 
 Скрыть/удалить товар из витрины.
 
+### POST `/api/v1/studio/store/sections`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: создать секцию витрины автора из товаров или пользовательской подборки.
+
+Правила:
+
+- `visibility_rule` in `always`, `live_only`, `offline_only`;
+- product должен быть `published`;
+- partner disclosure обязателен для партнёрских товаров.
+
+### PATCH `/api/v1/studio/store/sections/{section_id}`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: обновить порядок, заголовок, описание и visibility rule секции.
+
+### PATCH `/api/v1/studio/live-state`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: ручное управление live-state автора до внешних stream-интеграций.
+
+Body:
+
+```json
+{
+  "status": "live"
+}
+```
+
+Правила:
+
+- `status` in `offline`, `live`, `paused`;
+- изменение публикует realtime event, если WS слой включён;
+- live-state не даёт права на редактирование без auth.
+
 ### GET `/api/v1/studio/analytics`
 
-Базовая аналитика.
+Статус: future для `v0.4+`.
+
+Назначение: расширенная аналитика после базовой `/api/v1/studio/statistics`.
+
+Правила:
+
+- не дублировать базовый график v0.3.5;
+- не возвращать payout/balance данные до wallet/ledger этапов.
+
+## Internal bot ingestion endpoints
+
+### POST `/api/v1/internal/bot-events`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: принять событие от trusted bot/worker слоя и создать `CreatorActivityEvent`.
+
+Auth: service-to-service signature или internal queue boundary.
+
+Body:
+
+- `platform`: `youtube`, `twitch`, `telegram`;
+- `external_channel_id`;
+- `external_event_id`;
+- `event_type`: `channel_subscription`;
+- `occurred_at`;
+- `payload`.
+
+Правила:
+
+- не публичный пользовательский endpoint;
+- signature/trusted boundary mandatory;
+- idempotent by (`platform`, `external_event_id`);
+- raw secrets не сохранять в payload;
+- rate limiting и dead-letter strategy обязательны для production.
 
 ## Donation endpoints
 
@@ -481,6 +981,8 @@ Headers:
 
 ## Buyer endpoints
 
+Профильные потребительские endpoints в `v0.3.5` должны жить в `/api/v1/me/*`, потому что избранное, отзывы и подборки принадлежат пользователю, а не отдельной buyer role.
+
 ### GET `/api/v1/buyer/orders`
 
 История заказов.
@@ -513,9 +1015,97 @@ Headers:
 
 Избранное.
 
+Статус: legacy planned alias; для `v0.3.5` использовать `/api/v1/me/favorites`.
+
 ### POST `/api/v1/buyer/favorites`
 
 Добавить в избранное.
+
+Статус: legacy planned alias; для `v0.3.5` использовать `/api/v1/me/favorites`.
+
+### GET `/api/v1/me/favorites`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: список избранного текущего пользователя.
+
+Query:
+
+- `entity_type`;
+- `limit`;
+- `cursor`.
+
+### POST `/api/v1/me/favorites`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: добавить товар, автора, продавца или подборку в избранное.
+
+Body:
+
+- `entity_type`;
+- `entity_id`.
+
+Правила:
+
+- owner only;
+- duplicate add идемпотентен;
+- hidden/private target возвращает not found или forbidden без раскрытия лишних данных.
+
+### DELETE `/api/v1/me/favorites/{favorite_id}`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: убрать элемент из избранного.
+
+### GET `/api/v1/me/reviews`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: отзывы, оставленные текущим пользователем.
+
+Правила:
+
+- owner only;
+- показывает published/hidden/flagged statuses для автора отзыва;
+- не раскрывает moderation internals сверх разрешённого.
+
+### GET `/api/v1/me/collections`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: список подборок текущего пользователя.
+
+### POST `/api/v1/me/collections`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: создать подборку пользователя.
+
+Body:
+
+- `title`;
+- optional `description`;
+- `visibility`: `private`, `public`, `unlisted`;
+- optional `skin_preset_id`.
+
+### PATCH `/api/v1/me/collections/{collection_id}`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: обновить название, описание, видимость, порядок или skin preset подборки.
+
+### POST `/api/v1/me/collections/{collection_id}/items`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: добавить товар, автора или продавца в подборку.
+
+### DELETE `/api/v1/me/collections/{collection_id}/items/{item_id}`
+
+Статус: planned для `v0.3.5`.
+
+Назначение: удалить элемент из подборки.
 
 ## Order and checkout endpoints
 
@@ -736,7 +1326,14 @@ Envelope:
 
 - `donation.alert.created`;
 - `donation.goal.updated`;
+- `donation.moderation_held`;
+- `creator.live_state_changed`;
+- `creator.metric_snapshot.updated`;
+- `creator.activity.created`;
+- `creator.channel_integration.updated`;
+- `widget.group.updated`;
 - `creator.store.purchase_created`;
+- `purchase.alert.created`;
 - `order.status_changed`;
 - `deal.status_changed`;
 - `dispute.created`;
@@ -762,3 +1359,9 @@ Envelope:
 - Breaking changes требуют ADR.
 - Все новые endpoints добавлять в этот документ.
 - Все новые сущности добавлять в `docs/DOMAIN_MODEL.md`.
+
+## UX-TASK-031: POST /api/v1/studio/onboarding
+
+Авторизованный пользователь передаёт title (2–80 символов), description (до 1000). Транзакционно добавляет собственную роль streamer и creator_profile со статусом draft. Повторный запрос возвращает существующий профиль без перезаписи. Ответ CurrentUser; стандартные unauthorized/validation/forbidden. Не принимает user_id, role или status.
+
+UX-TASK-031: обнаружена выдача draft авторов публичными GET и допустимость draft в разрешении адресата доната. В связи с созданием приватных черновиков разрешён только published; PublicProfile скрывает непубличный creator_profile. Provider/суммы/проведение платежей не меняются. Изменение доступа намеренное, чтобы черновик не был публичным до публикации.

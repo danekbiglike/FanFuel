@@ -12,4 +12,3 @@ export function buildWidgetUrl(baseUrl: string, token: string): string {
   url.searchParams.set("token", token);
   return url.toString();
 }
-

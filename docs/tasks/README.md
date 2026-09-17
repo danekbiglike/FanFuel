@@ -13,6 +13,7 @@
 - [v0.1 — Auth + Profiles](v0.1/README.md).
 - [v0.2 — Donate MVP](v0.2/README.md).
 - [v0.3 — Marketplace MVP](v0.3/README.md).
+- [v0.3.5 — Aurora Refresh + Universal Profile + Studio Skins](v0.3.5/README.md).
 - [v0.4 — Creator Store + Partners](v0.4/README.md).
 - [v0.5 — Real Payment Provider Integration](v0.5/README.md).
 - [v0.6 — Seller Balance + Payouts](v0.6/README.md).

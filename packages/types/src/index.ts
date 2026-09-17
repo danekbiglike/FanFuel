@@ -25,6 +25,7 @@ export type UserStatus = "active" | "blocked" | "pending_verification" | "delete
 export interface User {
   id: string;
   email: string;
+  email_verified_at?: string;
   status: UserStatus;
   default_locale: Locale;
   time_zone: string;
@@ -75,6 +76,7 @@ export interface CurrentUser {
   user: User;
   roles: UserRole[];
   profile?: Profile;
+  profile_name_confirmed_at?: string;
   creator_profile?: CreatorProfile;
   seller_profile?: SellerProfile;
 }
@@ -92,6 +94,22 @@ export interface AuthResponse {
   token_type: "Bearer";
   expires_at: string;
   user: CurrentUser;
+}
+
+export interface AuthIdentifyResponse {
+  next_action: "login" | "register";
+}
+
+export interface EmailVerificationStartResponse {
+  challenge_id: string;
+  email: string;
+  expires_at: string;
+  resend_available_at: string;
+}
+
+export interface EmailVerificationVerifyResponse {
+  registration_token: string;
+  expires_at: string;
 }
 
 export interface PublicCreatorResponse {

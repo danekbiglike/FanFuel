@@ -44,7 +44,9 @@ export default function ProductPage() {
             <article className="ff-product-main" aria-labelledby="product-title">
               <div className="ff-product-card-head">
                 <Badge tone="info">
-                  {product.category ? translateKey(product.category.name_i18n_key) : kindLabel(product.kind)}
+                  {product.category
+                    ? translateKey(product.category.name_i18n_key)
+                    : kindLabel(product.kind)}
                 </Badge>
                 <Badge tone="success">{productStatusLabel(product.status)}</Badge>
                 <Badge tone="held">{dictionary.common.safeDealMockBadge}</Badge>
@@ -63,8 +65,12 @@ export default function ProductPage() {
                 {product.reviews && product.reviews.length > 0 ? (
                   product.reviews.map((review) => (
                     <article className="ff-review-row" key={review.id}>
-                      <strong>{dictionary.common.productRatingLabel}: {review.rating}/5</strong>
-                      <p className="ff-meta">{review.text || dictionary.common.productReviewNoText}</p>
+                      <strong>
+                        {dictionary.common.productRatingLabel}: {review.rating}/5
+                      </strong>
+                      <p className="ff-meta">
+                        {review.text || dictionary.common.productReviewNoText}
+                      </p>
                     </article>
                   ))
                 ) : (
@@ -80,14 +86,19 @@ export default function ProductPage() {
                 <div>
                   <span className="ff-meta">{dictionary.common.productPrice}</span>
                   <strong className="ff-price">
-                    {formatMoney({ amountMinor: product.price_amount_minor, currency: product.currency, locale: appLocale })}
+                    {formatMoney({
+                      amountMinor: product.price_amount_minor,
+                      currency: product.currency,
+                      locale: appLocale
+                    })}
                   </strong>
                 </div>
                 <div>
                   <span className="ff-meta">{dictionary.common.productSeller}</span>
                   <strong>{product.seller?.display_name ?? dictionary.common.roleSeller}</strong>
                   <p className="ff-meta">
-                    {dictionary.common.productSellerRating}: {product.seller?.rating_avg.toFixed(1) ?? "0.0"} / 5
+                    {dictionary.common.productSellerRating}:{" "}
+                    {product.seller?.rating_avg.toFixed(1) ?? "0.0"} / 5
                   </p>
                 </div>
                 <div className="ff-alert ff-alert-info">{dictionary.common.safeDealMockText}</div>
@@ -129,7 +140,9 @@ function kindLabel(kind: Product["kind"]): string {
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;

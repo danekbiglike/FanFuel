@@ -83,6 +83,12 @@ cp .env.example .env
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 ```
 
+Для локальной проверки писем подтверждения добавьте Mailpit override; inbox будет доступен на `http://localhost:8025`:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.mailpit.yml up -d --build
+```
+
 Миграции:
 
 ```bash

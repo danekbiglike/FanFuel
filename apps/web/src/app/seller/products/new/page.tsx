@@ -1,10 +1,16 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Alert, EmptyState } from "@fanfuel/ui";
+import { Alert, EmptyState, Select } from "@fanfuel/ui";
 import type { CurrencyCode, Product, ProductCategory } from "@fanfuel/types";
 import { AppTopBar } from "../../../../components/app-chrome";
-import { ApiError, createSellerProduct, getCategories, getStoredToken, submitSellerProduct } from "../../../../lib/api";
+import {
+  ApiError,
+  createSellerProduct,
+  getCategories,
+  getStoredToken,
+  submitSellerProduct
+} from "../../../../lib/api";
 import { dictionary } from "../../../../lib/i18n";
 
 const defaultCurrency = (process.env.NEXT_PUBLIC_DEFAULT_CURRENCY ?? "RUB") as CurrencyCode;
@@ -43,7 +49,13 @@ export default function SellerNewProductPage() {
   }, []);
 
   const canSubmit = useMemo(
-    () => token && categoryId && title && description && terms && Number(priceMajor.replace(",", ".")) > 0,
+    () =>
+      token &&
+      categoryId &&
+      title &&
+      description &&
+      terms &&
+      Number(priceMajor.replace(",", ".")) > 0,
     [categoryId, description, priceMajor, terms, title, token]
   );
 
@@ -114,23 +126,36 @@ export default function SellerNewProductPage() {
             <div className="ff-two-columns">
               <label className="ff-field">
                 <span>{dictionary.common.marketplaceCategory}</span>
-                <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)} disabled={isLoading}>
+                <Select
+                  value={categoryId}
+                  onChange={(event) => setCategoryId(event.target.value)}
+                  disabled={isLoading}
+                >
                   {categories.map((item) => (
                     <option key={item.id} value={item.id}>
                       {translateKey(item.name_i18n_key)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className="ff-field">
                 <span>{dictionary.common.productKind}</span>
-                <select value={kind} onChange={(event) => setKind(event.target.value as Product["kind"])}>
-                  <option value="digital_asset">{dictionary.common["productKind.digital_asset"]}</option>
+                <Select
+                  value={kind}
+                  onChange={(event) => setKind(event.target.value as Product["kind"])}
+                >
+                  <option value="digital_asset">
+                    {dictionary.common["productKind.digital_asset"]}
+                  </option>
                   <option value="obs_pack">{dictionary.common["productKind.obs_pack"]}</option>
-                  <option value="design_asset">{dictionary.common["productKind.design_asset"]}</option>
+                  <option value="design_asset">
+                    {dictionary.common["productKind.design_asset"]}
+                  </option>
                   <option value="coaching">{dictionary.common["productKind.coaching"]}</option>
-                  <option value="digital_service">{dictionary.common["productKind.digital_service"]}</option>
-                </select>
+                  <option value="digital_service">
+                    {dictionary.common["productKind.digital_service"]}
+                  </option>
+                </Select>
               </label>
             </div>
 
@@ -144,7 +169,11 @@ export default function SellerNewProductPage() {
             </label>
             <label className="ff-field">
               <span>{dictionary.common.productDescriptionField}</span>
-              <textarea value={description} onChange={(event) => setDescription(event.target.value)} required />
+              <textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                required
+              />
             </label>
             <label className="ff-field">
               <span>{dictionary.common.productTermsTitle}</span>
@@ -163,25 +192,32 @@ export default function SellerNewProductPage() {
               </label>
               <label className="ff-field">
                 <span>{dictionary.common.currency}</span>
-                <select value={currency} onChange={(event) => setCurrency(event.target.value as CurrencyCode)}>
+                <Select
+                  value={currency}
+                  onChange={(event) => setCurrency(event.target.value as CurrencyCode)}
+                >
                   <option value="RUB">RUB</option>
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
-                </select>
+                </Select>
               </label>
             </div>
 
             <div className="ff-two-columns">
               <label className="ff-field">
                 <span>{dictionary.common.deliveryType}</span>
-                <select
+                <Select
                   value={deliveryType}
-                  onChange={(event) => setDeliveryType(event.target.value as Product["delivery_type"])}
+                  onChange={(event) =>
+                    setDeliveryType(event.target.value as Product["delivery_type"])
+                  }
                 >
                   <option value="manual">{dictionary.common["deliveryType.manual"]}</option>
-                  <option value="digital_file">{dictionary.common["deliveryType.digital_file"]}</option>
+                  <option value="digital_file">
+                    {dictionary.common["deliveryType.digital_file"]}
+                  </option>
                   <option value="session">{dictionary.common["deliveryType.session"]}</option>
-                </select>
+                </Select>
               </label>
               <label className="ff-field">
                 <span>{dictionary.common.affiliatePercent}</span>
@@ -194,7 +230,11 @@ export default function SellerNewProductPage() {
             </div>
 
             <div className="ff-actions">
-              <button className="ff-button ff-button-primary" type="submit" disabled={isSubmitting || !canSubmit}>
+              <button
+                className="ff-button ff-button-primary"
+                type="submit"
+                disabled={isSubmitting || !canSubmit}
+              >
                 {isSubmitting ? dictionary.common.loading : dictionary.common.save}
               </button>
               {createdProduct ? (
@@ -227,7 +267,9 @@ function translateKey(key: string): string {
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;

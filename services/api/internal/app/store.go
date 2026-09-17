@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -27,16 +28,13 @@ func NewStore(db *pgxpool.Pool, adminBootstrapEmail string, allowAdminBootstrap 
 	}
 }
 
-func (s *Store) RegisterUser(ctx context.Context, req RegisterRequest) (*CurrentUser, error) {
-	email, ok := normalizeEmail(req.Email)
-	if !ok || !validPassword(req.Password) {
+func (s *Store) RegisterVerifiedUser(ctx context.Context, req RegisterRequest, email string, challengeID string) (*CurrentUser, error) {
+	email, ok := normalizeEmail(email)
+	if !ok || !validPassword(req.Password) || challengeID == "" {
 		return nil, errValidation
 	}
 
-	displayName := strings.TrimSpace(req.DisplayName)
-	if !validDisplayName(displayName) {
-		displayName = defaultDisplayName(email)
-	}
+	displayName := defaultDisplayName(email)
 
 	passwordHash, err := hashPassword(req.Password)
 	if err != nil {
@@ -49,10 +47,29 @@ func (s *Store) RegisterUser(ctx context.Context, req RegisterRequest) (*Current
 	}
 	defer rollbackTx(ctx, tx)
 
+	var challengeEmail string
+	var verifiedAt *time.Time
+	var completedAt *time.Time
+	var invalidatedAt *time.Time
+	if err := tx.QueryRow(ctx, `
+		SELECT email, verified_at, completed_at, invalidated_at
+		FROM email_verification_challenges
+		WHERE id = $1 AND purpose = 'registration'
+		FOR UPDATE
+	`, challengeID).Scan(&challengeEmail, &verifiedAt, &completedAt, &invalidatedAt); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errVerificationTokenInvalid
+		}
+		return nil, err
+	}
+	if !strings.EqualFold(challengeEmail, email) || verifiedAt == nil || completedAt != nil || invalidatedAt != nil {
+		return nil, errVerificationTokenInvalid
+	}
+
 	var userID string
 	if err := tx.QueryRow(ctx, `
-		INSERT INTO users (email, password_hash, default_locale, time_zone)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO users (email, email_verified_at, password_hash, status, default_locale, time_zone)
+		VALUES ($1, now(), $2, 'active', $3, $4)
 		RETURNING id
 	`, email, passwordHash, normalizeLocale(req.Locale), normalizeTimeZone(req.TimeZone)).Scan(&userID); err != nil {
 		if isUniqueViolation(err) {
@@ -66,7 +83,7 @@ func (s *Store) RegisterUser(ctx context.Context, req RegisterRequest) (*Current
 		return nil, err
 	}
 
-	profileSlug, err := s.nextProfileSlug(ctx, tx, normalizeSlug(firstNonEmpty(req.DisplayName, emailLocalPart(email))))
+	profileSlug, err := s.nextProfileSlug(ctx, tx, normalizeSlug(emailLocalPart(email)))
 	if err != nil {
 		return nil, err
 	}
@@ -94,26 +111,21 @@ func (s *Store) RegisterUser(ctx context.Context, req RegisterRequest) (*Current
 		return nil, err
 	}
 
-	switch strings.ToLower(strings.TrimSpace(req.RoleIntent)) {
-	case string(RoleStreamer):
-		if err := s.createCreatorProfile(ctx, tx, userID, profileID, profileSlug); err != nil {
-			return nil, err
-		}
-	case string(RoleSeller):
-		if err := s.createSellerProfile(ctx, tx, userID, displayName); err != nil {
-			return nil, err
-		}
-	}
-
 	if s.shouldBootstrapAdmin(ctx, tx, email) {
 		if err := s.grantRole(ctx, tx, userID, RoleAdmin); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := s.recordAudit(ctx, tx, &userID, "auth.register", "user", &userID, nil, nil, map[string]string{
-		"role_intent": strings.ToLower(strings.TrimSpace(req.RoleIntent)),
-	}); err != nil {
+	if err := s.recordAudit(ctx, tx, &userID, "auth.register", "user", &userID, nil, nil, nil); err != nil {
+		return nil, err
+	}
+
+	if _, err := tx.Exec(ctx, `
+		UPDATE email_verification_challenges
+		SET completed_at = now()
+		WHERE id = $1
+	`, challengeID); err != nil {
 		return nil, err
 	}
 
@@ -122,6 +134,153 @@ func (s *Store) RegisterUser(ctx context.Context, req RegisterRequest) (*Current
 	}
 
 	return s.GetCurrentUser(ctx, userID)
+}
+
+func (s *Store) EmailExists(ctx context.Context, email string) (bool, error) {
+	var exists bool
+	err := s.db.QueryRow(ctx, `
+		SELECT EXISTS(
+			SELECT 1 FROM users
+			WHERE lower(email) = lower($1) AND deleted_at IS NULL
+		)
+	`, email).Scan(&exists)
+	return exists, err
+}
+
+func (s *Store) CreateEmailVerificationChallenge(ctx context.Context, challenge EmailVerificationChallenge) error {
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer rollbackTx(ctx, tx)
+	if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtext(lower($1)))`, challenge.Email); err != nil {
+		return err
+	}
+
+	var resendAvailableAt time.Time
+	var verifiedAt *time.Time
+	err = tx.QueryRow(ctx, `
+		SELECT resend_available_at, verified_at
+		FROM email_verification_challenges
+		WHERE lower(email) = lower($1)
+		  AND purpose = 'registration'
+		  AND invalidated_at IS NULL
+		  AND completed_at IS NULL
+		ORDER BY created_at DESC
+		LIMIT 1
+		FOR UPDATE
+	`, challenge.Email).Scan(&resendAvailableAt, &verifiedAt)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return err
+	}
+	if err == nil && time.Now().UTC().Before(resendAvailableAt) {
+		return errVerificationResendLimited
+	}
+	if verifiedAt != nil && time.Now().UTC().Before(verifiedAt.Add(15*time.Minute)) {
+		return errVerificationResendLimited
+	}
+
+	if _, err := tx.Exec(ctx, `
+		UPDATE email_verification_challenges
+		SET invalidated_at = now()
+		WHERE lower(email) = lower($1)
+		  AND purpose = 'registration'
+		  AND invalidated_at IS NULL
+		  AND completed_at IS NULL
+	`, challenge.Email); err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(ctx, `
+		INSERT INTO email_verification_challenges (
+			id, email, purpose, locale, code_digest, max_attempts,
+			expires_at, resend_available_at
+		) VALUES ($1, $2, 'registration', $3, $4, $5, $6, $7)
+	`, challenge.ID, challenge.Email, challenge.Locale, challenge.CodeDigest,
+		challenge.MaxAttempts, challenge.ExpiresAt, challenge.ResendAvailableAt)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
+
+func (s *Store) InvalidateEmailVerificationChallenge(ctx context.Context, challengeID string) {
+	_, _ = s.db.Exec(ctx, `
+		UPDATE email_verification_challenges
+		SET invalidated_at = COALESCE(invalidated_at, now())
+		WHERE id = $1
+	`, challengeID)
+}
+
+func (s *Store) VerifyEmailChallenge(ctx context.Context, challengeID string, codeDigest string) (*EmailVerificationChallenge, error) {
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rollbackTx(ctx, tx)
+
+	var challenge EmailVerificationChallenge
+	err = tx.QueryRow(ctx, `
+		SELECT id, email, locale, code_digest, attempt_count, max_attempts,
+			expires_at, resend_available_at, verified_at, completed_at, invalidated_at
+		FROM email_verification_challenges
+		WHERE id = $1 AND purpose = 'registration'
+		FOR UPDATE
+	`, challengeID).Scan(
+		&challenge.ID, &challenge.Email, &challenge.Locale, &challenge.CodeDigest,
+		&challenge.AttemptCount, &challenge.MaxAttempts, &challenge.ExpiresAt,
+		&challenge.ResendAvailableAt, &challenge.VerifiedAt, &challenge.CompletedAt,
+		&challenge.InvalidatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errVerificationCodeInvalid
+		}
+		return nil, err
+	}
+
+	now := time.Now().UTC()
+	if challenge.VerifiedAt != nil || challenge.CompletedAt != nil || challenge.InvalidatedAt != nil {
+		return nil, errVerificationCodeInvalid
+	}
+	if !now.Before(challenge.ExpiresAt) {
+		return nil, errVerificationCodeExpired
+	}
+	if challenge.AttemptCount >= challenge.MaxAttempts {
+		return nil, errVerificationAttemptsExhausted
+	}
+	if !hmacDigestEqual(challenge.CodeDigest, codeDigest) {
+		challenge.AttemptCount++
+		_, updateErr := tx.Exec(ctx, `
+			UPDATE email_verification_challenges
+			SET attempt_count = $2
+			WHERE id = $1
+		`, challenge.ID, challenge.AttemptCount)
+		if updateErr != nil {
+			return nil, updateErr
+		}
+		if err := tx.Commit(ctx); err != nil {
+			return nil, err
+		}
+		if challenge.AttemptCount >= challenge.MaxAttempts {
+			return nil, errVerificationAttemptsExhausted
+		}
+		return nil, errVerificationCodeInvalid
+	}
+
+	if _, err := tx.Exec(ctx, `
+		UPDATE email_verification_challenges
+		SET verified_at = now()
+		WHERE id = $1
+	`, challenge.ID); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+	challenge.VerifiedAt = &now
+	return &challenge, nil
 }
 
 func (s *Store) Login(ctx context.Context, req LoginRequest) (*CurrentUser, error) {
@@ -133,11 +292,12 @@ func (s *Store) Login(ctx context.Context, req LoginRequest) (*CurrentUser, erro
 	var userID string
 	var passwordHash string
 	var status string
+	var emailVerifiedAt *time.Time
 	if err := s.db.QueryRow(ctx, `
-		SELECT id, password_hash, status
+		SELECT id, password_hash, status, email_verified_at
 		FROM users
 		WHERE lower(email) = lower($1) AND deleted_at IS NULL
-	`, email).Scan(&userID, &passwordHash, &status); err != nil {
+	`, email).Scan(&userID, &passwordHash, &status, &emailVerifiedAt); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errInvalidCredentials
 		}
@@ -145,7 +305,7 @@ func (s *Store) Login(ctx context.Context, req LoginRequest) (*CurrentUser, erro
 		return nil, err
 	}
 
-	if status != "active" || !verifyPassword(req.Password, passwordHash) {
+	if status != "active" || emailVerifiedAt == nil || !verifyPassword(req.Password, passwordHash) {
 		return nil, errInvalidCredentials
 	}
 
@@ -155,12 +315,13 @@ func (s *Store) Login(ctx context.Context, req LoginRequest) (*CurrentUser, erro
 func (s *Store) GetCurrentUser(ctx context.Context, userID string) (*CurrentUser, error) {
 	var user User
 	if err := s.db.QueryRow(ctx, `
-		SELECT id, email, status, default_locale, time_zone, created_at, updated_at, deleted_at
+		SELECT id, email, email_verified_at, status, default_locale, time_zone, created_at, updated_at, deleted_at
 		FROM users
 		WHERE id = $1 AND deleted_at IS NULL
 	`, userID).Scan(
 		&user.ID,
 		&user.Email,
+		&user.EmailVerifiedAt,
 		&user.Status,
 		&user.DefaultLocale,
 		&user.TimeZone,
@@ -185,6 +346,11 @@ func (s *Store) GetCurrentUser(ctx context.Context, userID string) (*CurrentUser
 		return nil, err
 	}
 
+	var profileNameConfirmedAt *time.Time
+	if profile != nil {
+		profileNameConfirmedAt = profile.NameConfirmedAt
+	}
+
 	creatorProfile, err := s.getCreatorProfileByUserID(ctx, user.ID)
 	if err != nil {
 		return nil, err
@@ -196,11 +362,12 @@ func (s *Store) GetCurrentUser(ctx context.Context, userID string) (*CurrentUser
 	}
 
 	return &CurrentUser{
-		User:           user,
-		Roles:          roles,
-		Profile:        profile,
-		CreatorProfile: creatorProfile,
-		SellerProfile:  sellerProfile,
+		User:                 user,
+		Roles:                roles,
+		Profile:              profile,
+		ProfileNameConfirmed: profileNameConfirmedAt,
+		CreatorProfile:       creatorProfile,
+		SellerProfile:        sellerProfile,
 	}, nil
 }
 
@@ -237,7 +404,8 @@ func (s *Store) UpdateProfile(ctx context.Context, userID string, req UpdateProf
 
 	if _, err := tx.Exec(ctx, `
 		UPDATE profiles
-		SET display_name = $1, slug = $2, bio = $3
+		SET display_name = $1, slug = $2, bio = $3,
+			name_confirmed_at = COALESCE(name_confirmed_at, now())
 		WHERE user_id = $4 AND deleted_at IS NULL
 	`, displayName, slug, strings.TrimSpace(req.Bio), userID); err != nil {
 		if isUniqueViolation(err) {
@@ -381,7 +549,7 @@ func (s *Store) UpdateUserPreferences(ctx context.Context, userID string, req Up
 func (s *Store) GetPublicProfile(ctx context.Context, slug string) (*PublicProfileResponse, error) {
 	var profile Profile
 	if err := s.db.QueryRow(ctx, `
-		SELECT p.id, p.user_id, p.display_name, p.slug, p.bio, p.created_at, p.updated_at
+		SELECT p.id, p.user_id, p.display_name, p.slug, p.bio, p.name_confirmed_at, p.created_at, p.updated_at
 		FROM profiles p
 		JOIN users u ON u.id = p.user_id
 		WHERE lower(p.slug) = lower($1) AND p.deleted_at IS NULL AND u.deleted_at IS NULL AND u.status = 'active'
@@ -391,6 +559,7 @@ func (s *Store) GetPublicProfile(ctx context.Context, slug string) (*PublicProfi
 		&profile.DisplayName,
 		&profile.Slug,
 		&profile.Bio,
+		&profile.NameConfirmedAt,
 		&profile.CreatedAt,
 		&profile.UpdatedAt,
 	); err != nil {
@@ -404,6 +573,10 @@ func (s *Store) GetPublicProfile(ctx context.Context, slug string) (*PublicProfi
 	creatorProfile, err := s.getCreatorProfileByUserID(ctx, profile.UserID)
 	if err != nil {
 		return nil, err
+	}
+
+	if creatorProfile != nil && creatorProfile.Status != "published" {
+		creatorProfile = nil
 	}
 
 	sellerProfile, err := s.getSellerProfileByUserID(ctx, profile.UserID)
@@ -423,7 +596,7 @@ func (s *Store) GetPublicCreator(ctx context.Context, slug string) (*PublicCreat
 	var creator CreatorProfile
 	if err := s.db.QueryRow(ctx, `
 		SELECT
-			p.id, p.user_id, p.display_name, p.slug, p.bio, p.created_at, p.updated_at,
+			p.id, p.user_id, p.display_name, p.slug, p.bio, p.name_confirmed_at, p.created_at, p.updated_at,
 			c.id, c.user_id, c.profile_id, c.creator_slug, c.title, c.description,
 			c.donations_enabled, c.store_enabled, c.partner_disclosure_enabled,
 			c.status, c.created_at, c.updated_at
@@ -434,13 +607,14 @@ func (s *Store) GetPublicCreator(ctx context.Context, slug string) (*PublicCreat
 			AND p.deleted_at IS NULL
 			AND u.deleted_at IS NULL
 			AND u.status = 'active'
-			AND c.status IN ('published', 'draft')
+			AND c.status = 'published'
 	`, normalizeSlug(slug)).Scan(
 		&profile.ID,
 		&profile.UserID,
 		&profile.DisplayName,
 		&profile.Slug,
 		&profile.Bio,
+		&profile.NameConfirmedAt,
 		&profile.CreatedAt,
 		&profile.UpdatedAt,
 		&creator.ID,
@@ -643,7 +817,7 @@ func (s *Store) getRoles(ctx context.Context, userID string) ([]Role, error) {
 func (s *Store) getProfileByUserID(ctx context.Context, userID string) (*Profile, error) {
 	var profile Profile
 	if err := s.db.QueryRow(ctx, `
-		SELECT id, user_id, display_name, slug, bio, created_at, updated_at
+		SELECT id, user_id, display_name, slug, bio, name_confirmed_at, created_at, updated_at
 		FROM profiles
 		WHERE user_id = $1 AND deleted_at IS NULL
 	`, userID).Scan(
@@ -652,6 +826,7 @@ func (s *Store) getProfileByUserID(ctx context.Context, userID string) (*Profile
 		&profile.DisplayName,
 		&profile.Slug,
 		&profile.Bio,
+		&profile.NameConfirmedAt,
 		&profile.CreatedAt,
 		&profile.UpdatedAt,
 	); err != nil {
@@ -855,16 +1030,6 @@ func emailLocalPart(email string) string {
 	}
 
 	return strings.TrimSpace(local)
-}
-
-func firstNonEmpty(values ...string) string {
-	for _, value := range values {
-		if strings.TrimSpace(value) != "" {
-			return value
-		}
-	}
-
-	return "user"
 }
 
 func pagination(limit int, offset int, total int) Pagination {

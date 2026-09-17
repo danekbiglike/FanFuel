@@ -47,7 +47,10 @@ export function resolveThemePreference(preference: ThemePreference): ResolvedThe
   return "light";
 }
 
-export function applyThemePreference(preference: ThemePreference, root?: HTMLElement): ResolvedTheme {
+export function applyThemePreference(
+  preference: ThemePreference,
+  root?: HTMLElement
+): ResolvedTheme {
   const target = root ?? (typeof document !== "undefined" ? document.documentElement : undefined);
   const resolvedTheme = resolveThemePreference(preference);
 

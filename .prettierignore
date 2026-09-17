@@ -1,0 +1,11 @@
+node_modules
+package-lock.json
+.tmp
+test-results
+.next
+dist
+build
+coverage
+*.log
+.env*
+services/bin

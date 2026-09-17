@@ -14,12 +14,54 @@ const (
 )
 
 type RegisterRequest struct {
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	DisplayName string `json:"display_name"`
-	RoleIntent  string `json:"role_intent"`
-	Locale      string `json:"locale"`
-	TimeZone    string `json:"time_zone"`
+	RegistrationToken string `json:"registration_token"`
+	Password          string `json:"password"`
+	Locale            string `json:"locale"`
+	TimeZone          string `json:"time_zone"`
+}
+
+type IdentifyRequest struct {
+	Email string `json:"email"`
+}
+
+type IdentifyResponse struct {
+	NextAction string `json:"next_action"`
+}
+
+type StartEmailVerificationRequest struct {
+	Email  string `json:"email"`
+	Locale string `json:"locale"`
+}
+
+type StartEmailVerificationResponse struct {
+	ChallengeID       string    `json:"challenge_id"`
+	Email             string    `json:"email"`
+	ExpiresAt         time.Time `json:"expires_at"`
+	ResendAvailableAt time.Time `json:"resend_available_at"`
+}
+
+type VerifyEmailRequest struct {
+	ChallengeID string `json:"challenge_id"`
+	Code        string `json:"code"`
+}
+
+type VerifyEmailResponse struct {
+	RegistrationToken string    `json:"registration_token"`
+	ExpiresAt         time.Time `json:"expires_at"`
+}
+
+type EmailVerificationChallenge struct {
+	ID                string
+	Email             string
+	Locale            string
+	CodeDigest        string
+	AttemptCount      int
+	MaxAttempts       int
+	ExpiresAt         time.Time
+	ResendAvailableAt time.Time
+	VerifiedAt        *time.Time
+	CompletedAt       *time.Time
+	InvalidatedAt     *time.Time
 }
 
 type LoginRequest struct {
@@ -55,24 +97,26 @@ type UpdateUserStatusRequest struct {
 }
 
 type User struct {
-	ID            string     `json:"id"`
-	Email         string     `json:"email"`
-	Status        string     `json:"status"`
-	DefaultLocale string     `json:"default_locale"`
-	TimeZone      string     `json:"time_zone"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
-	DeletedAt     *time.Time `json:"deleted_at,omitempty"`
+	ID              string     `json:"id"`
+	Email           string     `json:"email"`
+	EmailVerifiedAt *time.Time `json:"email_verified_at,omitempty"`
+	Status          string     `json:"status"`
+	DefaultLocale   string     `json:"default_locale"`
+	TimeZone        string     `json:"time_zone"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	DeletedAt       *time.Time `json:"deleted_at,omitempty"`
 }
 
 type Profile struct {
-	ID          string    `json:"id"`
-	UserID      string    `json:"user_id"`
-	DisplayName string    `json:"display_name"`
-	Slug        string    `json:"slug"`
-	Bio         string    `json:"bio"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID              string     `json:"id"`
+	UserID          string     `json:"user_id"`
+	DisplayName     string     `json:"display_name"`
+	Slug            string     `json:"slug"`
+	Bio             string     `json:"bio"`
+	NameConfirmedAt *time.Time `json:"-"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
 }
 
 type CreatorProfile struct {
@@ -105,11 +149,12 @@ type SellerProfile struct {
 }
 
 type CurrentUser struct {
-	User           User            `json:"user"`
-	Roles          []Role          `json:"roles"`
-	Profile        *Profile        `json:"profile,omitempty"`
-	CreatorProfile *CreatorProfile `json:"creator_profile,omitempty"`
-	SellerProfile  *SellerProfile  `json:"seller_profile,omitempty"`
+	User                 User            `json:"user"`
+	Roles                []Role          `json:"roles"`
+	Profile              *Profile        `json:"profile,omitempty"`
+	ProfileNameConfirmed *time.Time      `json:"profile_name_confirmed_at,omitempty"`
+	CreatorProfile       *CreatorProfile `json:"creator_profile,omitempty"`
+	SellerProfile        *SellerProfile  `json:"seller_profile,omitempty"`
 }
 
 type UserPreferences struct {

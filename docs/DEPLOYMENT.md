@@ -372,3 +372,46 @@ pg_dump "$DATABASE_URL" > backup.sql
 - Не менять production outline без обновления docs.
 - Все новые env vars добавлять в `.env.example` и `SECRETS.template.md`.
 - После работы обновить `docs/HANDOFF.md` или `docs/CHANGELOG.md`.
+
+## Отдельная VM приложения — FF-0009
+
+Для VM используется дополнительный override и сборка frontend без dev servers:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.vm.yml build
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.vm.yml up -d
+sh infra/scripts/migrate.sh docker-compose.yml
+```
+
+Перед первым стартом создать `.env` на VM с уникальными секретами. После подключения edge в FF-0010 все `*_PORT`, включая web/API/WS/widget, задают `127.0.0.1:<port>`. Не публиковать базовый Compose с его wildcard bindings наружу.
+
+nginx на VM приложения обращается к loopback upstream: web `3000`, API `8080`, WebSocket `8081` (путь `/ws/alerts`), widget `5173`. Виджет собран с base `/widget/`; nginx удаляет этот префикс при проксировании в widget container. Админка на loopback `3001` доступна через SSH tunnel. Edge принимает публичные TCP 80/443 и передаёт их на 80/443 VM приложения по Host/SNI. Адреса и ключи находятся в игнорируемом `docs/SERVER_ACCESS.md`.
+
+`NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_WIDGET_BASE_URL`, `VITE_API_BASE_URL` и `VITE_WS_BASE_URL` передаются также во время сборки. Изменение публичного домена требует повторной сборки frontend. До настройки отдельного nginx/TLS возможна проверка HTTP upstream, но браузерные обращения к публичному HTTPS API ещё не работают.
+
+Для Docker ingress запускать от root:
+
+```sh
+sh infra/scripts/vm-firewall.sh <LAN_INTERFACE> <ALLOWED_SOURCE_CIDR>
+```
+
+На созданной VM эта команда закреплена в `fanfuel-firewall.service` после Docker; разрешённый источник сужен до edge. UFW разрешает 80/443 только от edge, SSH доступен через NAT forwarding Windows. DHCP-адрес приложения закреплён на роутере в FF-0010.
+
+В FF-0010 пользователь возобновил настройку edge и роутера. `infra/nginx/fanfuel.conf` остаётся HTTP bootstrap, а `infra/nginx/fanfuel-tls.conf` — итоговая конфигурация на VM приложения. Существующая TLS-маршрутизация LibreChat на edge сохранена.
+
+### HTTPS и обновление сертификата — FF-0010
+
+Сначала проверить извне `http://fanfuel.ru/.well-known/acme-challenge/<test-file>` из `/var/www/letsencrypt`. Затем на FanFuel VM из корня проекта:
+
+```sh
+sudo sh infra/scripts/enable-vm-tls.sh
+sudo certbot renew --dry-run
+```
+
+Скрипт получает сертификат для `fanfuel.ru` и `www.fanfuel.ru`, включает TLS после успешной проверки nginx и устанавливает deploy hook для reload при обновлении. `certbot.timer` выполняет автоматическое продление. HTTP перенаправляется на HTTPS; ACME challenge остаётся доступным на HTTP. Admin API и mock callbacks закрыты на публичном nginx.
+
+Edge использует TCP passthrough для HTTPS, поэтому сертификаты и certbot хранятся на VM приложения. Текущая схема не передаёт исходный IP клиента через TLS; rate limits на nginx приложения агрегируются по адресу edge. Если понадобится индивидуальное ограничение по IP, потребуется согласованное внедрение PROXY protocol или TLS termination на edge.
+
+### Образ MinIO для VM
+
+При запуске FF-0009 исходный `minio/minio:latest` вернул `pull access denied`. VM override использует доступный образ из `quay.io/minio/minio`, закреплённый по digest; общий dev Compose не изменён. Реестр указан в [официальной Docker-инструкции MinIO](https://github.com/minio/minio/blob/master/docs/docker/README.md). Storage остаётся на loopback. Перед публичным использованием storage отдельно проверить поддержку и обновления выбранной версии.

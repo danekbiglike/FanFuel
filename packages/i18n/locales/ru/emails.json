@@ -1,0 +1,8 @@
+{
+  "auth.emailVerification.subject": "Код подтверждения FanFuel",
+  "auth.emailVerification.text": "Ваш код подтверждения FanFuel: {{code}}. Он действует 10 минут. Если вы не запрашивали код, проигнорируйте письмо.",
+  "auth.emailVerification.heading": "Подтвердите почту",
+  "auth.emailVerification.codeLabel": "Код подтверждения",
+  "auth.emailVerification.expiry": "Код действует 10 минут.",
+  "auth.emailVerification.ignore": "Если вы не запрашивали код, просто проигнорируйте письмо."
+}

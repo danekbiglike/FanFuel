@@ -629,7 +629,7 @@ func (s *Store) resolveDonationCreator(ctx context.Context, creatorID string, cr
 			JOIN users u ON u.id = c.user_id
 			WHERE c.id = $1
 				AND c.donations_enabled = true
-				AND c.status IN ('published', 'draft')
+				AND c.status = 'published'
 				AND u.status = 'active'
 				AND u.deleted_at IS NULL
 		`, strings.TrimSpace(creatorID)).Scan(&id); err != nil {
@@ -652,7 +652,7 @@ func (s *Store) resolveDonationCreator(ctx context.Context, creatorID string, cr
 		JOIN users u ON u.id = c.user_id
 		WHERE lower(c.creator_slug) = lower($1)
 			AND c.donations_enabled = true
-			AND c.status IN ('published', 'draft')
+			AND c.status = 'published'
 			AND u.status = 'active'
 			AND u.deleted_at IS NULL
 	`, normalizeSlug(creatorSlug)).Scan(&id); err != nil {

@@ -1,5 +1,23 @@
 # User Flows
 
+## FLOW-GAMING-LOCAL: Скрытая локальная match-3 игра
+
+Версия: v0.3.5
+
+Статус реализации: IMPLEMENTED
+
+Страница: PAGE-GAMING
+
+Task: UX-TASK-034
+
+1. Владелец открывает `/gaming` по прямому URL.
+2. Игра восстанавливает локальный прогресс или создаёт первый уровень.
+3. Игрок меняет местами соседние фишки, выполняет цели и собирает заряд суперсилы.
+4. При победе получает локальные игровые монеты и открывает следующий уровень.
+5. При поражении повторяет уровень; публичные данные и backend не изменяются.
+
+Альтернативы: игрок применяет локальный усилитель, покупает его за игровые монеты, сбрасывает только игровой прогресс или возвращается на главную FanFuel.
+
 Документ описывает основные пользовательские сценарии FanFuel. Каждый flow имеет статус реализации и привязан к страницам из `docs/PAGE_MAP.md`.
 
 ## Как читать статусы
@@ -11,22 +29,379 @@
 - `PAYMENT_REVIEW` — зависит от платёжной модели.
 - `LEGAL_REVIEW` — зависит от юридической проверки.
 
+## Дизайн-обновление v0.3.5
+
+### FLOW-AURORA-REFRESH-QA: обновление текущих экранов до FanFuel Aurora
+
+ID: FLOW-AURORA-REFRESH-QA
+Роль: product/design/agent
+Цель: сначала привести существующие страницы к новой визуальной базе, чтобы последующие страницы профиля, Studio и витрины строились в одном стиле.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-HOME, PAGE-MARKETPLACE, PAGE-PRODUCT, PAGE-CHECKOUT, PAGE-BUYER-DASHBOARD, PAGE-SELLER-DASHBOARD, PAGE-ME-PROFILE, PAGE-CREATOR-PUBLIC, PAGE-ADMIN-DASHBOARD, PAGE-WIDGET-ALERT
+
+Шаги:
+
+1. Агент фиксирует Aurora tokens и правила glass/material usage в дизайн-системе.
+2. Обновляет shared primitives и текущие страницы без изменения маршрутов.
+3. Проверяет, что warm/orange не является primary brand и не доминирует в logo, CTA, hero и бейджах одновременно.
+4. Проверяет `ru`/`en`, light/dark, 320/390/768/1440, long strings и contrast.
+5. Только после успешного pass начинает задачи профиля, Studio, витрины автора и виджетов.
+
+Состояния:
+
+- Dark Aurora.
+- Light Aurora.
+- Reduced motion.
+- Empty marketplace.
+- Product without media fallback.
+
+Ошибки:
+
+- Glass применён ко всем карточкам и таблицам.
+- Страница выглядит как adult/betting/casino/старый skin-shop.
+- Redesign создаёт новые future routes или меняет layout slots скинов.
+- Текст/бейджи ломаются на русском или английском.
+
+## Пользовательский профиль и v0.3.5
+
+### FLOW-USER-REGISTER: Регистрация базового аккаунта
+
+ID: FLOW-USER-REGISTER
+Роль: authenticated user
+Цель: создать аккаунт и задать имя платформы без выбора роли.
+Статус реализации: IMPLEMENTED
+MVP/Future: v0.1, обновлено 2026-09-14
+Страницы: PAGE-AUTH, PAGE-AUTH-NAME, PAGE-MARKETPLACE
+
+Шаги:
+
+1. Пользователь вводит email на `/auth`.
+2. Для нового email получает одноразовый код и подтверждает владение адресом.
+3. Задаёт новый пароль; аккаунт создаётся с заполненным `email_verified_at` и базовой ролью buyer.
+4. Пользователь попадает на `/auth/name`.
+5. Вводит имя на платформе.
+6. Продолжает в marketplace или возвращается в сохранённый creator flow.
+
+Состояния:
+
+- Validation errors.
+- API error.
+- Expired token.
+- Неверный/просроченный/исчерпавший попытки email code.
+- Ошибка доставки письма и resend cooldown.
+- Уже заданное имя.
+
+Ошибки:
+
+- Регистрация снова просит роль или имя.
+- Имя платформы автоматически занимает публичный ник/адрес витрины.
+- Вход пропускает незавершённый шаг имени.
+- Аккаунт создаётся до подтверждения email.
+- Код или registration token можно использовать повторно.
+
+### FLOW-USER-PROFILE-HUB: Управление профилем пользователя
+
+ID: FLOW-USER-PROFILE-HUB
+Роль: authenticated user
+Цель: управлять своим аккаунтом, избранным, отзывами, подборками и режимами автора/продавца.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-ME-PROFILE, PAGE-ME-SETTINGS, PAGE-ME-FAVORITES, PAGE-ME-REVIEWS, PAGE-ME-COLLECTIONS
+
+Шаги:
+
+1. Пользователь открывает `/me/profile`.
+2. Видит аватар, имя, entry points в настройки, избранное, отзывы и подборки.
+3. Если не является автором/продавцом, видит действия "стать автором" и "стать продавцом".
+4. Если уже автор/продавец, видит pause/resume и archive page actions.
+5. Destructive actions требуют confirmation и объясняют последствия.
+
+Состояния:
+
+- Avatar upload pending.
+- Role mode paused.
+- Archive blocked by active obligations.
+- Unauthorized.
+
+Ошибки:
+
+- Профиль снова становится dumping ground для Studio/Seller controls.
+- Архивирование физически удаляет финансовую или order history.
+
+### FLOW-USER-COLLECTIONS: Создание пользовательских подборок
+
+ID: FLOW-USER-COLLECTIONS
+Роль: authenticated user
+Цель: создавать подборки товаров и авторов независимо от роли автора.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-ME-COLLECTIONS, PAGE-ME-FAVORITES, PAGE-CREATOR-STORE
+
+Шаги:
+
+1. Пользователь открывает свои подборки.
+2. Создаёт подборку с visibility `private`, `public` или `unlisted`.
+3. Добавляет published товары, авторов или продавцов.
+4. При необходимости использует подборку в витрине автора, если имеет creator mode.
+
+Состояния:
+
+- Empty first collection.
+- Hidden product removed from public view.
+- Private collection.
+
+Ошибки:
+
+- Подборки доступны только авторам.
+- Private подборка становится публичной без явного действия.
+
+### FLOW-CREATOR-LIVE-STORE: Live-only витрина автора
+
+ID: FLOW-CREATOR-LIVE-STORE
+Роль: streamer, buyer, guest
+Цель: показать карточки и подборки на витрине автора только во время прямой трансляции.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-STUDIO-STORE, PAGE-CREATOR-STORE, PAGE-CREATOR-PUBLIC
+
+Шаги:
+
+1. Автор открывает `/studio/store`.
+2. Добавляет секцию товаров или подборку.
+3. Выбирает `visibility_rule=live_only`.
+4. Включает live-state вручную в MVP.
+5. Зритель открывает публичную витрину и видит live-only блоки только при active live.
+
+Состояния:
+
+- Offline.
+- Live.
+- Paused creator page.
+- Product hidden/unavailable.
+
+Ошибки:
+
+- Live-only блоки видны offline.
+- Пауза автора выглядит как 500/404 вместо понятного unavailable state.
+
+### FLOW-STUDIO-STATISTICS: Просмотр статистики Studio
+
+ID: FLOW-STUDIO-STATISTICS
+Роль: streamer
+Цель: увидеть динамику дохода по донатам и партнёрским товарам.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-STUDIO-DASHBOARD, PAGE-STUDIO-STATISTICS
+
+Шаги:
+
+1. Автор открывает `/studio`.
+2. Переходит во вкладку статистики.
+3. Выбирает период.
+4. Фильтрует источник: все, донаты, партнёрские товары.
+5. Смотрит график и summary за период.
+
+Состояния:
+
+- No data.
+- Loading chart.
+- Partial data.
+- Error retry.
+
+Ошибки:
+
+- График показывает fake revenue.
+- Статистика называется доступным балансом или ведёт к payout UI.
+
+### FLOW-STUDIO-EVENTS: Последние события Studio
+
+ID: FLOW-STUDIO-EVENTS
+Роль: streamer
+Цель: видеть события канала, донатов и партнёрских покупок в одном feed.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-STUDIO-EVENTS
+
+Шаги:
+
+1. Автор открывает `/studio/events`.
+2. Выбирает подвкладку: все события, донаты, подписки на каналы, покупки партнёрских товаров.
+3. Если канал не подключён, видит статус bot integration.
+4. При активном боте видит подписки YouTube/Twitch/Telegram как события.
+
+Состояния:
+
+- Empty feed.
+- Bot not connected.
+- Integration error.
+- Delayed ingestion.
+
+Ошибки:
+
+- UI показывает raw bot payload или secrets.
+- Подписки на каналы выглядят как гарантированно realtime без учёта platform delays.
+
+### FLOW-STUDIO-DONATION-SETTINGS: Настройка правил донатов
+
+ID: FLOW-STUDIO-DONATION-SETTINGS
+Роль: streamer
+Цель: настроить суммы, сообщения, audio/TTS, модерацию и спам-фильтр.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-STUDIO-DONATION-SETTINGS, PAGE-CREATOR-DONATE, PAGE-WIDGET-ALERT
+
+Шаги:
+
+1. Автор открывает `/studio/donation-settings`.
+2. Задаёт presets сумм и message max length.
+3. Настраивает аудиосообщения по категориям и минимальной сумме.
+4. Настраивает озвучку по категориям и минимальной сумме.
+5. Выбирает moderation mode и spam-filter policy.
+6. Проверяет mock donation preview.
+
+Состояния:
+
+- Validation error.
+- Moderation hold.
+- Spam blocked.
+- Audio/TTS disabled.
+
+Ошибки:
+
+- Held donation уходит в OBS alert до модерации.
+- Настройки доната меняют payment status или provider flow.
+
+### FLOW-STUDIO-PRODUCTS-COLLECTIONS: Продукты и подборки автора
+
+ID: FLOW-STUDIO-PRODUCTS-COLLECTIONS
+Роль: streamer
+Цель: выбрать товары для витрины и собрать авторские подборки.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-STUDIO-PRODUCTS, PAGE-STUDIO-COLLECTIONS, PAGE-STUDIO-STORE
+
+Шаги:
+
+1. Автор открывает `/studio/products`.
+2. Выбирает published/eligible товары.
+3. Открывает `/studio/collections`.
+4. Собирает подборку из товаров или авторов.
+5. Использует подборку как секцию витрины и при необходимости помечает её `live_only`.
+
+Состояния:
+
+- Empty product catalog.
+- Product hidden/unavailable.
+- Partner disclosure required.
+- Empty collection.
+
+Ошибки:
+
+- Hidden product попадает в публичную витрину.
+- Private user collection становится публичной без явного действия.
+
+### FLOW-STUDIO-WIDGET-RULES: Настройка правил виджетов
+
+ID: FLOW-STUDIO-WIDGET-RULES
+Роль: streamer
+Цель: настроить alert под товар, группу товаров, подборку или сумму доната.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-STUDIO-WIDGETS, PAGE-WIDGET-PREVIEW
+
+Шаги:
+
+1. Автор открывает `/studio/widgets`.
+2. Создаёт widget или выбирает существующий.
+3. Добавляет rule: product, product group, collection, purchase event или donation amount threshold.
+4. Выбирает image/gif/animation asset.
+5. Проверяет preview на mock event.
+
+Состояния:
+
+- Rule conflict.
+- Asset upload failed.
+- Preview unavailable.
+
+Ошибки:
+
+- Настройки меняются через public widget URL.
+- Purchase alert раскрывает лишние персональные данные.
+
+### FLOW-STUDIO-WIDGET-CATALOG: Каталог категорий виджетов
+
+ID: FLOW-STUDIO-WIDGET-CATALOG
+Роль: streamer
+Цель: выбрать подходящий виджет под задачу без ручной настройки с нуля.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-STUDIO-WIDGETS, PAGE-STUDIO-WIDGET-GROUPS, PAGE-WIDGET-PREVIEW
+
+Шаги:
+
+1. Автор открывает `/studio/widgets`.
+2. Выбирает категорию: оповещения, статистика, сбор средств, товары, цикличные промо, прочие.
+3. Выбирает preset.
+4. Настраивает supported events, assets и placement.
+5. Проверяет preview.
+
+Состояния:
+
+- Unsupported event.
+- Preset validation error.
+- Preview no data.
+- Reduced motion.
+
+Ошибки:
+
+- Widget preset принимает произвольный JS/HTML/CSS.
+- Product widget раскрывает приватные данные заказа или покупателя.
+
+### FLOW-STUDIO-WIDGET-GROUPS: Группы виджетов и зоны OBS
+
+ID: FLOW-STUDIO-WIDGET-GROUPS
+Роль: streamer
+Цель: расположить разные типы алертов в разных местах OBS.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-STUDIO-WIDGET-GROUPS, PAGE-WIDGET-PURCHASE, PAGE-WIDGET-ALERT
+
+Шаги:
+
+1. Автор создаёт widget group.
+2. Настраивает placement zones.
+3. Назначает donation alerts в center.
+4. Назначает sponsored purchase alerts в top_right.
+5. Подключает read-only group URL в OBS.
+
+Состояния:
+
+- Token visible once.
+- Revoked group.
+- Zone overlap warning.
+
+Ошибки:
+
+- Group token используется как API auth token.
+- UI превращается в полноценный drag-and-drop редактор сцены.
+
 ## Покупатель
 
 ### FLOW-BUYER-HOME: Просмотр главной
 
-ID: FLOW-BUYER-HOME  
-Роль: guest, buyer  
-Цель: понять, что FanFuel объединяет донаты, цифровые товары и поддержку автора.  
-Статус реализации: IMPLEMENTED  
-MVP/Future: v0.3  
+ID: FLOW-BUYER-HOME
+Роль: guest, buyer
+Цель: понять, что FanFuel объединяет донаты, цифровые товары и поддержку автора.
+Статус реализации: IMPLEMENTED
+MVP/Future: v0.3
 Страницы: PAGE-HOME, PAGE-MARKETPLACE, PAGE-FOR-BUYERS
 
 Шаги:
 
 1. Пользователь открывает `/`.
 2. Приложение открывает ту же marketplace-витрину, что и `/marketplace`, без redirect.
-3. Пользователь видит торговый hero, поиск, быстрые категории, товарные ленты и подборки авторов.
+3. Пользователь видит торговый hero, быстрые направления, товарные ленты, хит в витринах авторов и авторские подборки; поиск остаётся в верхней панели.
 4. Если нужна вводная про преимущества, пользователь открывает `/for-buyers`.
 
 Состояния:
@@ -42,20 +417,21 @@ MVP/Future: v0.3
 
 ### FLOW-BUYER-SEARCH: Поиск товара
 
-ID: FLOW-BUYER-SEARCH  
-Роль: buyer, guest  
-Цель: найти цифровой товар или услугу.  
-Статус реализации: IMPLEMENTED  
-MVP/Future: MVP v0.3  
+ID: FLOW-BUYER-SEARCH
+Роль: buyer, guest
+Цель: найти цифровой товар или услугу.
+Статус реализации: IMPLEMENTED
+MVP/Future: MVP v0.3
 Страницы: PAGE-MARKETPLACE
 
 Шаги:
 
 1. Пользователь открывает marketplace.
-2. Вводит запрос или выбирает категорию.
-3. Применяет фильтры.
-4. Открывает карточку товара.
-5. Гость и авторизованный пользователь могут начать поиск из верхней панели с любой страницы; запрос ведёт в `/marketplace?query=...`.
+2. На первом экране вводит запрос в большой hero search или выбирает быстрое направление.
+3. Hero search ведёт в `/marketplace/catalog?query=...`; он не применяет скрытый фильтр на главной.
+4. Быстрое направление открывает явную страницу (`/marketplace/category/*`, `/creators`, `/marketplace/promocodes`) и не скроллит пользователя в другую секцию.
+5. Открывает карточку товара, автора или витрину автора.
+6. Гость и авторизованный пользователь могут начать поиск из верхней панели с любой страницы; на `/marketplace` desktop topbar search появляется как compact search после прокрутки ниже hero.
 
 Состояния:
 
@@ -70,11 +446,11 @@ MVP/Future: MVP v0.3
 
 ### FLOW-BUYER-PRODUCT: Просмотр карточки товара
 
-ID: FLOW-BUYER-PRODUCT  
-Роль: buyer, guest  
-Цель: понять товар, цену, продавца, условия и safe deal.  
-Статус реализации: IMPLEMENTED  
-MVP/Future: MVP v0.3  
+ID: FLOW-BUYER-PRODUCT
+Роль: buyer, guest
+Цель: понять товар, цену, продавца, условия и safe deal.
+Статус реализации: IMPLEMENTED
+MVP/Future: MVP v0.3
 Страницы: PAGE-PRODUCT
 
 Шаги:
@@ -97,11 +473,11 @@ MVP/Future: MVP v0.3
 
 ### FLOW-BUYER-BUY: Покупка товара
 
-ID: FLOW-BUYER-BUY  
-Роль: buyer  
-Цель: оформить заказ и оплатить.  
-Статус реализации: IMPLEMENTED  
-MVP/Future: v0.3 mock, v0.5 real payments  
+ID: FLOW-BUYER-BUY
+Роль: buyer
+Цель: оформить заказ и оплатить.
+Статус реализации: IMPLEMENTED
+MVP/Future: v0.3 mock, v0.5 real payments
 Страницы: PAGE-PRODUCT, PAGE-CHECKOUT, PAGE-BUYER-ORDER
 
 Шаги:
@@ -127,11 +503,11 @@ MVP/Future: v0.3 mock, v0.5 real payments
 
 ### FLOW-BUYER-PROMO: Использование промокода стримера
 
-ID: FLOW-BUYER-PROMO  
-Роль: buyer  
-Цель: применить промокод и увидеть скидку/attribution.  
-Статус реализации: FUTURE  
-MVP/Future: v0.4  
+ID: FLOW-BUYER-PROMO
+Роль: buyer
+Цель: применить промокод и увидеть скидку/attribution.
+Статус реализации: FUTURE
+MVP/Future: v0.4
 Страницы: PAGE-CHECKOUT, PAGE-BUYER-PROMOCODES
 
 Шаги:
@@ -155,22 +531,24 @@ MVP/Future: v0.4
 
 ### FLOW-BUYER-CREATOR-STORE: Покупка из витрины стримера
 
-ID: FLOW-BUYER-CREATOR-STORE  
-Роль: buyer, guest  
-Цель: купить товар из витрины автора и поддержать его.  
-Статус реализации: FUTURE  
-MVP/Future: v0.4  
+ID: FLOW-BUYER-CREATOR-STORE
+Роль: buyer, guest
+Цель: купить товар из витрины автора и поддержать его.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5 live-only MVP, v0.4 attribution expansion
 Страницы: PAGE-CREATOR-STORE, PAGE-PRODUCT, PAGE-CHECKOUT
 
 Шаги:
 
 1. Buyer открывает витрину автора.
-2. Выбирает товар.
-3. Видит disclosure партнёрского товара.
-4. Покупает через checkout.
+2. Если автор live, видит live-only карточки и подборки.
+3. Выбирает published товар.
+4. Видит disclosure, если товар партнёрский.
+5. Покупает через checkout.
 
 Состояния:
 
+- Offline/no live-only blocks.
 - Empty store.
 - Product hidden/unavailable.
 - Attribution expired.
@@ -178,15 +556,16 @@ MVP/Future: v0.4
 Ошибки:
 
 - Неясно, что товар партнёрский.
+- Live-only блоки видны offline.
 - Не видно, какую поддержку получает автор.
 
 ### FLOW-BUYER-ORDER: Открытие заказа
 
-ID: FLOW-BUYER-ORDER  
-Роль: buyer  
-Цель: увидеть статус заказа и следующий шаг.  
-Статус реализации: IMPLEMENTED  
-MVP/Future: v0.3  
+ID: FLOW-BUYER-ORDER
+Роль: buyer
+Цель: увидеть статус заказа и следующий шаг.
+Статус реализации: IMPLEMENTED
+MVP/Future: v0.3
 Страницы: PAGE-BUYER-ORDER
 
 Шаги:
@@ -208,11 +587,11 @@ MVP/Future: v0.3
 
 ### FLOW-BUYER-CONFIRM: Подтверждение получения
 
-ID: FLOW-BUYER-CONFIRM  
-Роль: buyer  
-Цель: подтвердить выполнение заказа.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.3 mock, v0.5 real provider/ledger  
+ID: FLOW-BUYER-CONFIRM
+Роль: buyer
+Цель: подтвердить выполнение заказа.
+Статус реализации: PARTIAL
+MVP/Future: v0.3 mock, v0.5 real provider/ledger
 Страницы: PAGE-BUYER-ORDER
 
 Шаги:
@@ -234,11 +613,11 @@ MVP/Future: v0.3 mock, v0.5 real provider/ledger
 
 ### FLOW-BUYER-DISPUTE: Открытие спора
 
-ID: FLOW-BUYER-DISPUTE  
-Роль: buyer  
-Цель: открыть спор в допустимый срок.  
-Статус реализации: FUTURE  
-MVP/Future: v0.7  
+ID: FLOW-BUYER-DISPUTE
+Роль: buyer
+Цель: открыть спор в допустимый срок.
+Статус реализации: FUTURE
+MVP/Future: v0.7
 Страницы: PAGE-BUYER-ORDER, PAGE-BUYER-DISPUTE
 
 Шаги:
@@ -262,11 +641,11 @@ MVP/Future: v0.7
 
 ### FLOW-BUYER-REVIEW: Оставление отзыва
 
-ID: FLOW-BUYER-REVIEW  
-Роль: buyer  
-Цель: оставить отзыв после завершения заказа.  
-Статус реализации: IMPLEMENTED  
-MVP/Future: v0.3  
+ID: FLOW-BUYER-REVIEW
+Роль: buyer
+Цель: оставить отзыв после завершения заказа.
+Статус реализации: IMPLEMENTED
+MVP/Future: v0.3
 Страницы: PAGE-BUYER-ORDER
 
 Шаги:
@@ -288,11 +667,11 @@ MVP/Future: v0.3
 
 ### FLOW-BUYER-HISTORY: Просмотр истории покупок
 
-ID: FLOW-BUYER-HISTORY  
-Роль: buyer  
-Цель: найти прошлые покупки и статусы.  
-Статус реализации: IMPLEMENTED  
-MVP/Future: v0.3  
+ID: FLOW-BUYER-HISTORY
+Роль: buyer
+Цель: найти прошлые покупки и статусы.
+Статус реализации: IMPLEMENTED
+MVP/Future: v0.3
 Страницы: PAGE-BUYER-PURCHASES
 
 Шаги:
@@ -313,41 +692,40 @@ MVP/Future: v0.3
 
 ## Стример
 
-### FLOW-STREAMER-REGISTER: Регистрация как стример
+### FLOW-STREAMER-REGISTER: Создание авторского черновика
 
-ID: FLOW-STREAMER-REGISTER  
-Роль: streamer  
-Цель: создать аккаунт с ролью streamer.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.1, улучшение v0.3  
-Страницы: PAGE-AUTH-REGISTER, PAGE-ONBOARDING, PAGE-STUDIO-DASHBOARD
+ID: FLOW-STREAMER-REGISTER
+Роль: streamer
+Цель: после базовой регистрации создать черновик публичной страницы автора.
+Статус реализации: PARTIAL
+MVP/Future: v0.3.5
+Страницы: PAGE-CREATE, PAGE-AUTH, PAGE-AUTH-NAME
 
 Шаги:
 
-1. Пользователь выбирает role intent streamer.
-2. Создаёт аккаунт.
-3. Сейчас попадает на `/me/profile`.
-4. В v0.3 должен попасть в onboarding/Studio.
-5. Пока отдельный `/studio` route не реализован, пункт Studio в меню помечается как "скоро" и не ведёт на future page.
+1. Пользователь заполняет публичную анкету автора до авторизации.
+2. Регистрирует базовый аккаунт без выбора роли.
+3. Задаёт имя платформы.
+4. Возвращается в /create и сохраняет черновик автора.
 
 Состояния:
 
 - Validation errors.
-- Role already exists.
+- Существующий creator profile.
 - Unauthorized после истечения токена.
 
 Ошибки:
 
-- Нет отдельного onboarding.
-- Пункт Studio в topbar ведёт в неготовый route вместо честного статуса "скоро".
+- Регистрация снова просит роль стримера.
+- Черновик автоматически публикуется без явного действия.
 
 ### FLOW-STREAMER-PAGE: Создание публичной страницы
 
-ID: FLOW-STREAMER-PAGE  
-Роль: streamer  
-Цель: заполнить публичный профиль автора.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.1-v0.3  
+ID: FLOW-STREAMER-PAGE
+Роль: streamer
+Цель: заполнить публичный профиль автора.
+Статус реализации: PARTIAL
+MVP/Future: v0.1-v0.3
 Страницы: PAGE-ME-PROFILE, PAGE-STUDIO-PUBLIC-PAGE, PAGE-CREATOR-PUBLIC
 
 Шаги:
@@ -369,11 +747,11 @@ MVP/Future: v0.1-v0.3
 
 ### FLOW-STREAMER-DONATIONS: Настройка донатов
 
-ID: FLOW-STREAMER-DONATIONS  
-Роль: streamer  
-Цель: включить и проверить донаты.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.2-v0.3  
+ID: FLOW-STREAMER-DONATIONS
+Роль: streamer
+Цель: включить и проверить донаты.
+Статус реализации: PARTIAL
+MVP/Future: v0.2-v0.3
 Страницы: PAGE-STUDIO-DONATIONS, PAGE-CREATOR-DONATE, PAGE-CREATOR-PUBLIC
 
 Шаги:
@@ -394,11 +772,11 @@ MVP/Future: v0.2-v0.3
 
 ### FLOW-STREAMER-OBS: Настройка OBS-алерта
 
-ID: FLOW-STREAMER-OBS  
-Роль: streamer  
-Цель: создать widget URL и подключить OBS alert.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.2-v0.3  
+ID: FLOW-STREAMER-OBS
+Роль: streamer
+Цель: создать widget URL и подключить OBS alert.
+Статус реализации: PARTIAL
+MVP/Future: v0.2-v0.3
 Страницы: PAGE-STUDIO-WIDGETS, PAGE-WIDGET-ALERT, PAGE-WIDGET-PREVIEW
 
 Шаги:
@@ -421,11 +799,11 @@ MVP/Future: v0.2-v0.3
 
 ### FLOW-STREAMER-GOAL: Создание цели
 
-ID: FLOW-STREAMER-GOAL  
-Роль: streamer  
-Цель: создать donation goal.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.2-v0.3  
+ID: FLOW-STREAMER-GOAL
+Роль: streamer
+Цель: создать donation goal.
+Статус реализации: PARTIAL
+MVP/Future: v0.2-v0.3
 Страницы: PAGE-STUDIO-GOALS, PAGE-CREATOR-PUBLIC, PAGE-WIDGET-GOAL
 
 Шаги:
@@ -447,37 +825,41 @@ MVP/Future: v0.2-v0.3
 
 ### FLOW-STREAMER-STORE: Добавление товаров в витрину
 
-ID: FLOW-STREAMER-STORE  
-Роль: streamer  
-Цель: добавить собственные или партнёрские товары в витрину.  
-Статус реализации: FUTURE  
-MVP/Future: v0.4  
+ID: FLOW-STREAMER-STORE
+Роль: streamer
+Цель: добавить собственные товары, подборки или базовые партнёрские блоки в витрину.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5 live-only MVP, v0.4 attribution expansion
 Страницы: PAGE-STUDIO-STORE, PAGE-STUDIO-PARTNERS, PAGE-CREATOR-STORE
 
 Шаги:
 
-1. Streamer выбирает товар.
-2. Настраивает позицию/подборку.
-3. Видит disclosure и attribution.
-4. Публикует витрину.
+1. Streamer открывает `/studio/store`.
+2. Выбирает товар или пользовательскую подборку.
+3. Настраивает позицию и `visibility_rule`.
+4. Проверяет preview online/offline.
+5. Публикует витрину.
 
 Состояния:
 
 - Empty catalog.
+- Offline preview.
+- Live-only hidden.
 - Product hidden.
 - Partner disclosure required.
 
 Ошибки:
 
 - Неясная партнёрская природа товара.
+- Нет ручного live-state или он не отражается публично.
 
 ### FLOW-STREAMER-PROMO: Создание промокода
 
-ID: FLOW-STREAMER-PROMO  
-Роль: streamer  
-Цель: создать промокод для аудитории.  
-Статус реализации: FUTURE  
-MVP/Future: v0.4  
+ID: FLOW-STREAMER-PROMO
+Роль: streamer
+Цель: создать промокод для аудитории.
+Статус реализации: FUTURE
+MVP/Future: v0.4
 Страницы: PAGE-STUDIO-PROMOCODES
 
 Шаги:
@@ -496,20 +878,20 @@ MVP/Future: v0.4
 
 - Промокод обходит rules/commission.
 
-### FLOW-STREAMER-ANALYTICS: Просмотр аналитики
+### FLOW-STREAMER-ANALYTICS: Расширенная аналитика
 
-ID: FLOW-STREAMER-ANALYTICS  
-Роль: streamer  
-Цель: понять донаты, продажи и вклад витрины.  
-Статус реализации: FUTURE  
-MVP/Future: v0.4  
+ID: FLOW-STREAMER-ANALYTICS
+Роль: streamer
+Цель: глубоко анализировать донаты, продажи, вклад витрины и долгосрочные тренды после базовой статистики v0.3.5.
+Статус реализации: FUTURE
+MVP/Future: v0.4
 Страницы: PAGE-STUDIO-ANALYTICS
 
 Шаги:
 
-1. Streamer открывает analytics.
-2. Смотрит donations/sales/conversion.
-3. Фильтрует период.
+1. Streamer открывает расширенную analytics.
+2. Смотрит donations/sales/conversion после накопления событий.
+3. Фильтрует период и сегменты.
 
 Состояния:
 
@@ -520,14 +902,15 @@ MVP/Future: v0.4
 Ошибки:
 
 - Fake metrics без источника.
+- Дублирование базовой `/studio/statistics` без нового смысла.
 
 ### FLOW-STREAMER-PAYOUT: Вывод средств
 
-ID: FLOW-STREAMER-PAYOUT  
-Роль: streamer  
-Цель: запросить выплату.  
-Статус реализации: PAYMENT_REVIEW  
-MVP/Future: v0.6  
+ID: FLOW-STREAMER-PAYOUT
+Роль: streamer
+Цель: запросить выплату.
+Статус реализации: PAYMENT_REVIEW
+MVP/Future: v0.6
 Страницы: PAGE-STUDIO-PAYOUTS
 
 Шаги:
@@ -549,38 +932,40 @@ MVP/Future: v0.6
 
 ## Продавец
 
-### FLOW-SELLER-REGISTER: Регистрация как продавец
+### FLOW-SELLER-REGISTER: Включение режима продавца
 
-ID: FLOW-SELLER-REGISTER  
-Роль: seller  
-Цель: создать аккаунт с ролью seller.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.1-v0.3  
-Страницы: PAGE-AUTH-REGISTER, PAGE-SELLER-DASHBOARD
+ID: FLOW-SELLER-REGISTER
+Роль: seller
+Цель: включить режим продавца после создания базового аккаунта.
+Статус реализации: PLANNED
+MVP/Future: v0.3.5
+Страницы: PAGE-AUTH, PAGE-AUTH-NAME, PAGE-ME-PROFILE
 
 Шаги:
 
-1. Пользователь выбирает role intent seller.
-2. Создаёт аккаунт.
-3. Сейчас попадает в `/me/profile`.
-4. В v0.3 должен попасть в seller onboarding.
+1. Пользователь регистрирует базовый аккаунт.
+2. Задаёт имя платформы.
+3. Из account hub явно включает режим продавца.
+4. Заполняет отдельный seller profile.
 
 Состояния:
 
 - Validation errors.
 - Seller profile draft.
+- Повторное включение режима.
 
 Ошибки:
 
-- Нет отдельного seller dashboard.
+- Регистрация создаёт seller profile без явного действия пользователя.
+- Юридические/налоговые требования не проверены.
 
 ### FLOW-SELLER-PROFILE: Создание seller profile
 
-ID: FLOW-SELLER-PROFILE  
-Роль: seller  
-Цель: заполнить профиль продавца.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.1-v0.3  
+ID: FLOW-SELLER-PROFILE
+Роль: seller
+Цель: заполнить профиль продавца.
+Статус реализации: PARTIAL
+MVP/Future: v0.1-v0.3
 Страницы: PAGE-ME-PROFILE, PAGE-SELLER-SETTINGS
 
 Шаги:
@@ -601,11 +986,11 @@ MVP/Future: v0.1-v0.3
 
 ### FLOW-SELLER-PRODUCT: Создание товара
 
-ID: FLOW-SELLER-PRODUCT  
-Роль: seller  
-Цель: создать товар для marketplace.  
-Статус реализации: IMPLEMENTED  
-MVP/Future: v0.3  
+ID: FLOW-SELLER-PRODUCT
+Роль: seller
+Цель: создать товар для marketplace.
+Статус реализации: IMPLEMENTED
+MVP/Future: v0.3
 Страницы: PAGE-SELLER-PRODUCT-NEW, PAGE-SELLER-PRODUCTS
 
 Шаги:
@@ -629,11 +1014,11 @@ MVP/Future: v0.3
 
 ### FLOW-SELLER-ORDER: Получение заказа
 
-ID: FLOW-SELLER-ORDER  
-Роль: seller  
-Цель: увидеть новый заказ.  
-Статус реализации: IMPLEMENTED  
-MVP/Future: v0.3  
+ID: FLOW-SELLER-ORDER
+Роль: seller
+Цель: увидеть новый заказ.
+Статус реализации: IMPLEMENTED
+MVP/Future: v0.3
 Страницы: PAGE-SELLER-ORDERS
 
 Шаги:
@@ -654,11 +1039,11 @@ MVP/Future: v0.3
 
 ### FLOW-SELLER-FULFILL: Выполнение заказа
 
-ID: FLOW-SELLER-FULFILL  
-Роль: seller  
-Цель: выполнить заказ и отправить результат.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.3 mock, v0.5 safe deal  
+ID: FLOW-SELLER-FULFILL
+Роль: seller
+Цель: выполнить заказ и отправить результат.
+Статус реализации: PARTIAL
+MVP/Future: v0.3 mock, v0.5 safe deal
 Страницы: PAGE-SELLER-ORDERS
 
 Шаги:
@@ -680,11 +1065,11 @@ MVP/Future: v0.3 mock, v0.5 safe deal
 
 ### FLOW-SELLER-DISPUTE: Работа со спором
 
-ID: FLOW-SELLER-DISPUTE  
-Роль: seller  
-Цель: ответить на спор.  
-Статус реализации: FUTURE  
-MVP/Future: v0.7  
+ID: FLOW-SELLER-DISPUTE
+Роль: seller
+Цель: ответить на спор.
+Статус реализации: FUTURE
+MVP/Future: v0.7
 Страницы: PAGE-SELLER-DISPUTES
 
 Шаги:
@@ -706,11 +1091,11 @@ MVP/Future: v0.7
 
 ### FLOW-SELLER-AFFILIATE: Настройка партнёрского процента
 
-ID: FLOW-SELLER-AFFILIATE  
-Роль: seller  
-Цель: предложить авторам партнёрскую долю.  
-Статус реализации: FUTURE  
-MVP/Future: v0.4  
+ID: FLOW-SELLER-AFFILIATE
+Роль: seller
+Цель: предложить авторам партнёрскую долю.
+Статус реализации: FUTURE
+MVP/Future: v0.4
 Страницы: PAGE-SELLER-AFFILIATE
 
 Шаги:
@@ -730,11 +1115,11 @@ MVP/Future: v0.4
 
 ### FLOW-SELLER-PROMO: Создание промокода
 
-ID: FLOW-SELLER-PROMO  
-Роль: seller  
-Цель: создать промокод для товара/кампании.  
-Статус реализации: FUTURE  
-MVP/Future: v0.4  
+ID: FLOW-SELLER-PROMO
+Роль: seller
+Цель: создать промокод для товара/кампании.
+Статус реализации: FUTURE
+MVP/Future: v0.4
 Страницы: PAGE-SELLER-PROMOCODES
 
 Шаги:
@@ -755,11 +1140,11 @@ MVP/Future: v0.4
 
 ### FLOW-SELLER-PAYOUT: Запрос выплаты
 
-ID: FLOW-SELLER-PAYOUT  
-Роль: seller  
-Цель: запросить вывод доступных средств.  
-Статус реализации: PAYMENT_REVIEW  
-MVP/Future: v0.6  
+ID: FLOW-SELLER-PAYOUT
+Роль: seller
+Цель: запросить вывод доступных средств.
+Статус реализации: PAYMENT_REVIEW
+MVP/Future: v0.6
 Страницы: PAGE-SELLER-PAYOUTS
 
 Шаги:
@@ -781,11 +1166,11 @@ MVP/Future: v0.6
 
 ### FLOW-SELLER-PRO: Переход на Seller Pro
 
-ID: FLOW-SELLER-PRO  
-Роль: seller  
-Цель: запросить Seller Pro.  
-Статус реализации: LEGAL_REVIEW  
-MVP/Future: v0.8  
+ID: FLOW-SELLER-PRO
+Роль: seller
+Цель: запросить Seller Pro.
+Статус реализации: LEGAL_REVIEW
+MVP/Future: v0.8
 Страницы: PAGE-SELLER-VERIFY-PRO
 
 Шаги:
@@ -809,11 +1194,11 @@ MVP/Future: v0.8
 
 ### FLOW-ADMIN-MODERATE-PRODUCT: Модерация товара
 
-ID: FLOW-ADMIN-MODERATE-PRODUCT  
-Роль: admin/moderator  
-Цель: принять или отклонить товар.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.3  
+ID: FLOW-ADMIN-MODERATE-PRODUCT
+Роль: admin/moderator
+Цель: принять или отклонить товар.
+Статус реализации: PARTIAL
+MVP/Future: v0.3
 Страницы: PAGE-ADMIN-PRODUCTS, PAGE-ADMIN-MODERATION
 
 Шаги:
@@ -835,11 +1220,11 @@ MVP/Future: v0.3
 
 ### FLOW-ADMIN-MODERATE-SELLER: Модерация продавца
 
-ID: FLOW-ADMIN-MODERATE-SELLER  
-Роль: admin/moderator  
-Цель: проверить seller profile/status.  
-Статус реализации: PLANNED  
-MVP/Future: v0.3  
+ID: FLOW-ADMIN-MODERATE-SELLER
+Роль: admin/moderator
+Цель: проверить seller profile/status.
+Статус реализации: PLANNED
+MVP/Future: v0.3
 Страницы: PAGE-ADMIN-SELLERS
 
 Шаги:
@@ -860,11 +1245,11 @@ MVP/Future: v0.3
 
 ### FLOW-ADMIN-DISPUTE: Обработка спора
 
-ID: FLOW-ADMIN-DISPUTE  
-Роль: admin/support  
-Цель: принять решение по спору.  
-Статус реализации: FUTURE  
-MVP/Future: v0.7  
+ID: FLOW-ADMIN-DISPUTE
+Роль: admin/support
+Цель: принять решение по спору.
+Статус реализации: FUTURE
+MVP/Future: v0.7
 Страницы: PAGE-ADMIN-DISPUTES
 
 Шаги:
@@ -887,11 +1272,11 @@ MVP/Future: v0.7
 
 ### FLOW-ADMIN-PAYMENTS: Просмотр платежей
 
-ID: FLOW-ADMIN-PAYMENTS  
-Роль: admin  
-Цель: видеть payment statuses и webhook processing.  
-Статус реализации: PAYMENT_REVIEW  
-MVP/Future: v0.5  
+ID: FLOW-ADMIN-PAYMENTS
+Роль: admin
+Цель: видеть payment statuses и webhook processing.
+Статус реализации: PAYMENT_REVIEW
+MVP/Future: v0.5
 Страницы: PAGE-ADMIN-PAYMENTS
 
 Шаги:
@@ -913,11 +1298,11 @@ MVP/Future: v0.5
 
 ### FLOW-ADMIN-PAYOUTS: Просмотр выплат
 
-ID: FLOW-ADMIN-PAYOUTS  
-Роль: admin  
-Цель: review payout requests.  
-Статус реализации: PAYMENT_REVIEW  
-MVP/Future: v0.6  
+ID: FLOW-ADMIN-PAYOUTS
+Роль: admin
+Цель: review payout requests.
+Статус реализации: PAYMENT_REVIEW
+MVP/Future: v0.6
 Страницы: PAGE-ADMIN-PAYOUTS
 
 Шаги:
@@ -939,11 +1324,11 @@ MVP/Future: v0.6
 
 ### FLOW-ADMIN-BLOCK: Блокировка пользователя
 
-ID: FLOW-ADMIN-BLOCK  
-Роль: admin  
-Цель: заблокировать или активировать пользователя.  
-Статус реализации: PARTIAL  
-MVP/Future: v0.1, улучшение v0.3  
+ID: FLOW-ADMIN-BLOCK
+Роль: admin
+Цель: заблокировать или активировать пользователя.
+Статус реализации: PARTIAL
+MVP/Future: v0.1, улучшение v0.3
 Страницы: PAGE-ADMIN-USERS
 
 Шаги:
@@ -966,11 +1351,11 @@ MVP/Future: v0.1, улучшение v0.3
 
 ### FLOW-ADMIN-AUDIT: Просмотр audit log
 
-ID: FLOW-ADMIN-AUDIT  
-Роль: admin  
-Цель: найти audit event.  
-Статус реализации: PLANNED  
-MVP/Future: v0.8  
+ID: FLOW-ADMIN-AUDIT
+Роль: admin
+Цель: найти audit event.
+Статус реализации: PLANNED
+MVP/Future: v0.8
 Страницы: PAGE-ADMIN-AUDIT
 
 Шаги:
@@ -991,11 +1376,11 @@ MVP/Future: v0.8
 
 ### FLOW-ADMIN-CATEGORIES: Настройка категорий
 
-ID: FLOW-ADMIN-CATEGORIES  
-Роль: admin  
-Цель: управлять категориями marketplace.  
-Статус реализации: PLANNED  
-MVP/Future: v0.3  
+ID: FLOW-ADMIN-CATEGORIES
+Роль: admin
+Цель: управлять категориями marketplace.
+Статус реализации: PLANNED
+MVP/Future: v0.3
 Страницы: PAGE-ADMIN-CATEGORIES
 
 Шаги:
@@ -1013,3 +1398,96 @@ MVP/Future: v0.3
 Ошибки:
 
 - Категория риска становится active без review.
+
+## Дополнение UX-TASK-026: сканирование `/marketplace`
+
+## Дополнение UX-TASK-027: search-first creator-commerce путь `/marketplace`
+
+ID: FLOW-MARKETPLACE-SEARCH-FIRST-CREATOR-COMMERCE
+Роль: buyer / viewer / streamer / seller
+Цель: пользователь за первые 5 секунд понимает, что FanFuel помогает найти товар или автора, купить безопасно и поддержать автора через витрину или промокод.
+Статус реализации: IMPLEMENTED
+
+Основной поток:
+
+1. Пользователь открывает `/marketplace` и видит hero с большим поиском и demo покупки через витрину автора.
+2. Пользователь может сразу искать товар, автора, OBS-пак или услугу; поиск ведёт в явный search/catalog scope.
+3. Пользователь видит цепочку: находит товар, покупает через автора, автор получает поддержку.
+4. Пользователь распознаёт ассортимент через категории с понятными иконками и примерами.
+5. Пользователь видит featured-модуль, где товар добавили авторы в витрины, и может открыть товар или список авторов.
+6. Пользователь сканирует крупные product cards и витрины авторов без перегруза бейджами.
+7. Пользователь переходит к своему действию: найти товар, найти автора, создать страницу или разместить товар.
+
+ID: FLOW-MARKETPLACE-CREATOR-HIERARCHY
+Роль: buyer / viewer / streamer / seller
+Цель: за первые секунды понять, что `/marketplace` — это маркетплейс цифровых товаров, где покупка может идти через автора, витрину или промокод.
+Статус реализации: IMPLEMENTED
+MVP/Future: v0.3.5
+Страницы: PAGE-MARKETPLACE, PAGE-HOME
+
+Шаги:
+
+1. Пользователь открывает `/marketplace`.
+2. Видит крупный hero: "Покупай нужное. Поддерживай любимых." и hero search.
+3. Под поиском распознаёт быстрые направления, но они не конкурируют с поиском.
+4. В hero-card видит автора, цель, товар, промокод и мини-flow покупки.
+5. Сразу после hero видит цепочку "Товар → Автор → Поддержка".
+6. В категориях считывает ассортимент через названия и примеры.
+7. В featured-блоке понимает, что товар добавили 14 авторов и покупка через витрину/промокод поддерживает выбранного автора.
+
+Состояния:
+
+- Нет товаров: компактный empty state без растягивания секций.
+- Нет cover image: category preview вместо шумной заглушки.
+- Есть cover image: реальное изображение продавца перекрывает category preview.
+
+Ошибки:
+
+- Быстрые направления выглядят как фильтры, но ведут как навигация без явного scope.
+- Блок поддержки выглядит как обычные второстепенные карточки и не считывается как цепочка.
+- SafeDeal описан внутренними provider/legal формулировками.
+
+## Дополнение UX-TASK-028: ранний товарный вход `/marketplace`
+
+ID: FLOW-MARKETPLACE-PRODUCT-DISCOVERY-FIRST
+Роль: buyer / viewer / streamer / seller
+Цель: пользователь быстро видит ассортимент, но параллельно считывает авторские подборки и поддержку через витрины/промокоды.
+Статус реализации: IMPLEMENTED
+
+Основной поток:
+
+1. Пользователь открывает `/marketplace`.
+2. В hero он видит поиск и demo покупки через автора.
+3. Сразу ниже он видит compact flow: товар найден, покупка через автора, автор получает поддержку.
+4. Затем пользователь получает быстрый товарный вход: категории ведут на явные страницы, а "Сейчас покупают" показывает 3 компактных товара.
+5. До обычного товарного грида пользователь видит подборки авторов с промокодом, целью и двумя товарами.
+6. Proof-module показывает, что конкретный товар добавили 14 авторов, и объясняет покупку через витрину или промокод.
+7. Популярные товары остаются обычным marketplace-сценарием после creator-commerce доказательств.
+
+## FLOW-HOME-AUDIENCE — UX-TASK-029
+
+Гость открывает главную → видит покупательский маркетплейс → ищет товар в хэдере или открывает категорию. Автор/продавец выбирает свой режим под хэдером → читает презентацию → переходит к базовой регистрации и следующему шагу имени. Переключение не меняет роль аккаунта.
+
+## Уточнение FLOW-HOME-AUDIENCE — UX-TASK-030
+
+Покупатель начинает с категорий или поиска в центре хедера. Новые товары загружаются из API; при ошибке повторная загрузка происходит на месте. Редакционные направления ведут на существующие категории. Автор изучает концепцию витрины и механику поддержки покупками, продавец — общий каталог и будущие авторские витрины. Все роли переключаются без навигации; «Маркет» и «Авторы» находятся рядом с аккаунтом справа.
+
+## UX-TASK-031 — страница автора до регистрации
+
+Версия: v0.3.5. Статус: IMPLEMENTED. Route: /create. По прямому запросу пользователя добавляется публичная анкета автора: название → описание → предпросмотр и авторизация. Данные сохраняются в sessionStorage текущей вкладки; email и пароль в черновик не входят. После входа возврат только на фиксированный /create, сохранение по явной кнопке. Новый авторский профиль создаётся как draft; существующий не перезаписывается этим сценарием. Покупатель может добавить роль автора. В хедере только вход, без отдельной регистрации/создания страницы; регистрация доступна вкладкой на auth-странице.
+
+Acceptance criteria: ru/en, semantic light/dark, mobile/desktop, клавиатура, валидация полей, восстановление черновика, сохранение при ошибке API, обе auth-вкладки сохраняют контекст, успешное сохранение через API, без автопубликации.
+
+### UX-TASK-031: необязательные шаги анкеты
+
+По запросу пользователя: название → описание (можно пропустить) → аватар и баннер (необязательно, можно пропустить) → спонсорские товары (можно пропустить) → авторизация. Изображения хранятся только в IndexedDB браузера, привязаны к черновику вкладки; на сервер не отправляются. Выбор товаров из реального каталога с affiliate_percent_bps > 0, без вымышленных товаров или обещаний выплат. Публикация витрины и загрузка медиа на сервер не реализуются этой UI-итерацией; локальные дополнения не удаляются при сохранении названия/описания в аккаунт. Успешный экран явно сообщает об этом. При ошибке каталога доступны повтор и пропуск. Ввод, возврат, повторное открытие и смена auth-вкладки сохраняют локальный черновик.
+
+## UX-TASK-033 — уточнение авторизации, 2026-09-15
+
+Задача по отдельным формам завершена и замещена UX-TASK-035; старые auth routes оставлены только для совместимости.
+
+Компактная auth-оболочка, доступные поля и отдельный шаг имени переиспользованы в едином сценарии.
+
+## UX-TASK-035 — единая авторизация и подтверждение email, 2026-09-17
+
+Сценарий регистрации: email → отправка кода → подтверждение кода → новый пароль → создание аккаунта → имя платформы. Сценарий входа: email существующего аккаунта → пароль. С каждого шага можно вернуться к email; `flow=creator` сохраняется. Новый аккаунт до подтверждения email не существует.

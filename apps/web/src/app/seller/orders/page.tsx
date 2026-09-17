@@ -5,7 +5,13 @@ import { formatMoney } from "@fanfuel/i18n";
 import { Alert, Badge, EmptyState, Skeleton } from "@fanfuel/ui";
 import type { OrderDetail } from "@fanfuel/types";
 import { AppTopBar } from "../../../components/app-chrome";
-import { ApiError, getSellerOrders, getStoredToken, startSellerOrder, submitSellerOrder } from "../../../lib/api";
+import {
+  ApiError,
+  getSellerOrders,
+  getStoredToken,
+  startSellerOrder,
+  submitSellerOrder
+} from "../../../lib/api";
 import { appLocale, dictionary } from "../../../lib/i18n";
 
 export default function SellerOrdersPage() {
@@ -43,8 +49,14 @@ export default function SellerOrdersPage() {
         action === "start"
           ? await startSellerOrder(token, order.order.id)
           : await submitSellerOrder(token, order.order.id);
-      setOrders((current) => current.map((item) => (item.order.id === response.order.id ? response : item)));
-      setMessage(action === "start" ? dictionary.common.orderStartedMessage : dictionary.common.orderSubmittedMessage);
+      setOrders((current) =>
+        current.map((item) => (item.order.id === response.order.id ? response : item))
+      );
+      setMessage(
+        action === "start"
+          ? dictionary.common.orderStartedMessage
+          : dictionary.common.orderSubmittedMessage
+      );
     } catch (err) {
       setError(getErrorText(err));
     } finally {
@@ -95,7 +107,9 @@ export default function SellerOrdersPage() {
                     <strong>{item.product.title}</strong>
                     <p className="ff-meta">{item.product.description}</p>
                   </div>
-                  <Badge tone={orderTone(item.order.status)}>{orderStatusLabel(item.order.status)}</Badge>
+                  <Badge tone={orderTone(item.order.status)}>
+                    {orderStatusLabel(item.order.status)}
+                  </Badge>
                   <strong>
                     {formatMoney({
                       amountMinor: item.deal.seller_amount_minor,
@@ -111,7 +125,9 @@ export default function SellerOrdersPage() {
                         disabled={activeOrderId === item.order.id}
                         onClick={() => void runOrderAction(item, "start")}
                       >
-                        {activeOrderId === item.order.id ? dictionary.common.loading : dictionary.common.startOrderWork}
+                        {activeOrderId === item.order.id
+                          ? dictionary.common.loading
+                          : dictionary.common.startOrderWork}
                       </button>
                     ) : null}
                     {item.order.status === "in_progress" ? (
@@ -121,7 +137,9 @@ export default function SellerOrdersPage() {
                         disabled={activeOrderId === item.order.id}
                         onClick={() => void runOrderAction(item, "submit")}
                       >
-                        {activeOrderId === item.order.id ? dictionary.common.loading : dictionary.common.submitOrderWork}
+                        {activeOrderId === item.order.id
+                          ? dictionary.common.loading
+                          : dictionary.common.submitOrderWork}
                       </button>
                     ) : null}
                   </div>
@@ -157,7 +175,9 @@ function orderTone(status: OrderDetail["order"]["status"]) {
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;

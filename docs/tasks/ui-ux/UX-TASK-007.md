@@ -1,7 +1,7 @@
 # UX-TASK-007: Привести dashboard layout к spec
 
 Статус: partial
-Версия: v0.3
+Версия: v0.3 / v0.3.5
 Приоритет: P0
 Затрагивает: PAGE-ME-PROFILE, PAGE-BUYER-DASHBOARD, PAGE-STUDIO-DASHBOARD, PAGE-SELLER-DASHBOARD, PAGE-ADMIN-DASHBOARD
 
@@ -17,11 +17,14 @@
 - Вынести Studio goals/widgets из `/me/profile`.
 - Вынести seller settings в seller section.
 - Сохранить `/me/profile` как account/settings fallback.
+- В `v0.3.5` довести `/me/profile` до user account hub: аватар, настройки, избранное, мои отзывы, подборки, стать автором/продавцом, pause/archive role modes.
+- В `v0.3.5` собрать Studio shell с вкладками: статистика, последние события, настройка донатов, витрина автора, виджеты, продукты и подборки.
 
 ### Что не нужно делать
 
 - Не переписывать все dashboards сразу.
-- Не добавлять payouts/disputes/store до их версий.
+- Не добавлять payouts/disputes и расширенную аналитику до их версий.
+- Не возвращать настройки витрины, виджетов и seller forms в `/me/profile`.
 
 ### Acceptance criteria
 

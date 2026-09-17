@@ -7,13 +7,19 @@ import (
 )
 
 var (
-	errInvalidCredentials  = errors.New("invalid credentials")
-	errForbidden           = errors.New("forbidden")
-	errNotFound            = errors.New("not found")
-	errValidation          = errors.New("validation failed")
-	errConflict            = errors.New("conflict")
-	errIdempotencyKey      = errors.New("idempotency key required")
-	errIdempotencyConflict = errors.New("idempotency key conflict")
+	errInvalidCredentials            = errors.New("invalid credentials")
+	errForbidden                     = errors.New("forbidden")
+	errNotFound                      = errors.New("not found")
+	errValidation                    = errors.New("validation failed")
+	errConflict                      = errors.New("conflict")
+	errIdempotencyKey                = errors.New("idempotency key required")
+	errIdempotencyConflict           = errors.New("idempotency key conflict")
+	errVerificationCodeInvalid       = errors.New("verification code invalid")
+	errVerificationCodeExpired       = errors.New("verification code expired")
+	errVerificationAttemptsExhausted = errors.New("verification attempts exhausted")
+	errVerificationResendLimited     = errors.New("verification resend limited")
+	errVerificationTokenInvalid      = errors.New("verification token invalid")
+	errEmailDelivery                 = errors.New("email delivery failed")
 )
 
 type apiError struct {
@@ -64,6 +70,18 @@ func mapError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusConflict, "idempotency_key_conflict", "idempotency_key_conflict", "errors.idempotencyKeyConflict", nil)
 	case errors.Is(err, errValidation):
 		writeError(w, http.StatusBadRequest, "validation_failed", "validation_failed", "errors.validationFailed", nil)
+	case errors.Is(err, errVerificationCodeInvalid):
+		writeError(w, http.StatusBadRequest, "verification_code_invalid", "verification_code_invalid", "errors.verificationCodeInvalid", nil)
+	case errors.Is(err, errVerificationCodeExpired):
+		writeError(w, http.StatusGone, "verification_code_expired", "verification_code_expired", "errors.verificationCodeExpired", nil)
+	case errors.Is(err, errVerificationAttemptsExhausted):
+		writeError(w, http.StatusTooManyRequests, "verification_attempts_exhausted", "verification_attempts_exhausted", "errors.verificationAttemptsExhausted", nil)
+	case errors.Is(err, errVerificationResendLimited):
+		writeError(w, http.StatusTooManyRequests, "verification_resend_limited", "verification_resend_limited", "errors.verificationResendLimited", nil)
+	case errors.Is(err, errVerificationTokenInvalid):
+		writeError(w, http.StatusUnauthorized, "verification_token_invalid", "verification_token_invalid", "errors.verificationTokenInvalid", nil)
+	case errors.Is(err, errEmailDelivery):
+		writeError(w, http.StatusServiceUnavailable, "email_delivery_failed", "email_delivery_failed", "errors.emailDeliveryFailed", nil)
 	default:
 		writeError(w, http.StatusInternalServerError, "internal_error", "internal_error", "errors.internal", nil)
 	}

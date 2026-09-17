@@ -33,8 +33,12 @@ const themeLabels = {
 };
 
 function AdminApp() {
-  const [token, setToken] = useState(() => window.localStorage.getItem("fanfuel_admin_token") ?? "");
-  const [themePreference, setThemePreference] = useState<ThemePreference>(() => getStoredThemePreference());
+  const [token, setToken] = useState(
+    () => window.localStorage.getItem("fanfuel_admin_token") ?? ""
+  );
+  const [themePreference, setThemePreference] = useState<ThemePreference>(() =>
+    getStoredThemePreference()
+  );
   const [activeTab, setActiveTab] = useState<"users" | "products">("users");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -100,9 +104,12 @@ function AdminApp() {
     setIsLoading(true);
 
     try {
-      const response = await apiFetch<ProductListResponse>("/api/v1/admin/products?status=pending_moderation&limit=50", {
-        headers: authHeaders(nextToken)
-      });
+      const response = await apiFetch<ProductListResponse>(
+        "/api/v1/admin/products?status=pending_moderation&limit=50",
+        {
+          headers: authHeaders(nextToken)
+        }
+      );
       setProducts(response.items);
     } catch (err) {
       setError(errorText(err));
@@ -113,7 +120,9 @@ function AdminApp() {
 
   async function updateStatus(user: AdminUserSummary, status: "active" | "blocked") {
     const confirmation =
-      status === "blocked" ? dictionary.common.confirmBlockUser : dictionary.common.confirmActivateUser;
+      status === "blocked"
+        ? dictionary.common.confirmBlockUser
+        : dictionary.common.confirmActivateUser;
     if (!window.confirm(confirmation)) {
       return;
     }
@@ -139,7 +148,9 @@ function AdminApp() {
 
   async function moderateProduct(product: Product, action: "approve" | "reject") {
     const confirmation =
-      action === "approve" ? dictionary.common.confirmApproveProduct : dictionary.common.confirmRejectProduct;
+      action === "approve"
+        ? dictionary.common.confirmApproveProduct
+        : dictionary.common.confirmRejectProduct;
     if (!window.confirm(confirmation)) {
       return;
     }
@@ -152,7 +163,10 @@ function AdminApp() {
       await apiFetch(`/api/v1/admin/products/${product.id}/${action}`, {
         method: "POST",
         headers: authHeaders(token),
-        body: action === "reject" ? JSON.stringify({ moderation_note: dictionary.common.adminModerationDefaultNote }) : undefined
+        body:
+          action === "reject"
+            ? JSON.stringify({ moderation_note: dictionary.common.adminModerationDefaultNote })
+            : undefined
       });
       setMessage(dictionary.common.successSaved);
       await loadProducts();
@@ -170,7 +184,11 @@ function AdminApp() {
           <span>FF</span>
           <strong>{dictionary.common.adminTitle}</strong>
         </a>
-        <ThemeSwitcher labels={themeLabels} preference={themePreference} onChange={setThemePreference} />
+        <ThemeSwitcher
+          labels={themeLabels}
+          preference={themePreference}
+          onChange={setThemePreference}
+        />
       </header>
       <section className="admin-panel" aria-labelledby="admin-title">
         <span>{dictionary.common.navAdmin}</span>
@@ -181,7 +199,12 @@ function AdminApp() {
           <form className="admin-card admin-form" onSubmit={handleLogin}>
             <label>
               <span>{dictionary.common.email}</span>
-              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
             </label>
             <label>
               <span>{dictionary.common.password}</span>
@@ -242,7 +265,11 @@ function AdminApp() {
             </div>
 
             {activeTab === "users" ? (
-              <div className="admin-table" role="table" aria-label={dictionary.common.adminUsersTitle}>
+              <div
+                className="admin-table"
+                role="table"
+                aria-label={dictionary.common.adminUsersTitle}
+              >
                 {users.map((user) => (
                   <div className="admin-row" role="row" key={user.id}>
                     <div>
@@ -278,7 +305,11 @@ function AdminApp() {
                 ))}
               </div>
             ) : (
-              <div className="admin-table" role="table" aria-label={dictionary.common.adminProductsTitle}>
+              <div
+                className="admin-table"
+                role="table"
+                aria-label={dictionary.common.adminProductsTitle}
+              >
                 {products.length === 0 ? (
                   <div className="admin-card">
                     <strong>{dictionary.common.adminProductsEmptyTitle}</strong>
@@ -325,7 +356,9 @@ function AdminApp() {
           </div>
         )}
 
-        <div className={error ? "admin-message admin-error" : "admin-message"}>{error || message}</div>
+        <div className={error ? "admin-message admin-error" : "admin-message"}>
+          {error || message}
+        </div>
       </section>
     </main>
   );
@@ -362,7 +395,9 @@ function authHeaders(token: string): HeadersInit {
 
 function errorText(error: unknown): string {
   if (error instanceof Error) {
-    return (dictionary.errors as Record<string, string>)[error.message] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.message] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;
@@ -393,11 +428,17 @@ function statusLabel(status: string): string {
 }
 
 function productStatusLabel(status: string): string {
-  return (dictionary.common as Record<string, string>)[`productStatus.${status}`] ?? dictionary.common.notAvailable;
+  return (
+    (dictionary.common as Record<string, string>)[`productStatus.${status}`] ??
+    dictionary.common.notAvailable
+  );
 }
 
 function productKindLabel(kind: string): string {
-  return (dictionary.common as Record<string, string>)[`productKind.${kind}`] ?? dictionary.common.notAvailable;
+  return (
+    (dictionary.common as Record<string, string>)[`productKind.${kind}`] ??
+    dictionary.common.notAvailable
+  );
 }
 
 createRoot(document.getElementById("root") as HTMLElement).render(

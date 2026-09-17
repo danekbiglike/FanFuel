@@ -13,5 +13,11 @@
   "errors.unauthorized": "Нужно войти в аккаунт.",
   "errors.invalidJson": "Некорректный формат запроса.",
   "errors.idempotencyKeyRequired": "Повторите отправку формы.",
-  "errors.idempotencyKeyConflict": "Повторная отправка отличается от первой."
+  "errors.idempotencyKeyConflict": "Повторная отправка отличается от первой.",
+  "errors.verificationCodeInvalid": "Неверный код подтверждения.",
+  "errors.verificationCodeExpired": "Срок действия кода истёк. Запросите новый.",
+  "errors.verificationAttemptsExhausted": "Попытки закончились. Запросите новый код.",
+  "errors.verificationResendLimited": "Новый код можно запросить чуть позже.",
+  "errors.verificationTokenInvalid": "Подтверждение устарело. Начните регистрацию заново.",
+  "errors.emailDeliveryFailed": "Не удалось отправить письмо. Попробуйте ещё раз позже."
 }

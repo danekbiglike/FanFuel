@@ -149,6 +149,8 @@ Mock provider не должен притворяться финальной юр
 
 Важно: `v0.3` safe deal — только domain/UI simulation поверх mock provider. Это не production escrow/hold и не юридическое обещание защиты.
 
+Статус `v0.3.5`: публичный route `/safe-deal` может показывать только короткое пользовательское объяснение сценария: условия видны заранее, заказ проходит статусы, при проблеме можно обратиться в поддержку. Нельзя показывать provider-specific детали, юридические гарантии, обещания escrow/hold/capture или финальные правила споров до `LEGAL_REVIEW_REQUIRED` и provider review.
+
 ## Tome adapter plan
 
 Перед реализацией:
@@ -269,6 +271,18 @@ Idempotency применяется для:
 - нельзя использовать float;
 - все расчёты аудируются через `balance_transactions`;
 - provider fees могут быть неизвестны до webhook/settlement.
+
+## Studio statistics не равна балансу
+
+`v0.3.5` добавляет график динамики дохода в Studio. Это аналитический слой поверх событий донатов и заказов, а не финансовый ledger и не сумма к выводу.
+
+Правила:
+
+- статистика строится из `Donation`, `Order`, `Payment` и partner attribution events, но не создаёт денежных движений;
+- суммы в статистике хранить и передавать только в minor units;
+- UI не должен называть график банковским счётом, балансом или гарантированной выплатой;
+- payout/available/frozen/pending amounts показывать только после `Wallet`/`BalanceTransaction`/`PayoutProvider` этапов;
+- provider-specific payment statuses не должны попадать в график напрямую без domain mapping.
 
 ## Balance lifecycle
 
@@ -456,3 +470,5 @@ LEGAL_REVIEW_REQUIRED:
 - fiscalization behavior;
 - legal text;
 - category restrictions.
+
+UX-TASK-031: обнаружена выдача draft авторов публичными GET и допустимость draft в разрешении адресата доната. В связи с созданием приватных черновиков разрешён только published; PublicProfile скрывает непубличный creator_profile. Provider/суммы/проведение платежей не меняются. Изменение доступа намеренное, чтобы черновик не был публичным до публикации.

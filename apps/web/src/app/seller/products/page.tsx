@@ -115,7 +115,9 @@ export default function SellerProductsPage() {
                     disabled={submittingId === product.id}
                     onClick={() => void handleSubmit(product)}
                   >
-                    {submittingId === product.id ? dictionary.common.loading : dictionary.common.submitToModeration}
+                    {submittingId === product.id
+                      ? dictionary.common.loading
+                      : dictionary.common.submitToModeration}
                   </button>
                 ) : null}
               </ProductCard>
@@ -139,12 +141,16 @@ function kindLabel(kind: Product["kind"]): string {
 }
 
 function deliveryTypeLabel(deliveryType: Product["delivery_type"]): string {
-  return (dictionary.common as Record<string, string>)[`deliveryType.${deliveryType}`] ?? deliveryType;
+  return (
+    (dictionary.common as Record<string, string>)[`deliveryType.${deliveryType}`] ?? deliveryType
+  );
 }
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;

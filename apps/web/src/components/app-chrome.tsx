@@ -20,6 +20,7 @@ import {
 import { useTheme } from "./theme-context";
 
 type PreferenceMenuKind = "theme" | "language";
+type TopbarSearchMode = "all" | "products" | "creators" | "sellers";
 
 type FloatingPreferenceMenu = {
   kind: PreferenceMenuKind;
@@ -28,15 +29,32 @@ type FloatingPreferenceMenu = {
   width: number;
 };
 
-export function AppTopBar() {
+const TOPBAR_SEARCH_SUGGESTIONS = [
+  "topbarSearchSuggestionObs",
+  "topbarSearchSuggestionWaveshift",
+  "topbarSearchSuggestionAlerts",
+  "topbarSearchSuggestionDiscord",
+  "topbarSearchSuggestionCoaching",
+  "topbarSearchSuggestionStreamFx"
+];
+
+export function AppTopBar({
+  deferSearchUntilScroll = false
+}: {
+  deferSearchUntilScroll?: boolean;
+} = {}) {
   const theme = useTheme();
   const menuRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement | null>(null);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [authState, setAuthState] = useState<"checking" | "guest" | "authenticated">("checking");
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchMode, setSearchMode] = useState<TopbarSearchMode>("all");
   const [isCompactSearch, setCompactSearch] = useState(false);
+  const [isDeferredSearchVisible, setDeferredSearchVisible] = useState(!deferSearchUntilScroll);
   const [isUserMenuOpen, setUserMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [localePreference, setLocalePreference] = useState<Locale>(appLocale);
   const [floatingPreferenceMenu, setFloatingPreferenceMenu] =
     useState<FloatingPreferenceMenu | null>(null);
@@ -137,8 +155,65 @@ export function AppTopBar() {
   }, [localePreference]);
 
   useEffect(() => {
+    if (!deferSearchUntilScroll) {
+      setDeferredSearchVisible(true);
+      return;
+    }
+
+    function syncDeferredSearch() {
+      setDeferredSearchVisible(window.scrollY > 520);
+    }
+
+    syncDeferredSearch();
+    window.addEventListener("scroll", syncDeferredSearch, { passive: true });
+    window.addEventListener("resize", syncDeferredSearch);
+
+    return () => {
+      window.removeEventListener("scroll", syncDeferredSearch);
+      window.removeEventListener("resize", syncDeferredSearch);
+    };
+  }, [deferSearchUntilScroll]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setSearchQuery(params.get("query") ?? "");
+    const type = params.get("type");
+    if (type === "creator") {
+      setSearchMode("creators");
+    } else if (type === "seller") {
+      setSearchMode("sellers");
+    } else if (type === "product") {
+      setSearchMode("products");
+    }
+  }, []);
+
+  useEffect(() => {
+    function handleTopbarSearchMode(event: Event) {
+      const detail = (event as CustomEvent<{ focus?: boolean; mode?: TopbarSearchMode }>).detail;
+      const nextMode = detail?.mode ?? "all";
+      setSearchMode(nextMode);
+
+      if (!detail?.focus) {
+        return;
+      }
+
+      window.requestAnimationFrame(() => {
+        const shouldUseMobilePanel = window.matchMedia("(max-width: 767px)").matches;
+        if (shouldUseMobilePanel) {
+          setMobileSearchOpen(true);
+          window.setTimeout(() => mobileSearchInputRef.current?.focus(), 80);
+          return;
+        }
+
+        searchInputRef.current?.focus();
+      });
+    }
+
+    window.addEventListener("fanfuel-topbar-search-mode", handleTopbarSearchMode);
+
+    return () => {
+      window.removeEventListener("fanfuel-topbar-search-mode", handleTopbarSearchMode);
+    };
   }, []);
 
   useEffect(() => {
@@ -233,9 +308,14 @@ export function AppTopBar() {
   }, [isUserMenuOpen]);
 
   const isAuthenticated = authState === "authenticated";
-  const topbarClassName = isAuthenticated
-    ? "ff-site-topbar ff-site-topbar-auth"
-    : "ff-site-topbar ff-site-topbar-guest";
+  const topbarClassName = [
+    "ff-site-topbar",
+    isAuthenticated ? "ff-site-topbar-auth" : "ff-site-topbar-guest",
+    deferSearchUntilScroll ? "ff-site-topbar-search-deferred" : "",
+    isDeferredSearchVisible ? "ff-site-topbar-search-visible" : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
   const canStream = currentUser?.roles.includes("streamer") ?? false;
   const canSell = currentUser?.roles.includes("seller") ?? false;
   const displayName =
@@ -244,20 +324,20 @@ export function AppTopBar() {
     ? `@${currentUser.profile.slug}`
     : currentUser?.user.email;
   const initials = getInitials(displayName);
-  const topbarSearchPlaceholder = isCompactSearch
-    ? common.topbarSearchPlaceholderCompact
-    : common.topbarSearchPlaceholder;
+  const topbarSearchPlaceholder = getSearchPlaceholder(searchMode, common, isCompactSearch);
+  const mobileSearchPlaceholder = getSearchPlaceholder(searchMode, common, false, true);
 
   function handleTopbarSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const query = searchQuery.trim();
-    const params = new URLSearchParams();
-    if (query) {
-      params.set("query", query);
-    }
+    setMobileSearchOpen(false);
+    window.location.assign(buildTopbarSearchUrl(query, searchMode));
+  }
 
-    window.location.assign(`/marketplace${params.toString() ? `?${params}` : ""}`);
+  function submitSuggestion(query: string) {
+    setMobileSearchOpen(false);
+    window.location.assign(buildTopbarSearchUrl(query, searchMode));
   }
 
   function handleLogout() {
@@ -378,92 +458,93 @@ export function AppTopBar() {
         </button>
       </form>
 
-      {isAuthenticated ? (
-        <div className="ff-topbar-actions">
-          <button
-            className="ff-icon-button ff-notification-button"
-            type="button"
-            disabled
-            aria-label={common.notifications}
-            title={common.notificationsUnavailable}
-          >
-            <BellIcon />
-          </button>
+      <div className="ff-topbar-account-group">
+        <nav className="ff-topbar-nav" aria-label={common.primaryNavigation}>
+          <a href="/marketplace">{common.navMarketplace}</a>
+          <a href="/creators">{common.navAuthors}</a>
+        </nav>
 
-          <div className="ff-user-menu-shell" ref={menuRef}>
+        {isAuthenticated ? (
+          <div className="ff-topbar-actions">
             <button
-              className="ff-user-menu-trigger"
+              className="ff-icon-button ff-mobile-search-button"
               type="button"
-              aria-haspopup="dialog"
-              aria-expanded={isUserMenuOpen}
-              onClick={() => setUserMenuOpen((value) => !value)}
+              aria-label={common.topbarMobileSearchOpen}
+              onClick={() => setMobileSearchOpen(true)}
             >
-              <span className="ff-user-avatar" aria-hidden="true">
-                {initials}
-              </span>
-              <span className="ff-user-trigger-name">{displayName}</span>
-              <ChevronDownIcon />
+              <SearchIcon />
+            </button>
+            <button
+              className="ff-icon-button ff-notification-button"
+              type="button"
+              disabled
+              aria-label={common.notifications}
+              title={common.notificationsUnavailable}
+            >
+              <BellIcon />
             </button>
 
-            {isUserMenuOpen ? (
-              <div className="ff-user-dropdown" aria-label={common.topbarAccountMenu}>
-                <div className="ff-user-dropdown-head">
-                  <strong>{displayName}</strong>
-                  {profileMeta ? <span>{profileMeta}</span> : null}
-                </div>
+            <div className="ff-user-menu-shell" ref={menuRef}>
+              <button
+                className="ff-user-menu-trigger"
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={isUserMenuOpen}
+                onClick={() => setUserMenuOpen((value) => !value)}
+              >
+                <span className="ff-user-avatar" aria-hidden="true">
+                  {initials}
+                </span>
+                <span className="ff-user-trigger-name">{displayName}</span>
+                <ChevronDownIcon />
+              </button>
 
-                <div className="ff-user-menu-group">
-                  <div className="ff-user-menu-section">{common.menuSectionAccount}</div>
-                  <a
-                    className="ff-user-menu-item ff-user-menu-subitem"
-                    href="/me/profile"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <span>{common.navProfile}</span>
-                  </a>
-                </div>
+              {isUserMenuOpen ? (
+                <div className="ff-user-dropdown" aria-label={common.topbarAccountMenu}>
+                  <div className="ff-user-dropdown-head">
+                    <strong>{displayName}</strong>
+                    {profileMeta ? <span>{profileMeta}</span> : null}
+                  </div>
 
-                <div className="ff-user-menu-group">
-                  <div className="ff-user-menu-section">{common.menuSectionMarketplace}</div>
-                  <a
-                    className="ff-user-menu-item ff-user-menu-subitem"
-                    href="/buyer"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <span>{common.navBuyer}</span>
-                  </a>
-                  {canSell ? (
+                  <div className="ff-user-menu-group">
+                    <div className="ff-user-menu-section">{common.menuSectionAccount}</div>
                     <a
                       className="ff-user-menu-item ff-user-menu-subitem"
-                      href="/seller"
+                      href="/me/profile"
                       onClick={() => setUserMenuOpen(false)}
                     >
-                      <span>{common.navSeller}</span>
+                      <span>{common.navProfile}</span>
                     </a>
-                  ) : null}
-                </div>
+                  </div>
 
-                <div className="ff-user-menu-group">
-                  <div className="ff-user-menu-section">{common.menuSectionSupport}</div>
-                  <button className="ff-user-menu-item ff-user-menu-subitem" type="button" disabled>
-                    <span>{common.navHelp}</span>
-                    <span className="ff-user-menu-hint">{common.menuSoon}</span>
-                  </button>
-                  <button className="ff-user-menu-item ff-user-menu-subitem" type="button" disabled>
-                    <span>{common.navMessages}</span>
-                    <span className="ff-user-menu-hint">{common.menuSoon}</span>
-                  </button>
-                </div>
-
-                {canStream ? (
                   <div className="ff-user-menu-group">
-                    <div className="ff-user-menu-section">{common.fanfuelStudio}</div>
+                    <div className="ff-user-menu-section">{common.menuSectionMarketplace}</div>
+                    <a
+                      className="ff-user-menu-item ff-user-menu-subitem"
+                      href="/buyer"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <span>{common.navBuyer}</span>
+                    </a>
+                    {canSell ? (
+                      <a
+                        className="ff-user-menu-item ff-user-menu-subitem"
+                        href="/seller"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <span>{common.navSeller}</span>
+                      </a>
+                    ) : null}
+                  </div>
+
+                  <div className="ff-user-menu-group">
+                    <div className="ff-user-menu-section">{common.menuSectionSupport}</div>
                     <button
                       className="ff-user-menu-item ff-user-menu-subitem"
                       type="button"
                       disabled
                     >
-                      <span>{common.navStudio}</span>
+                      <span>{common.navHelp}</span>
                       <span className="ff-user-menu-hint">{common.menuSoon}</span>
                     </button>
                     <button
@@ -471,168 +552,242 @@ export function AppTopBar() {
                       type="button"
                       disabled
                     >
-                      <span>{common.navFinances}</span>
-                      <span className="ff-user-menu-hint">{common.menuPaymentReview}</span>
+                      <span>{common.navMessages}</span>
+                      <span className="ff-user-menu-hint">{common.menuSoon}</span>
                     </button>
                   </div>
-                ) : null}
 
-                <div className="ff-user-menu-group">
-                  <div className="ff-user-menu-section">{common.menuSectionSettings}</div>
-                  <button className="ff-user-menu-item ff-user-menu-subitem" type="button" disabled>
-                    <span>{common.navSettings}</span>
-                    <span className="ff-user-menu-hint">{common.menuSoon}</span>
-                  </button>
-                  <button
-                    className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-control-button"
-                    type="button"
-                    aria-haspopup="listbox"
-                    aria-expanded={floatingPreferenceMenu?.kind === "theme"}
-                    onClick={(event) => openFloatingPreferenceMenu("theme", event)}
-                  >
-                    <span>{common.theme}</span>
-                    <span className="ff-user-menu-value">
-                      {currentThemeLabel}
-                      <ChevronDownIcon />
-                    </span>
-                  </button>
-                  <button
-                    className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-control-button"
-                    type="button"
-                    aria-haspopup="listbox"
-                    aria-expanded={floatingPreferenceMenu?.kind === "language"}
-                    onClick={(event) => openFloatingPreferenceMenu("language", event)}
-                  >
-                    <span>{common.navLanguage}</span>
-                    <span className="ff-user-menu-value">
-                      {currentLanguageLabel}
-                      <ChevronDownIcon />
-                    </span>
-                  </button>
-                </div>
+                  {canStream ? (
+                    <div className="ff-user-menu-group">
+                      <div className="ff-user-menu-section">{common.fanfuelStudio}</div>
+                      <button
+                        className="ff-user-menu-item ff-user-menu-subitem"
+                        type="button"
+                        disabled
+                      >
+                        <span>{common.navStudio}</span>
+                        <span className="ff-user-menu-hint">{common.menuSoon}</span>
+                      </button>
+                      <button
+                        className="ff-user-menu-item ff-user-menu-subitem"
+                        type="button"
+                        disabled
+                      >
+                        <span>{common.navFinances}</span>
+                        <span className="ff-user-menu-hint">{common.menuPaymentReview}</span>
+                      </button>
+                    </div>
+                  ) : null}
 
-                <div className="ff-user-menu-group">
-                  <button
-                    className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-logout"
-                    type="button"
-                    onClick={handleLogout}
-                  >
-                    <span>{common.logoutAction}</span>
-                  </button>
-                </div>
-              </div>
-            ) : null}
-
-            {floatingPreferenceMenuNode}
-          </div>
-        </div>
-      ) : (
-        <div className="ff-topbar-actions">
-          <div className="ff-user-menu-shell" ref={menuRef}>
-            <button
-              className="ff-user-menu-trigger ff-guest-menu-trigger"
-              type="button"
-              aria-label={common.topbarGuestMenu}
-              aria-haspopup="dialog"
-              aria-expanded={isUserMenuOpen}
-              onClick={() => setUserMenuOpen((value) => !value)}
-            >
-              <MenuIcon />
-            </button>
-
-            {isUserMenuOpen ? (
-              <div
-                className="ff-user-dropdown ff-guest-dropdown"
-                aria-label={common.topbarGuestMenu}
-              >
-                <div className="ff-user-menu-group ff-guest-auth-group">
-                  <div className="ff-user-menu-section">{common.menuSectionAccount}</div>
-                  <div className="ff-guest-auth-actions">
-                    <a
-                      className="ff-guest-auth-button"
-                      href="/auth/login"
-                      onClick={() => setUserMenuOpen(false)}
+                  <div className="ff-user-menu-group">
+                    <div className="ff-user-menu-section">{common.menuSectionSettings}</div>
+                    <button
+                      className="ff-user-menu-item ff-user-menu-subitem"
+                      type="button"
+                      disabled
                     >
-                      {common.navLogin}
-                    </a>
-                    <a
-                      className="ff-guest-auth-button ff-guest-auth-button-primary"
-                      href="/auth/register"
-                      onClick={() => setUserMenuOpen(false)}
+                      <span>{common.navSettings}</span>
+                      <span className="ff-user-menu-hint">{common.menuSoon}</span>
+                    </button>
+                    <button
+                      className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-control-button"
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded={floatingPreferenceMenu?.kind === "theme"}
+                      onClick={(event) => openFloatingPreferenceMenu("theme", event)}
                     >
-                      {common.navRegister}
-                    </a>
+                      <span>{common.theme}</span>
+                      <span className="ff-user-menu-value">
+                        {currentThemeLabel}
+                        <ChevronDownIcon />
+                      </span>
+                    </button>
+                    <button
+                      className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-control-button"
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded={floatingPreferenceMenu?.kind === "language"}
+                      onClick={(event) => openFloatingPreferenceMenu("language", event)}
+                    >
+                      <span>{common.navLanguage}</span>
+                      <span className="ff-user-menu-value">
+                        {currentLanguageLabel}
+                        <ChevronDownIcon />
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="ff-user-menu-group">
+                    <button
+                      className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-logout"
+                      type="button"
+                      onClick={handleLogout}
+                    >
+                      <span>{common.logoutAction}</span>
+                    </button>
                   </div>
                 </div>
+              ) : null}
 
-                <div className="ff-user-menu-group">
-                  <div className="ff-user-menu-section">{common.menuSectionExplore}</div>
-                  <a
-                    className="ff-user-menu-item ff-user-menu-subitem"
-                    href="/marketplace"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <span>{common.navMarketplace}</span>
-                  </a>
-                  <a
-                    className="ff-user-menu-item ff-user-menu-subitem"
-                    href="/for-buyers"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <span>{common.navForBuyers}</span>
-                  </a>
-                  <a
-                    className="ff-user-menu-item ff-user-menu-subitem"
-                    href="/for-streamers"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <span>{common.navForStreamers}</span>
-                  </a>
-                  <a
-                    className="ff-user-menu-item ff-user-menu-subitem"
-                    href="/for-sellers"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <span>{common.navForSellers}</span>
-                  </a>
+              {floatingPreferenceMenuNode}
+            </div>
+          </div>
+        ) : (
+          <div className="ff-topbar-actions">
+            <button
+              className="ff-icon-button ff-mobile-search-button"
+              type="button"
+              aria-label={common.topbarMobileSearchOpen}
+              onClick={() => setMobileSearchOpen(true)}
+            >
+              <SearchIcon />
+            </button>
+            <a className="ff-topbar-login" href="/auth">
+              {common.navAuth}
+            </a>
+            <div className="ff-user-menu-shell" ref={menuRef}>
+              <button
+                className="ff-user-menu-trigger ff-guest-menu-trigger"
+                type="button"
+                aria-label={common.topbarGuestMenu}
+                aria-haspopup="dialog"
+                aria-expanded={isUserMenuOpen}
+                onClick={() => setUserMenuOpen((value) => !value)}
+              >
+                <MenuIcon />
+              </button>
+
+              {isUserMenuOpen ? (
+                <div
+                  className="ff-user-dropdown ff-guest-dropdown"
+                  aria-label={common.topbarGuestMenu}
+                >
+                  <div className="ff-user-menu-group">
+                    <div className="ff-user-menu-section">{common.menuSectionExplore}</div>
+                    <a
+                      className="ff-user-menu-item ff-user-menu-subitem"
+                      href="/marketplace"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <span>{common.navMarketplace}</span>
+                    </a>
+                    <a
+                      className="ff-user-menu-item ff-user-menu-subitem"
+                      href="/creators"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
+                      <span>{common.navAuthors}</span>
+                    </a>
+                  </div>
+
+                  <div className="ff-user-menu-group">
+                    <div className="ff-user-menu-section">{common.menuSectionSettings}</div>
+                    <button
+                      className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-control-button"
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded={floatingPreferenceMenu?.kind === "theme"}
+                      onClick={(event) => openFloatingPreferenceMenu("theme", event)}
+                    >
+                      <span>{common.theme}</span>
+                      <span className="ff-user-menu-value">
+                        {currentThemeLabel}
+                        <ChevronDownIcon />
+                      </span>
+                    </button>
+                    <button
+                      className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-control-button"
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded={floatingPreferenceMenu?.kind === "language"}
+                      onClick={(event) => openFloatingPreferenceMenu("language", event)}
+                    >
+                      <span>{common.navLanguage}</span>
+                      <span className="ff-user-menu-value">
+                        {currentLanguageLabel}
+                        <ChevronDownIcon />
+                      </span>
+                    </button>
+                  </div>
                 </div>
+              ) : null}
 
-                <div className="ff-user-menu-group">
-                  <div className="ff-user-menu-section">{common.menuSectionSettings}</div>
-                  <button
-                    className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-control-button"
-                    type="button"
-                    aria-haspopup="listbox"
-                    aria-expanded={floatingPreferenceMenu?.kind === "theme"}
-                    onClick={(event) => openFloatingPreferenceMenu("theme", event)}
-                  >
-                    <span>{common.theme}</span>
-                    <span className="ff-user-menu-value">
-                      {currentThemeLabel}
-                      <ChevronDownIcon />
-                    </span>
-                  </button>
-                  <button
-                    className="ff-user-menu-item ff-user-menu-subitem ff-user-menu-control-button"
-                    type="button"
-                    aria-haspopup="listbox"
-                    aria-expanded={floatingPreferenceMenu?.kind === "language"}
-                    onClick={(event) => openFloatingPreferenceMenu("language", event)}
-                  >
-                    <span>{common.navLanguage}</span>
-                    <span className="ff-user-menu-value">
-                      {currentLanguageLabel}
-                      <ChevronDownIcon />
-                    </span>
-                  </button>
-                </div>
-              </div>
-            ) : null}
+              {floatingPreferenceMenuNode}
+            </div>
+          </div>
+        )}
+      </div>
 
-            {floatingPreferenceMenuNode}
+      {isMobileSearchOpen ? (
+        <div className="ff-mobile-search-panel" role="dialog" aria-modal="true">
+          <div className="ff-mobile-search-head">
+            <strong>{common.marketplaceSearch}</strong>
+            <button
+              className="ff-icon-button"
+              type="button"
+              aria-label={common.topbarMobileSearchClose}
+              onClick={() => setMobileSearchOpen(false)}
+            >
+              <span aria-hidden="true">{"\u00d7"}</span>
+            </button>
+          </div>
+          <div className="ff-mobile-search-tabs" aria-label={common.topbarSearchModeTabs}>
+            <button
+              type="button"
+              aria-pressed={searchMode === "products"}
+              onClick={() => setSearchMode("products")}
+            >
+              {common.topbarSearchModeProducts}
+            </button>
+            <button
+              type="button"
+              aria-pressed={searchMode === "creators"}
+              onClick={() => setSearchMode("creators")}
+            >
+              {common.topbarSearchModeCreators}
+            </button>
+            <button
+              type="button"
+              aria-pressed={searchMode === "sellers"}
+              onClick={() => setSearchMode("sellers")}
+            >
+              {common.topbarSearchModeSellers}
+            </button>
+          </div>
+          <form
+            className="ff-mobile-search-form"
+            role="search"
+            onSubmit={handleTopbarSearch}
+            suppressHydrationWarning
+          >
+            <label className="ff-sr-only" htmlFor="ff-mobile-search-input">
+              {common.marketplaceSearch}
+            </label>
+            <input
+              ref={mobileSearchInputRef}
+              id="ff-mobile-search-input"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={mobileSearchPlaceholder}
+              autoFocus
+              suppressHydrationWarning
+            />
+            <button type="submit" aria-label={common.topbarSearchSubmit}>
+              <SearchIcon />
+            </button>
+          </form>
+          <div className="ff-mobile-search-suggestions" aria-label={common.topbarSearchQuickHints}>
+            {TOPBAR_SEARCH_SUGGESTIONS.map((key) => {
+              const label = common[key as keyof typeof common] ?? key;
+              return (
+                <button key={key} type="button" onClick={() => submitSuggestion(label)}>
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
-      )}
+      ) : null}
     </header>
   );
 }
@@ -647,6 +802,60 @@ function getInitials(value: string): string {
   const source = parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : trimmed.slice(0, 2);
 
   return source.toUpperCase();
+}
+
+function buildTopbarSearchUrl(query: string, mode: TopbarSearchMode): string {
+  const params = new URLSearchParams();
+  const trimmedQuery = query.trim();
+
+  if (trimmedQuery) {
+    params.set("query", trimmedQuery);
+  }
+
+  if (mode === "creators") {
+    return buildUrlWithParams("/creators", params);
+  }
+
+  if (mode === "sellers") {
+    params.set("type", "seller");
+    return buildUrlWithParams("/marketplace/catalog", params);
+  }
+
+  if (mode === "products") {
+    params.set("type", "product");
+  }
+
+  return buildUrlWithParams("/marketplace/catalog", params);
+}
+
+function buildUrlWithParams(pathname: string, params: URLSearchParams): string {
+  const queryString = params.toString();
+  return `${pathname}${queryString ? `?${queryString}` : ""}`;
+}
+
+function getSearchPlaceholder(
+  mode: TopbarSearchMode,
+  common: Record<string, string>,
+  isCompact: boolean,
+  isMobile = false
+): string {
+  if (mode === "creators") {
+    return common.topbarSearchCreatorPlaceholder;
+  }
+
+  if (mode === "sellers") {
+    return common.topbarSearchSellerPlaceholder;
+  }
+
+  if (mode === "products") {
+    return common.topbarSearchProductPlaceholder;
+  }
+
+  if (isMobile) {
+    return common.topbarSearchPlaceholderMobile;
+  }
+
+  return isCompact ? common.topbarSearchPlaceholderCompact : common.topbarSearchPlaceholder;
 }
 
 function SearchIcon() {

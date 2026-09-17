@@ -5,7 +5,7 @@ const config: PublicLandingConfig = {
   titleKey: "forStreamersTitle",
   leadKey: "forStreamersLead",
   primaryActionKey: "forStreamersPrimaryAction",
-  primaryHref: "/auth/register",
+  primaryHref: "/auth",
   secondaryActionKey: "openMarketplace",
   secondaryHref: "/marketplace",
   previewLabelKey: "forStreamersPreviewLabel",

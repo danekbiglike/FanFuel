@@ -30,10 +30,17 @@ export default function BuyerDashboardPage() {
   }, []);
 
   const totalSpent = useMemo(
-    () => formatTotals(orders.filter((item) => ["paid", "in_progress", "delivered", "completed"].includes(item.order.status))),
+    () =>
+      formatTotals(
+        orders.filter((item) =>
+          ["paid", "in_progress", "delivered", "completed"].includes(item.order.status)
+        )
+      ),
     [orders]
   );
-  const activeCount = orders.filter((item) => ["paid", "in_progress", "delivered"].includes(item.order.status)).length;
+  const activeCount = orders.filter((item) =>
+    ["paid", "in_progress", "delivered"].includes(item.order.status)
+  ).length;
 
   return (
     <main className="ff-page">
@@ -49,7 +56,7 @@ export default function BuyerDashboardPage() {
           <EmptyState>
             <strong>{dictionary.common.checkoutLoginRequiredTitle}</strong>
             <span>{dictionary.common.checkoutLoginRequiredText}</span>
-            <a className="ff-button ff-button-primary" href="/auth/login">
+            <a className="ff-button ff-button-primary" href="/auth">
               {dictionary.common.navLogin}
             </a>
           </EmptyState>
@@ -88,9 +95,13 @@ export default function BuyerDashboardPage() {
                     <article className="ff-order-row" key={item.order.id}>
                       <div>
                         <strong>{item.product.title}</strong>
-                        <p className="ff-meta">{item.product.seller?.display_name ?? dictionary.common.roleSeller}</p>
+                        <p className="ff-meta">
+                          {item.product.seller?.display_name ?? dictionary.common.roleSeller}
+                        </p>
                       </div>
-                      <Badge tone={orderTone(item.order.status)}>{orderStatusLabel(item.order.status)}</Badge>
+                      <Badge tone={orderTone(item.order.status)}>
+                        {orderStatusLabel(item.order.status)}
+                      </Badge>
                       <strong>
                         {formatMoney({
                           amountMinor: item.order.total_amount_minor,
@@ -98,7 +109,10 @@ export default function BuyerDashboardPage() {
                           locale: appLocale
                         })}
                       </strong>
-                      <a className="ff-button ff-button-secondary" href={`/buyer/orders/${item.order.id}`}>
+                      <a
+                        className="ff-button ff-button-secondary"
+                        href={`/buyer/orders/${item.order.id}`}
+                      >
                         {dictionary.common.openOrder}
                       </a>
                     </article>
@@ -132,7 +146,9 @@ function orderTone(status: OrderDetail["order"]["status"]) {
 
 function getErrorText(error: unknown): string {
   if (error instanceof ApiError) {
-    return (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError;
+    return (
+      (dictionary.errors as Record<string, string>)[error.i18nKey] ?? dictionary.common.apiError
+    );
   }
 
   return dictionary.common.apiError;
@@ -141,7 +157,10 @@ function getErrorText(error: unknown): string {
 function formatTotals(items: OrderDetail[]): string {
   const totals = new Map<CurrencyCode, number>();
   items.forEach((item) => {
-    totals.set(item.order.currency, (totals.get(item.order.currency) ?? 0) + item.order.total_amount_minor);
+    totals.set(
+      item.order.currency,
+      (totals.get(item.order.currency) ?? 0) + item.order.total_amount_minor
+    );
   });
 
   if (totals.size === 0) {

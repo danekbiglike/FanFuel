@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func (a *App) handleFoundation(w http.ResponseWriter, _ *http.Request) {
@@ -25,13 +26,144 @@ func (a *App) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := a.store.RegisterUser(r.Context(), req)
+	claims, err := a.tokens.ParseRegistrationToken(req.RegistrationToken)
+	if err != nil {
+		mapError(w, errVerificationTokenInvalid)
+		return
+	}
+
+	user, err := a.store.RegisterVerifiedUser(r.Context(), req, claims.Email, claims.ChallengeID)
 	if err != nil {
 		mapError(w, err)
 		return
 	}
 
 	a.writeAuthResponse(w, *user)
+}
+
+func (a *App) handleIdentify(w http.ResponseWriter, r *http.Request) {
+	if !a.authLimiter.Allow("identify-ip:" + clientKey(r)) {
+		writeError(w, http.StatusTooManyRequests, "rate_limited", "rate_limited", "errors.rateLimited", nil)
+		return
+	}
+
+	var req IdentifyRequest
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	email, ok := normalizeEmail(req.Email)
+	if !ok {
+		mapError(w, errValidation)
+		return
+	}
+	if !a.authLimiter.Allow("identify-email:" + email) {
+		writeError(w, http.StatusTooManyRequests, "rate_limited", "rate_limited", "errors.rateLimited", nil)
+		return
+	}
+
+	exists, err := a.store.EmailExists(r.Context(), email)
+	if err != nil {
+		mapError(w, err)
+		return
+	}
+	nextAction := "register"
+	if exists {
+		nextAction = "login"
+	}
+	writeJSON(w, http.StatusOK, IdentifyResponse{NextAction: nextAction})
+}
+
+func (a *App) handleStartEmailVerification(w http.ResponseWriter, r *http.Request) {
+	if !a.authLimiter.Allow("verify-start-ip:" + clientKey(r)) {
+		writeError(w, http.StatusTooManyRequests, "rate_limited", "rate_limited", "errors.rateLimited", nil)
+		return
+	}
+
+	var req StartEmailVerificationRequest
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	email, ok := normalizeEmail(req.Email)
+	if !ok {
+		mapError(w, errValidation)
+		return
+	}
+	if !a.authLimiter.Allow("verify-start-email:" + email) {
+		writeError(w, http.StatusTooManyRequests, "rate_limited", "rate_limited", "errors.rateLimited", nil)
+		return
+	}
+	exists, err := a.store.EmailExists(r.Context(), email)
+	if err != nil {
+		mapError(w, err)
+		return
+	}
+	if exists {
+		mapError(w, errConflict)
+		return
+	}
+
+	challengeID, code, digest, err := a.verification.NewChallenge()
+	if err != nil {
+		mapError(w, err)
+		return
+	}
+	now := time.Now().UTC()
+	challenge := EmailVerificationChallenge{
+		ID:                challengeID,
+		Email:             email,
+		Locale:            normalizeLocale(req.Locale),
+		CodeDigest:        digest,
+		MaxAttempts:       emailVerificationAttempts,
+		ExpiresAt:         now.Add(emailVerificationTTL),
+		ResendAvailableAt: now.Add(emailVerificationCooldown),
+	}
+	if err := a.store.CreateEmailVerificationChallenge(r.Context(), challenge); err != nil {
+		mapError(w, err)
+		return
+	}
+	if a.emailSender == nil || a.emailSender.SendVerificationCode(r.Context(), VerificationEmail{To: email, Locale: challenge.Locale, Code: code}) != nil {
+		a.store.InvalidateEmailVerificationChallenge(r.Context(), challengeID)
+		mapError(w, errEmailDelivery)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, StartEmailVerificationResponse{
+		ChallengeID:       challengeID,
+		Email:             maskEmail(email),
+		ExpiresAt:         challenge.ExpiresAt,
+		ResendAvailableAt: challenge.ResendAvailableAt,
+	})
+}
+
+func (a *App) handleVerifyEmail(w http.ResponseWriter, r *http.Request) {
+	if !a.authLimiter.Allow("verify-code-ip:" + clientKey(r)) {
+		writeError(w, http.StatusTooManyRequests, "rate_limited", "rate_limited", "errors.rateLimited", nil)
+		return
+	}
+
+	var req VerifyEmailRequest
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	req.ChallengeID = strings.TrimSpace(req.ChallengeID)
+	req.Code = strings.TrimSpace(req.Code)
+	if req.ChallengeID == "" || !validVerificationCode(req.Code) {
+		mapError(w, errValidation)
+		return
+	}
+
+	digest := a.verification.Digest(req.ChallengeID, req.Code)
+	challenge, err := a.store.VerifyEmailChallenge(r.Context(), req.ChallengeID, digest)
+	if err != nil {
+		mapError(w, err)
+		return
+	}
+	registrationToken, expiresAt, err := a.tokens.CreateRegistrationToken(challenge.Email, challenge.ID)
+	if err != nil {
+		mapError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, VerifyEmailResponse{RegistrationToken: registrationToken, ExpiresAt: expiresAt})
 }
 
 func (a *App) handleLogin(w http.ResponseWriter, r *http.Request) {

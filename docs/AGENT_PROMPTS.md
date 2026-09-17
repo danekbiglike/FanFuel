@@ -482,4 +482,3 @@ Checklist:
 - mobile-first;
 - partner disclosure;
 - MVP scope respected.
-

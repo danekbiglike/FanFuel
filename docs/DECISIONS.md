@@ -4,7 +4,7 @@ ADR-журнал FanFuel. Новые решения, влияющие на ма�
 
 ## ADR-0001: Monorepo
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -30,7 +30,7 @@ FanFuel включает web, admin, OBS widgets, Go services, shared UI, SDK, i
 
 ## ADR-0002: Next.js для web
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -56,7 +56,7 @@ Vite SPA, Remix, отдельный SSR backend.
 
 ## ADR-0003: Vite для OBS widgets
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -81,7 +81,7 @@ Next.js route inside web app, vanilla JS widgets.
 
 ## ADR-0004: Go backend
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -106,7 +106,7 @@ Node.js/NestJS, Python/FastAPI, JVM.
 
 ## ADR-0005: Go WebSocket gateway
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -132,7 +132,7 @@ WebSocket inside API, managed realtime provider.
 
 ## ADR-0006: PostgreSQL
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -157,7 +157,7 @@ MySQL, CockroachDB, managed document DB.
 
 ## ADR-0007: Redis
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -182,7 +182,7 @@ RabbitMQ, NATS, Kafka, Postgres-only queue.
 
 ## ADR-0008: S3/R2-compatible storage
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -208,7 +208,7 @@ RabbitMQ, NATS, Kafka, Postgres-only queue.
 
 ## ADR-0009: Payment provider abstraction
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -234,7 +234,7 @@ RabbitMQ, NATS, Kafka, Postgres-only queue.
 
 ## ADR-0010: Русскоязычный продукт с i18n
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -259,7 +259,7 @@ Default locale `ru`, supported locales `ru/en`, все пользователь�
 
 ## ADR-0011: Docker-based deployment
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -284,7 +284,7 @@ Bare metal install, Kubernetes с первого дня, managed PaaS.
 
 ## ADR-0012: npm workspaces для frontend monorepo
 
-Дата: 2026-05-08  
+Дата: 2026-05-08
 Статус: accepted
 
 ### Контекст
@@ -310,8 +310,8 @@ pnpm workspaces, Yarn workspaces, Turborepo с отдельным package manage
 
 ## ADR-0013: JWT access token для v0.1 Auth
 
-Дата: 2026-05-08  
-Статус: accepted
+Дата: 2026-05-08
+Статус: accepted; registration role policy superseded by ADR-0022
 
 ### Контекст
 
@@ -319,7 +319,7 @@ pnpm workspaces, Yarn workspaces, Turborepo с отдельным package manage
 
 ### Решение
 
-Использовать JWT access token в `Authorization: Bearer <token>` с HS256, `JWT_SECRET`, `ACCESS_TOKEN_TTL_MINUTES` и bcrypt password hashing. Public API регистрации принимает только `buyer`, `streamer`, `seller`; роль `admin` через публичный role intent не выдаётся. Dev bootstrap admin разрешён только вне production через `ADMIN_BOOTSTRAP_EMAIL`, если admin role ещё отсутствует.
+Использовать JWT access token в `Authorization: Bearer <token>` с HS256, `JWT_SECRET`, `ACCESS_TOKEN_TTL_MINUTES` и bcrypt password hashing. Исходная политика role intent заменена ADR-0022: публичная регистрация создаёт только базовую роль `buyer`. Роль `admin` через публичную регистрацию не выдаётся. Dev bootstrap admin разрешён только вне production через `ADMIN_BOOTSTRAP_EMAIL`, если admin role ещё отсутствует.
 
 ### Последствия
 
@@ -337,7 +337,7 @@ Server-side sessions, JWT access + refresh сразу, OAuth-first подход.
 
 ## ADR-0014: Mock payment callback и Redis events для Donate MVP
 
-Дата: 2026-05-09  
+Дата: 2026-05-09
 Статус: accepted
 
 ### Контекст
@@ -365,7 +365,7 @@ Donate flow можно проверять локально и на VM без rea
 
 ## ADR-0015: Semantic tokens и `data-theme` для UI
 
-Дата: 2026-05-09  
+Дата: 2026-05-09
 Статус: accepted
 
 ### Контекст
@@ -404,7 +404,7 @@ FanFuel должен поддерживать зрелый creator-commerce UI, 
 
 ## ADR-0016: Mock safe deal для Marketplace MVP
 
-Дата: 2026-05-09  
+Дата: 2026-05-09
 Статус: accepted
 
 ### Контекст
@@ -436,3 +436,227 @@ Marketplace можно тестировать end-to-end локально: ка�
 - `docs/API_PLAN.md`
 - `docs/DOMAIN_MODEL.md`
 - `docs/TASKS.md`
+
+## ADR-0017: Skin-ready UI без изменения структуры страниц
+
+Дата: 2026-05-15
+Статус: proposed
+
+### Контекст
+
+К `v0.3.5` FanFuel должен поддержать разные визуальные скины сайта и публичных страниц, но без риска сломать навигацию, i18n, mobile layout, доступность и рабочие кабинеты. Одновременно профиль пользователя нужно отделить от настроек автора/продавца, чтобы role-specific Studio/Seller flows не росли внутри `/me/profile`.
+
+### Решение
+
+Ввести безопасный слой `DesignSkinPreset` поверх существующих semantic tokens:
+
+- скин меняет только allowlisted token overrides, density, radius scale, shadow/elevation и preview assets;
+- скин не меняет layout slots, route structure, порядок ключевых блоков, i18n keys и бизнес-статусы;
+- произвольный CSS/HTML/JS запрещён;
+- public profile, creator store и widget preview используют один layout contract и проверяются на `ru`/`en`, light/dark и mobile;
+- `/me/profile` становится user account hub, а настройки автора, витрины и виджетов живут в `/studio/*`, продавца — в `/seller/*`.
+
+### Последствия
+
+Можно развивать визуальную вариативность без ветвления страниц и без кастомных шаблонов, которые сложно поддерживать. Нужны schema validation, visual QA matrix и дисциплина i18n для длинных строк. User role lifecycle требует owner-only endpoints, confirmation и audit log.
+
+### Альтернативы
+
+- Разрешить произвольные темы/CSS для авторов.
+- Оставить один глобальный дизайн без skin layer.
+- Дать авторам редактировать layout drag-and-drop уже в MVP.
+
+### Связанные документы
+
+- `docs/roadmap/v0.3.5-universal-profile-studio.md`
+- `docs/DESIGN_SYSTEM.md`
+- `docs/THEMING.md`
+- `docs/API_PLAN.md`
+- `docs/DOMAIN_MODEL.md`
+- `docs/UI_UX_TRACKER.md`
+
+## ADR-0018: Studio statistics и bot events как provider-agnostic activity layer
+
+Дата: 2026-05-15
+Статус: proposed
+
+### Контекст
+
+К `v0.3.5` Studio должна получить статистику дохода, последние события, подписки на каналы YouTube/Twitch/Telegram через ботов, покупки партнёрских товаров и настройки донатов. Эти функции затрагивают деньги, realtime, внешние платформы и безопасность токенов, но не должны раньше времени превращаться в payouts, ledger или provider-specific интеграцию.
+
+### Решение
+
+Ввести отдельный activity/analytics слой Studio:
+
+- `CreatorActivityEvent` хранит unified feed событий без raw secrets;
+- `CreatorMetricSnapshot` хранит агрегаты для графиков в minor units и не является балансом;
+- `CreatorChannelIntegration` хранит masked status внешних каналов, а секреты остаются backend-side encrypted references;
+- bot ingestion идёт через signed service-to-service endpoint или trusted queue boundary;
+- `/studio/statistics` показывает аналитику по событиям, а не доступные к выводу деньги;
+- `/studio/events` показывает донаты, channel subscriptions и partner purchases с дедупликацией.
+
+### Последствия
+
+Studio может расти как рабочий центр автора без смешивания с платежным ledger и без привязки к одному внешнему сервису. Перед production-подключением ботов нужны platform/security review, rate limits, retry/dead-letter strategy и policy по OAuth scopes. UI должен осторожно формулировать "доход" и не обещать выплату.
+
+### Альтернативы
+
+- Читать статистику напрямую из payment/order таблиц на каждом запросе.
+- Хранить YouTube/Twitch/Telegram payload как публичные события без отдельного masking слоя.
+- Отложить все события Studio до полноценной BI/analytics системы.
+
+### Связанные документы
+
+- `docs/roadmap/v0.3.5-universal-profile-studio.md`
+- `docs/API_PLAN.md`
+- `docs/DOMAIN_MODEL.md`
+- `docs/PAYMENTS.md`
+- `docs/SECURITY.md`
+- `docs/UI_UX_TRACKER.md`
+
+## ADR-0019: FanFuel Aurora как базовый visual refresh перед v0.3.5
+
+Дата: 2026-05-16
+Статус: proposed
+
+### Контекст
+
+Текущий public/marketplace UI использует тёмную основу, яркий оранжевый акцент и плотные бейджи. Для creator-commerce продукта это несёт риск нежелательного считывания как adult/betting/casino/старый skin-shop и может мешать доверию к покупкам, safe deal и поддержке автора. Перед расширением профиля, Studio, витрины и виджетов нужно обновить уже существующий визуальный слой.
+
+### Решение
+
+Принять `FanFuel Aurora` как internal design direction для `v0.3.5`:
+
+- primary brand: violet/cyan через semantic tokens;
+- support action: emerald;
+- warm/orange: только редкий статусный акцент для hit/warning/popular;
+- deep navy/graphite surfaces вместо почти чёрного визуального монолита;
+- glass material только для allowlisted слоёв: topbar, search, tabs, modals/drawers, hero preview, sticky checkout, widget preview;
+- public pages могут быть эмоциональнее, dashboards/admin остаются плотными и рабочими;
+- первый блок задач `v0.3.5` обновляет текущие экраны, затем идут skin-ready/profile/studio задачи.
+
+### Последствия
+
+Новые страницы `v0.3.5` будут строиться поверх единой базы, а не усиливать старый orange/black стиль. Потребуются token migration, contrast QA, screenshot QA в `ru/en`, light/dark и mobile. Нельзя возвращать orange как primary без нового ADR/design review.
+
+### Альтернативы
+
+- Оставить текущий orange/black визуал и строить Studio поверх него.
+- Сделать весь UI glassmorphism.
+- Разрешить авторам произвольный CSS/HTML для “скинов”.
+- Сменить внешний бренд/название продукта вместо аккуратного visual refresh.
+
+### Связанные документы
+
+- `docs/DESIGN_SYSTEM.md`
+- `docs/THEMING.md`
+- `docs/UI_RULES.md`
+- `docs/UX_RULES.md`
+- `docs/DESIGN_AUDIT.md`
+- `docs/tasks/v0.3.5/FF-0348.md`
+- `docs/tasks/v0.3.5/FF-0349.md`
+- `docs/tasks/v0.3.5/FF-0350.md`
+
+## ADR-0020: Отдельная VM приложения и отдельный edge nginx
+
+Дата: 2026-09-14. Статус: принято для задачи FF-0009.
+
+### Контекст
+
+Пользователь запросил новую VM FanFuel на диске D: и затем уточнил, что nginx будет размещён на другой VM. Существующие VM других проектов не используются для приложения.
+
+### Решение
+
+- Отдельная Ubuntu 24.04 VM, Docker Compose и постоянные volumes приложения.
+- `docker-compose.vm.yml` применяется после base/dev файлов; Next.js запускается через `next start`, Vite-приложения собираются в статические файлы.
+- `APP_ENV=production` отключает dev bootstrap администратора и включает точный CORS allowlist. Это технический режим запуска, а не признание готовности платежей к production.
+- Секреты генерируются отдельно на VM, `.env` имеет права 0600; SSH использует отдельный ключ вне Git.
+- Базы, storage API/console, worker и admin привязаны к loopback. Web/API/WS/widget публикуются на LAN-адресе VM для будущего edge.
+- `DOCKER-USER` ограничивает вход из LAN к прикладным контейнерам. До получения адреса nginx VM разрешена локальная подсеть; затем правило следует сузить до адреса edge и необходимых административных источников. UFW сам по себе не защищает published Docker ports.
+- nginx/TLS/внешние пробросы остаются отдельным шагом по просьбе пользователя. Созданный до уточнения HTTP bootstrap внутри FanFuel VM далее не изменяется и не считается финальным edge.
+
+### Последствия
+
+- В публичной конфигурации edge потребуются TLS, проксирование HTTP/WebSocket, ограничения auth/API и запрет публикации mock callbacks/admin API.
+- Реальные платежи, выплаты и legal readiness остаются за пределами задачи. `LEGAL_REVIEW_REQUIRED` и provider review сохраняются.
+- Нужно закрепить LAN-адрес VM через DHCP reservation; фактические адреса и SSH-доступы записаны только в игнорируемом `docs/SERVER_ACCESS.md`.
+- Перезапуск контейнеров обеспечен `unless-stopped`, firewall восстанавливается systemd. Автозапуск самой VM при старте Windows отдельно не настраивается.
+
+Дополнение FF-0009: недоступный Docker Hub образ MinIO заменён только в VM override на официальный Quay image с закреплённым digest. Storage не публикуется в LAN; обновление/поддержка object storage требует отдельного решения перед публичным использованием файлов.
+
+## ADR-0021: Публичный Host/SNI edge и TLS на VM приложения
+
+Дата: 2026-09-14. Статус: принято. TASK-ID: FF-0010. Уточняет ADR-0020.
+
+- Общий edge сохраняет TLS passthrough для LibreChat; добавлены только домены FanFuel в Host/SNI maps.
+- TCP 80/443 роутера направлены на edge; новые SSH-пробросы не создаются. Остальные правила роутера не меняются.
+- HTTPS завершается на FanFuel VM, где установлен certbot и достаточно места для него. На маленьком системном диске Alpine edge certbot не используется.
+- Все Docker published ports FanFuel возвращены на loopback; UFW принимает 80/443 только от edge. IP приложения закреплён в DHCP.
+- Let's Encrypt сертификат покрывает основной и www-домен. Обновление выполняет certbot.timer с nginx reload hook.
+- Public admin API и mock callbacks запрещены на nginx; реальные платежи и legal readiness этим не включаются.
+- Ограничение принятой схемы: исходный TLS client IP до приложения не передаётся, лимиты nginx агрегируются по IP edge. Улучшение требует PROXY protocol или изменения места TLS termination; в текущей задаче работающий LibreChat transport не меняется.
+
+## ADR-0022: Базовая регистрация без role intent и имени платформы
+
+Дата: 2026-09-14. Статус: принято. TASK-ID: UX-TASK-032.
+
+### Контекст
+
+Регистрация просила имя на платформе и роль для старта. Это смешивало три разных значения: имя для интерфейса, публичный ник/название витрины и будущий username, а также заставляло выбирать роль до первого опыта в продукте. Backend по role intent сразу создавал creator/seller profile.
+
+### Решение
+
+- `POST /api/v1/auth/register` принимает только `email`, `password` и optional locale/time zone.
+- Публичная регистрация всегда создаёт базовый аккаунт с ролью `buyer`.
+- `display_name` и `role_intent` удалены из request contract; старые клиенты должны обновиться.
+- Профиль создаётся с временным display name и `name_confirmed_at = null`.
+- Следующий обязательный шаг — `/auth/name`; он сохраняет имя через `PATCH /api/v1/me/profile`.
+- Текущему пользователю API возвращает `profile_name_confirmed_at`; публичные profile responses не раскрывают этот маркер.
+- Режимы автора/продавца включаются отдельными явными сценариями после базового аккаунта.
+- Существующие профили в миграции помечаются подтверждёнными, чтобы не заставлять текущих пользователей повторять шаг.
+
+### Последствия
+
+- Это локальное pre-beta breaking change публичного auth contract; оно зафиксировано здесь и в `docs/API_PLAN.md`.
+- После подключения email verification шаг имени должен идти после реального подтверждения email, но смысл поля не меняется.
+- Имя платформы, публичный ник/название витрины и username остаются отдельными значениями и не резервируют друг друга.
+
+## ADR — UX-TASK-031: создание авторского черновика после входа
+
+Решение: публичная анкета хранит только название/описание в sessionStorage; серверное создание выполняется после авторизации и явного сохранения. Фиксированный auth-return исключает внешний redirect. POST onboarding выдаёт только роль streamer своему пользователю (как существующая регистрация), блокирует повторное создание блокировкой строки пользователя, не изменяет существующие страницы и пишет audit log. Публикация отдельная.
+
+UX-TASK-031: обнаружена выдача draft авторов публичными GET и допустимость draft в разрешении адресата доната. В связи с созданием приватных черновиков разрешён только published; PublicProfile скрывает непубличный creator_profile. Provider/суммы/проведение платежей не меняются. Изменение доступа намеренное, чтобы черновик не был публичным до публикации.
+
+## ADR-0023: UX авторизации без публичного определения наличия аккаунта
+
+Дата: 2026-09-15. Статус: принято. TASK-ID: UX-TASK-033.
+
+Сохраняем email/password и фиксированные переходы marketplace/name/creator. Не вводим endpoint проверки существования пользователя, вход по display_name/slug или телефону. Будущая автоматическая развилка требует подтверждения владения email и отдельного backend/security проекта; обоснование и источники — `docs/AUTH_UX_REVIEW.md`.
+
+Пароль не сохраняется при смене режима, email живёт только в памяти auth layout. Текущая политика JWT/localStorage не меняется. Ошибка сети при проверке сессии не является доказательством невалидного токена; очищать его можно при unauthorized либо явном выборе другого аккаунта. Проверка регистрации на клиенте учитывает фактический предел bcrypt в 72 UTF-8 байта без обрезания пароля; серверная политика требует отдельного выравнивания, см. DESIGN_AUDIT.
+
+## ADR-0024: Подтверждение email до регистрации и единый identifier-first flow
+
+Дата: 2026-09-17. Статус: принято. TASK-ID: UX-TASK-035. Заменяет решение ADR-0023 о запрете публичной развилки.
+
+### Контекст
+
+Пользователь явно запросил обязательное подтверждение почты и объединение отдельных страниц входа/регистрации. Текущий backend создаёт активный аккаунт сразу по email/password и не отправляет письма. Телефон и account username пока отсутствуют в домене.
+
+### Решение
+
+- Канонический маршрут авторизации — `/auth`; старые `/auth/login` и `/auth/register` выполняют совместимый redirect.
+- `POST /auth/identify` определяет только существование email и возвращает `login` либо `register`.
+- Новый аккаунт не создаётся до подтверждения одноразового кода.
+- Код живёт 10 минут, имеет максимум 5 попыток, resend cooldown 60 секунд, хранится только как HMAC digest и инвалидирует предыдущий challenge.
+- После проверки кода выдаётся короткоживущий registration JWT, привязанный к email и challenge. Challenge помечается завершённым в транзакции создания пользователя, поэтому token нельзя применить повторно.
+- Письма отправляются через `EmailSender`; первая реализация использует SMTP из environment, а dev stack — Mailpit. Синхронная отправка из API принята как временный MVP; перенос в worker/queue нужен до существенной нагрузки.
+- Аккаунты, существующие до миграции, получают `email_verified_at` из `created_at`, чтобы rollout не блокировал текущий вход.
+
+### Security-компромисс
+
+Ответ `identify` раскрывает факт существования аккаунта. Это осознанно принято ради парольного входа без OTP на каждом посещении. Ограничения: rate limit по IP и identifier, одинаковый HTTP status, отсутствие профиля/статуса/ролей в ответе. Более строгий будущий вариант должен подтверждать владение email до выбора режима либо использовать единый OTP/passkey flow.
+
+### Последствия
+
+Контракт регистрации меняется до public beta: вместо email требуется registration token. Нужны миграция challenge-таблицы, SMTP readiness, мониторинг доставки и cleanup истёкших challenge. Телефон/username не добавляются этой задачей.

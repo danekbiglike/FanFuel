@@ -123,9 +123,12 @@ Go REST API отвечает за:
 - signed upload/download URLs;
 - audit logs.
 
-Текущее состояние `v0.1`:
+Текущее состояние auth (`v0.3.5`):
 
 - auth реализован через JWT access token, bcrypt и `Authorization: Bearer`;
+- `/api/v1/auth/identify` выбирает парольный вход для существующего email или подтверждение нового email;
+- новый аккаунт создаётся только по короткоживущему registration token после одноразового email-кода; verification challenge хранит HMAC digest, срок и лимиты попыток;
+- отправка кода идёт через `EmailSender` и SMTP-конфигурацию из environment; синхронная отправка в API является временным MVP-решением, перенос retries в worker запланирован при росте нагрузки;
 - роли `buyer`, `streamer`, `seller`, `admin` проверяются на backend;
 - public registration не выдаёт `admin`;
 - dev bootstrap admin работает только вне production через `ADMIN_BOOTSTRAP_EMAIL`;
@@ -159,7 +162,9 @@ handlers -> services/usecases -> repositories -> database
 - отправка email/notification;
 - malware/virus review placeholder;
 - cleanup временных файлов;
-- recalculation analytics snapshots.
+- recalculation analytics snapshots;
+- ingestion событий от bot/integration слоя YouTube, Twitch и Telegram;
+- пересчёт `CreatorMetricSnapshot` для Studio statistics.
 
 Очереди можно начать с Redis, но интерфейс должен позволять миграцию на отдельную очередь позже.
 
@@ -169,6 +174,8 @@ handlers -> services/usecases -> repositories -> database
 
 - OBS alerts;
 - donation goal updates;
+- Studio activity feed updates;
+- creator metric snapshot updates;
 - marketplace purchase events;
 - order status updates;
 - dispute updates;
@@ -301,6 +308,8 @@ FanFuel использует shared design system из `packages/ui`.
 - authenticated choice хранится в `user_preferences` и синхронизируется через `/api/v1/me/preferences`;
 - OBS widgets читают тему отдельно, включая URL override `?theme=light|dark|system|transparent`;
 - все user-facing строки ThemeSwitcher и settings идут через `packages/i18n`.
+
+`v0.3.5` добавляет план skin presets поверх semantic tokens: скин может менять только allowlisted token overrides, плотность, радиусы, тени и preview assets. Скин не меняет route structure, layout slots, i18n keys, permission model или status semantics.
 
 Подробности:
 
