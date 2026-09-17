@@ -32,9 +32,9 @@ Thumbs.db
 *.log
 tmp/
 temp/
+/.tmp/
 
 # Docker / runtime
 postgres-data/
 redis-data/
 storage-data/
-
