@@ -1,0 +1,22 @@
+# Локальный HTTP-доступ к статическому playground при недоступном публичном маршруте.
+# Порт не пробрасывается на роутере; вход только с домашней подсети.
+server {
+    listen __EDGE_LAN_IP__:8085;
+    server_name _;
+    server_tokens off;
+
+    allow 192.168.0.0/24;
+    deny all;
+
+    location / {
+        proxy_pass https://__FANFUEL_VM_IP__:443;
+        proxy_set_header Host playground.fanfuel.ru;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_ssl_server_name on;
+        proxy_ssl_name playground.fanfuel.ru;
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/cert.pem;
+        proxy_ssl_verify_depth 3;
+    }
+}

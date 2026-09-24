@@ -1,0 +1,31 @@
+main { max-width: 2200px; }
+header a { color: var(--accent); }
+header a + a { margin-left: 18px; }
+.controls label { font-size: 14px; }
+select { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+input[type="file"] { color: var(--text); max-width: 210px; }
+select:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.study-status { color: var(--muted); min-height: 24px; }
+.study-compare { display: flex; gap: 18px; overflow-x: auto; align-items: flex-start; padding-bottom: 16px; }
+.study-compare figure { margin: 0; flex: none; }
+.study-compare figcaption { margin-bottom: 8px; color: var(--muted); font-size: 14px; }
+.study-compare img, .study-compare canvas { display: block; max-width: none; background: var(--art); border: 1px solid var(--border); border-radius: 12px; }
+.study-compare.large { flex-direction: column; }
+#contour-seed { width: 100px; padding: 8px; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; }
+.pen-panel { margin: 28px 0; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--panel); }
+.pen-panel h2 { margin: 0 0 8px; font-size: 22px; }
+.pen-panel > p { color: var(--muted); line-height: 1.5; }
+#contour-pen-canvas { width: min(100%, 512px); height: auto; aspect-ratio: 8 / 5; background: var(--art); border: 1px solid var(--border); border-radius: 8px; touch-action: none; cursor: crosshair; }
+.soft-panel { margin: 28px 0; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--panel); }
+.soft-panel h2 { margin: 0 0 8px; font-size: 22px; }
+.soft-panel > p { color: var(--muted); line-height: 1.5; }
+.soft-stage { position: relative; width: 100%; aspect-ratio: 72 / 37; background: var(--art); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.soft-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; pointer-events: none; }
+.soft-hit { position: absolute; z-index: 1; padding: 0; margin: 0; border: 0; border-radius: 45%; background: transparent; cursor: grab; touch-action: none; }
+.soft-hit:active { cursor: grabbing; }
+.soft-hit:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.soft-card { position: absolute; top: 55%; width: 23%; height: 31%; border: 2px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--text); padding: 12px; font-size: 15px; }
+.soft-card-a { left: 28%; }
+.soft-card-b { left: 63%; top: 43%; }
+.soft-floor { position: absolute; inset: auto 0 0; height: 3%; background: var(--border); }
+@media (max-width: 600px) { .soft-card { padding: 5px; font-size: 11px; } }

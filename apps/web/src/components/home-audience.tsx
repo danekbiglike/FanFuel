@@ -76,10 +76,10 @@ function CreatorPresentation() {
           <p className="ff-role-lead">{homeText("creator.lead")}</p>
           <div className="ff-role-actions">
             <a className="ff-button ff-button-primary" href="/create">
-              {homeText("creator.action")} <Arrow />
+              {homeText("creator.action")}
             </a>
             <a className="ff-role-text-link" href="#creator-mechanic">
-              {homeText("creator.secondary")} <span aria-hidden="true">↓</span>
+              {homeText("creator.secondary")}
             </a>
           </div>
           <p className="ff-role-availability">
@@ -120,7 +120,6 @@ function CreatorPresentation() {
             <div key={kind}>
               <DiscoveryArt kind={kind as DiscoveryArtKind} />
               <strong>{homeText(`creator.control${index + 1}`)}</strong>
-              <Arrow />
             </div>
           ))}
         </div>
@@ -161,7 +160,7 @@ function CreatorStoreConcept() {
           <span />
         </div>
         <div className="ff-store-concept-profile">
-          <span aria-hidden="true">✦</span>
+          <span aria-hidden="true">F</span>
           <div>
             <strong>{homeText("creator.storeLabel")}</strong>
             <p>{homeText("creator.storeSubtitle")}</p>
@@ -205,10 +204,10 @@ function SellerPresentation() {
           <p className="ff-role-lead">{homeText("seller.lead")}</p>
           <div className="ff-role-actions">
             <a className="ff-button ff-button-primary" href="/auth">
-              {homeText("seller.action")} <Arrow />
+              {homeText("seller.action")}
             </a>
             <a className="ff-role-text-link" href="/marketplace/catalog">
-              {homeText("seller.secondary")} <Arrow />
+              {homeText("seller.secondary")}
             </a>
           </div>
         </div>
@@ -311,27 +310,11 @@ function RoleClosing({ audience }: { audience: "creator" | "seller" }) {
           className="ff-button ff-button-primary"
           href={audience === "creator" ? "/create" : "/auth"}
         >
-          {homeText(`${audience}.action`)} <Arrow />
+          {homeText(`${audience}.action`)}
         </a>
         <small>{homeText("shared.testNote")}</small>
       </div>
     </section>
-  );
-}
-
-export function Arrow() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      aria-hidden="true"
-    >
-      <path d="M5 12h14m-6-6 6 6-6 6" />
-    </svg>
   );
 }
 

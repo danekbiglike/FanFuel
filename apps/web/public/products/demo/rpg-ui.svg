@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" fill="none">
+  <rect width="960" height="600" fill="#252C2A"/>
+  <path d="M0 480c185-55 308-52 470 4 155 53 310 49 490-14v130H0V480Z" fill="#303B36"/>
+  <rect x="57" y="72" width="405" height="405" rx="24" fill="#D9DFD0"/>
+  <rect x="73" y="88" width="373" height="373" rx="16" fill="#F4F0E5"/>
+  <rect x="95" y="109" width="329" height="47" rx="8" fill="#26362D"/>
+  <circle cx="120" cy="132" r="7" fill="#C9FA39"/><circle cx="145" cy="132" r="7" fill="#95B9A1"/>
+  <rect x="96" y="175" width="146" height="215" rx="10" fill="#C8D9C0"/>
+  <path d="M129 281c0-31 24-55 54-55s54 24 54 55v96H129v-96Z" fill="#526F5A"/>
+  <path d="m139 282 44-58 44 58-44 25-44-25Z" fill="#C9FA39"/>
+  <rect x="261" y="176" width="162" height="18" rx="9" fill="#B3BCAF"/><rect x="261" y="209" width="126" height="12" rx="6" fill="#D2D3C8"/>
+  <rect x="261" y="248" width="162" height="58" rx="10" fill="#E5E8DC"/><rect x="275" y="262" width="36" height="32" rx="6" fill="#C9FA39"/><rect x="322" y="263" width="84" height="8" rx="4" fill="#778679"/><rect x="322" y="280" width="61" height="7" rx="3" fill="#B1B9AD"/>
+  <rect x="261" y="322" width="162" height="58" rx="10" fill="#E5E8DC"/><circle cx="294" cy="351" r="17" fill="#78927B"/><rect x="322" y="340" width="84" height="8" rx="4" fill="#778679"/><rect x="322" y="357" width="61" height="7" rx="3" fill="#B1B9AD"/>
+  <text x="520" y="130" fill="#C9FA39" font-family="Arial,sans-serif" font-size="20" font-weight="700" letter-spacing="3">INDIE RPG  /  UI KIT</text>
+  <text x="515" y="248" fill="#F4F0E5" font-family="Arial,sans-serif" font-size="82" font-weight="800" letter-spacing="-4">SMALL</text>
+  <text x="515" y="333" fill="#F4F0E5" font-family="Arial,sans-serif" font-size="82" font-weight="800" letter-spacing="-4">WONDERS</text>
+  <path d="M520 360c84 10 193 7 360-3" stroke="#C9FA39" stroke-width="9" stroke-linecap="round"/>
+  <text x="520" y="414" fill="#B6C0B4" font-family="Arial,sans-serif" font-size="23">Panels, dialogs, item frames</text>
+  <text x="520" y="450" fill="#B6C0B4" font-family="Arial,sans-serif" font-size="23">SVG + PNG · editable parts</text>
+  <circle cx="866" cy="99" r="31" fill="#C9FA39"/><path d="m851 99 10 10 21-23" stroke="#26362D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

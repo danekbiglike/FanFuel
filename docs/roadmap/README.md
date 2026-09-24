@@ -16,7 +16,8 @@
 - [v0.1 — Auth + Profiles](v0.1-auth-profiles.md) — implemented.
 - [v0.2 — Donate MVP](v0.2-donate-mvp.md) — implemented.
 - [v0.3 — Marketplace MVP](v0.3-marketplace-mvp.md) — implemented для mock/local MVP.
-- [v0.3.5 — Aurora Refresh + Universal Profile + Studio Skins](v0.3.5-universal-profile-studio.md) — planned.
+- [v0.3.5 — Marketplace-first + Universal Profile + Studio](v0.3.5-universal-profile-studio.md) — planned; начинается с жёсткого контракта главной.
+- [Experience/Brand — живой UI, маскот и FanFuel World](experience-brand-world.md) — последовательный продуктовый трек после стабилизации главной.
 - [v0.4 — Creator Store + Partners](v0.4-creator-store-partners.md) — planned.
 - [v0.5 — Real Payment Provider Integration](v0.5-real-payment-provider-integration.md) — planned.
 - [v0.6 — Seller Balance + Payouts](v0.6-seller-balance-payouts.md) — planned.

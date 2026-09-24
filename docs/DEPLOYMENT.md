@@ -387,6 +387,10 @@ sh infra/scripts/migrate.sh docker-compose.yml
 
 nginx на VM приложения обращается к loopback upstream: web `3000`, API `8080`, WebSocket `8081` (путь `/ws/alerts`), widget `5173`. Виджет собран с base `/widget/`; nginx удаляет этот префикс при проксировании в widget container. Админка на loopback `3001` доступна через SSH tunnel. Edge принимает публичные TCP 80/443 и передаёт их на 80/443 VM приложения по Host/SNI. Адреса и ключи находятся в игнорируемом `docs/SERVER_ACCESS.md`.
 
+Для публичной доступности недостаточно работающего edge и проброса портов на домашнем роутере. Если WAN роутера имеет частный адрес, входящие TCP 80/443 должен направлять вышестоящий NAT провайдера (услуга внешнего IP / Static NAT) либо провайдер должен выдать маршрутизируемый публичный WAN-адрес. DNS A-запись указывает на внешний адрес провайдера и сама по себе не создаёт входящий маршрут. Проверять публикацию нужно из независимой внешней сети; HTTPS 200 при прямом обращении к edge из LAN подтверждает только локальную цепочку. 24.09.2026 публичный доступ восстановлен после переподключения моста VirtualBox; обе VM снова видят роутер. Детали в `docs/HANDOFF.md`.
+
+Для наблюдения за повторением сбоя Windows-задание `FanFuel - Monitor VM Bridge` каждые две минуты запускает `C:\ProgramData\FanFuel\monitor-vm-bridge.ps1` (исходник: `infra/scripts/monitor-vm-bridge.ps1`). Оно пишет `C:\ProgramData\FanFuel\vm-bridge-state.json`; конфигурация с локальными адресами и путями к ключам находится рядом в `vm-bridge-monitor.json` и не хранится в репозитории. Статусы: `healthy`, `degraded` после первой неудачи, `alert` после второй. Автоматизация Codex с ID `fanfuel` читает состояние раз в десять минут и уведомляет об изменениях. Монитор только наблюдает; ручное восстановление описано в `docs/HANDOFF.md`.
+
 `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_WIDGET_BASE_URL`, `VITE_API_BASE_URL` и `VITE_WS_BASE_URL` передаются также во время сборки. Изменение публичного домена требует повторной сборки frontend. До настройки отдельного nginx/TLS возможна проверка HTTP upstream, но браузерные обращения к публичному HTTPS API ещё не работают.
 
 Для Docker ingress запускать от root:
@@ -395,7 +399,7 @@ nginx на VM приложения обращается к loopback upstream: we
 sh infra/scripts/vm-firewall.sh <LAN_INTERFACE> <ALLOWED_SOURCE_CIDR>
 ```
 
-На созданной VM эта команда закреплена в `fanfuel-firewall.service` после Docker; разрешённый источник сужен до edge. UFW разрешает 80/443 только от edge, SSH доступен через NAT forwarding Windows. DHCP-адрес приложения закреплён на роутере в FF-0010.
+На созданной VM эта команда закреплена в `fanfuel-firewall.service` после Docker; разрешённый источник сужен до edge. UFW разрешает 80/443 только от edge, SSH доступен через NAT forwarding Windows. В FF-0010 адрес приложения был закреплён на роутере по DHCP; после потери аренды 24.09.2026 интерфейс `enp0s8` переведён на статический `192.168.0.108/24`, маршрут через `192.168.0.1` с метрикой 100. `enp0s3` оставлен на NAT DHCP как независимый SSH-доступ. Конфигурация находится в `/etc/netplan/50-cloud-init.yaml`, исходный файл сохранён рядом с суффиксом `.before-20260924-dhcp-loss`. В `/etc/cloud/cloud.cfg.d/99-fanfuel-network.cfg` отключено только управление сетью со стороны cloud-init, чтобы оно не перезаписало netplan при перезагрузке. Резервирование адреса на роутере оставлено для защиты от конфликта.
 
 В FF-0010 пользователь возобновил настройку edge и роутера. `infra/nginx/fanfuel.conf` остаётся HTTP bootstrap, а `infra/nginx/fanfuel-tls.conf` — итоговая конфигурация на VM приложения. Существующая TLS-маршрутизация LibreChat на edge сохранена.
 
@@ -415,3 +419,19 @@ Edge использует TCP passthrough для HTTPS, поэтому серт�
 ### Образ MinIO для VM
 
 При запуске FF-0009 исходный `minio/minio:latest` вернул `pull access denied`. VM override использует доступный образ из `quay.io/minio/minio`, закреплённый по digest; общий dev Compose не изменён. Реестр указан в [официальной Docker-инструкции MinIO](https://github.com/minio/minio/blob/master/docs/docker/README.md). Storage остаётся на loopback. Перед публичным использованием storage отдельно проверить поддержку и обновления выбранной версии.
+
+### Статическая тестовая главная Ойли — UX-TASK-044
+
+`playground.fanfuel.ru` использует тот же публичный edge и FanFuel VM. Edge направляет Host/SNI на её порты 80/443. На VM приложения отдельный nginx vhost отдаёт статические файлы, без нового контейнера и прокси к Next.js. Источники конфигурации: `infra/nginx/fanfuel-playground-http.conf`, `infra/nginx/fanfuel-playground-tls.conf`, `infra/scripts/enable-playground-edge.sh`. Текущая сборка и инструкции разработки: `docs/PLAYGROUND.md`.
+
+Когда входящий Static NAT провайдера недоступен, edge имеет отдельный HTTP-вход `http://<EDGE_LAN_IP>:8085/` только к статическому playground. Скрипт `infra/scripts/enable-playground-lan.sh` подставляет LAN-адреса в `infra/nginx/fanfuel-playground-lan.conf.template`, устанавливает server block, включает только его файл в nginx, проверяет конфигурацию и сохраняет резервную копию для отката. Порт привязан к LAN-адресу edge, ограничен домашней подсетью и не пробрасывается роутером; соединение edge → FanFuel VM идёт по HTTPS с проверкой сертификата. iPhone не смог открыть прямой адрес VM в Wi-Fi, поэтому фактический адрес для телефона — `http://<WINDOWS_LAN_IP>:8085/`. На Windows из корня репозитория должен работать `node infra/scripts/playground-lan-proxy.mjs <WINDOWS_LAN_IP> 8085 <EDGE_LAN_IP> 8085`. После перезагрузки Windows этот процесс нужно запустить снова. Не размещать на HTTP-входе авторизацию, API, платежи или личные данные. Публичные 80/443 и их маршруты не меняются.
+
+Первичное включение: проверить A-запись `playground.fanfuel.ru`; разместить HTTP-конфигурацию в `/etc/nginx/sites-available/fanfuel-playground`, включить symlink в `sites-enabled`, выполнить `nginx -t` и reload. На edge выполнить `sudo sh enable-playground-edge.sh` из заранее скопированного файла. После публичной проверки HTTP-01 выпустить отдельный сертификат на FanFuel VM:
+
+```sh
+sudo certbot certonly --webroot -w /var/www/letsencrypt \
+  --non-interactive --agree-tos --cert-name playground.fanfuel.ru \
+  -d playground.fanfuel.ru
+```
+
+Собрать `npm run build:playground -w @fanfuel/pencil-engine`, передать **только** `packages/pencil-engine/dist-playground` в новый `/var/www/fanfuel-playground/releases/<id>`, проверить права чтения nginx. Сменить `/var/www/fanfuel-playground/current` атомарно на новый release, установить TLS-конфигурацию, затем `nginx -t` и reload. Проверить HTTPS 200, сертификат, HTML/JS/Worker, noindex/CSP, перетаскивание и настройки в браузере, отдельно `https://fanfuel.ru/`. `certbot.timer` и существующий deploy hook продлевают сертификат и перезагружают nginx. Контроль продления: `sudo certbot renew --dry-run --no-random-sleep-on-renew --cert-name playground.fanfuel.ru`. Откат страницы — вернуть symlink `current` на предыдущий release; при ошибке TLS-конфигурации восстановить HTTP-конфигурацию из `sites-available` и проверить nginx до reload.

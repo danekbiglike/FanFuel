@@ -7,8 +7,10 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
   {
     ignores: [
+      ".tmp/**",
       "**/.next/**",
       "**/dist/**",
+      "**/dist-playground/**",
       "**/build/**",
       "**/coverage/**",
       "**/node_modules/**",

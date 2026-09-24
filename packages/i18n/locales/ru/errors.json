@@ -19,5 +19,7 @@
   "errors.verificationAttemptsExhausted": "Попытки закончились. Запросите новый код.",
   "errors.verificationResendLimited": "Новый код можно запросить чуть позже.",
   "errors.verificationTokenInvalid": "Подтверждение устарело. Начните регистрацию заново.",
-  "errors.emailDeliveryFailed": "Не удалось отправить письмо. Попробуйте ещё раз позже."
+  "errors.emailDeliveryFailed": "Не удалось отправить письмо. Попробуйте ещё раз позже.",
+  "attributionChoiceRequired": "Выбери одного автора для поддержки.",
+  "mediaUnavailable": "Хранилище изображений пока не подключено."
 }

@@ -93,6 +93,70 @@ func (a *App) handleSellerProductRoutes(w http.ResponseWriter, r *http.Request) 
 	}
 
 	productID := parts[0]
+	if len(parts) == 2 && parts[1] == "insights" && r.Method == http.MethodGet {
+		seller, err := a.store.getSellerProfileByUserID(r.Context(), user.User.ID)
+		if err != nil {
+			mapError(w, err)
+			return
+		}
+		if seller == nil {
+			mapError(w, errForbidden)
+			return
+		}
+		product, err := a.store.getProduct(r.Context(), productID, false)
+		if err != nil {
+			mapError(w, err)
+			return
+		}
+		if product.SellerProfileID != seller.ID {
+			mapError(w, errNotFound)
+			return
+		}
+		result, err := a.store.productInsightsFor(r.Context(), product)
+		if err != nil {
+			mapError(w, err)
+			return
+		}
+		writeJSON(w, 200, result)
+		return
+	}
+	if len(parts) == 1 && r.Method == http.MethodGet {
+		seller, err := a.store.getSellerProfileByUserID(r.Context(), user.User.ID)
+		if err != nil {
+			mapError(w, err)
+			return
+		}
+		if seller == nil {
+			mapError(w, errForbidden)
+			return
+		}
+		product, err := a.store.getProduct(r.Context(), productID, false)
+		if err != nil {
+			mapError(w, err)
+			return
+		}
+		if product.SellerProfileID != seller.ID {
+			mapError(w, errNotFound)
+			return
+		}
+		writeJSON(w, 200, product)
+		return
+	}
+
+	if len(parts) == 2 && parts[1] == "commerce" && r.Method == http.MethodPut {
+		var req CommerceProductInput
+		if !decodeJSON(w, r, &req) {
+			return
+		}
+		product, err := a.store.ConfigureProduct(r.Context(), user.User.ID, productID, req)
+		if err != nil {
+			mapError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, product)
+		return
+	}
+
 	if len(parts) == 1 && r.Method == http.MethodPatch {
 		var req UpdateProductRequest
 		if !decodeJSON(w, r, &req) {

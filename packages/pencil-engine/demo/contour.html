@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow" id="contour-eyebrow"></p>
+        <h1 id="contour-title"></h1>
+        <p id="contour-subtitle"></p>
+        <a id="contour-back" href="./study.html"></a>
+      </header>
+      <div class="controls">
+        <label for="contour-size" id="contour-size-label"></label>
+        <select id="contour-size"><option value="180">180 px</option><option value="512" selected>512 px</option><option value="1000">1000 px</option></select>
+        <label for="contour-width" id="contour-width-label"></label>
+        <input id="contour-width" type="range" min="0.8" max="8" step="0.2" value="5.2" />
+        <output id="contour-width-value" for="contour-width"></output>
+        <label for="contour-grain" id="contour-grain-label"></label>
+        <input id="contour-grain" type="range" min="0" max="70" step="5" value="45" />
+        <output id="contour-grain-value" for="contour-grain"></output>
+        <label for="contour-pressure" id="contour-pressure-label"></label>
+        <input id="contour-pressure" type="range" min="40" max="180" step="5" value="100" />
+        <output id="contour-pressure-value" for="contour-pressure"></output>
+        <label for="contour-variation" id="contour-variation-label"></label>
+        <input id="contour-variation" type="range" min="0" max="200" step="5" value="100" />
+        <output id="contour-variation-value" for="contour-variation"></output>
+        <label for="contour-randomness" id="contour-randomness-label"></label>
+        <input id="contour-randomness" type="range" min="0" max="100" step="5" value="0" />
+        <output id="contour-randomness-value" for="contour-randomness"></output>
+        <label for="contour-taper-length" id="contour-taper-length-label"></label>
+        <input id="contour-taper-length" type="range" min="0" max="40" step="1" value="16" />
+        <output id="contour-taper-length-value" for="contour-taper-length"></output>
+        <label for="contour-taper-min" id="contour-taper-min-label"></label>
+        <input id="contour-taper-min" type="range" min="5" max="100" step="5" value="35" />
+        <output id="contour-taper-min-value" for="contour-taper-min"></output>
+        <label for="contour-seed" id="contour-seed-label"></label>
+        <input id="contour-seed" type="number" min="0" max="999999" step="1" value="72801" />
+        <label for="contour-import" id="contour-import-label"></label>
+        <input id="contour-import" type="file" multiple accept=".zip,.abr,.vbr,.gbr" />
+        <label for="contour-brush-select" id="contour-brush-label"></label>
+        <select id="contour-brush-select"><option value="" id="contour-default-brush"></option></select>
+        <button id="contour-theme" type="button"></button>
+      </div>
+      <p class="note" id="contour-brush-note"></p>
+      <section class="pen-panel">
+        <h2 id="contour-pen-title"></h2>
+        <p id="contour-pen-note"></p>
+        <canvas id="contour-pen-canvas" width="512" height="320"></canvas>
+        <p class="study-status" id="contour-pen-status" role="status"></p>
+        <div class="controls">
+          <button id="contour-pen-export" type="button"></button>
+          <button id="contour-pen-clear" type="button"></button>
+          <label for="contour-pen-import" id="contour-pen-import-label"></label>
+          <input id="contour-pen-import" type="file" accept=".json,application/json" />
+        </div>
+      </section>
+      <section class="soft-panel">
+        <h2 id="contour-soft-title"></h2>
+        <p id="contour-soft-note"></p>
+        <div class="soft-stage" id="contour-soft-stage">
+          <div class="soft-card soft-card-a" data-soft-surface="card-a"><span id="contour-soft-card-a"></span></div>
+          <div class="soft-card soft-card-b" data-soft-surface="card-b"><span id="contour-soft-card-b"></span></div>
+          <div class="soft-floor" data-soft-surface="floor"></div>
+          <canvas id="contour-soft-canvas" width="720" height="370"></canvas>
+          <button class="soft-hit" id="contour-soft-hit" type="button"></button>
+        </div>
+        <p class="study-status" id="contour-soft-status" role="status"></p>
+        <p class="study-status" id="contour-soft-timing"></p>
+        <div class="controls">
+          <label for="contour-soft-brush" id="contour-soft-brush-label"></label>
+          <select id="contour-soft-brush">
+            <option value="soft" id="contour-soft-brush-soft"></option>
+            <option value="previous" id="contour-soft-brush-previous"></option>
+            <option value="imported" id="contour-soft-brush-imported" disabled></option>
+          </select>
+          <label for="contour-soft-softness" id="contour-soft-softness-label"></label>
+          <input id="contour-soft-softness" type="range" min="0" max="100" value="60" />
+          <output for="contour-soft-softness" id="contour-soft-softness-value">60 %</output>
+          <label for="contour-soft-redraw" id="contour-soft-redraw-label"></label>
+          <input id="contour-soft-redraw" type="range" min="0" max="100" value="60" />
+          <output for="contour-soft-redraw" id="contour-soft-redraw-value">60 %</output>
+          <label for="contour-soft-smoothing" id="contour-soft-smoothing-label"></label>
+          <input id="contour-soft-smoothing" type="range" min="0" max="100" value="70" />
+          <output for="contour-soft-smoothing" id="contour-soft-smoothing-value">70 %</output>
+          <label for="contour-soft-handwork" id="contour-soft-handwork-label"></label>
+          <input id="contour-soft-handwork" type="range" min="0" max="100" value="50" />
+          <output for="contour-soft-handwork" id="contour-soft-handwork-value">50 %</output>
+          <button id="contour-soft-reset" type="button"></button>
+        </div>
+      </section>
+      <p class="study-status" id="contour-status" role="status"></p>
+      <div class="study-compare">
+        <figure><figcaption id="contour-reference-label"></figcaption><img id="contour-reference" alt="" /></figure>
+        <figure><figcaption id="contour-result-label"></figcaption><canvas id="contour-canvas"></canvas></figure>
+      </div>
+      <p class="note" id="contour-note"></p>
+    </main>
+    <script type="module" src="./contour.ts"></script>
+  </body>
+</html>

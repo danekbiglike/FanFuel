@@ -6,28 +6,28 @@
 
 - Роль — это рабочий контекст, а не отдельный аккаунт.
 - Глобальная навигация не должна показывать пользователю все будущие разделы сразу.
-- Главный entry для authenticated user — role-aware switcher.
+- Главный публичный entry для любого пользователя — marketplace-first `/`; role-aware switcher применяется внутри кабинетов и не меняет начальную покупательскую вкладку главной.
 - Кабинеты используют одинаковую структуру: topbar, sidebar, content, contextual actions.
 - Публичные страницы не должны зависеть от авторизации, кроме персонализированных действий.
 
 ## Верхний уровень
 
-| Зона   | Назначение                                      | Пример routes                                  | Статус          |
-| ------ | ----------------------------------------------- | ---------------------------------------------- | --------------- |
-| Public | Объяснение продукта, marketplace, creator pages | `/`, `/marketplace`, `/creators/[slug]`        | PARTIAL/PLANNED |
-| Auth   | Вход, регистрация, onboarding                   | `/auth/login`, `/auth/register`, `/onboarding` | PARTIAL/PLANNED |
-| Buyer  | Покупки и заказы                                | `/buyer`, `/buyer/orders/[id]`                 | PLANNED         |
-| Studio | Кабинет стримера                                | `/studio`, `/studio/widgets`                   | PLANNED/PARTIAL |
-| Seller | Кабинет продавца                                | `/seller`, `/seller/products`                  | PLANNED         |
-| Admin  | Операционная панель                             | `/admin`, `/admin/users`                       | PARTIAL/PLANNED |
-| Widget | OBS/browser source                              | `apps/widget /?token=`                         | PARTIAL         |
+| Зона   | Назначение                            | Пример routes                                  | Статус               |
+| ------ | ------------------------------------- | ---------------------------------------------- | -------------------- |
+| Public | Marketplace, role tabs, creator pages | `/`, `/marketplace`, `/creators/[slug]`        | NEEDS_REWORK/PARTIAL |
+| Auth   | Вход, регистрация, onboarding         | `/auth/login`, `/auth/register`, `/onboarding` | PARTIAL/PLANNED      |
+| Buyer  | Покупки и заказы                      | `/buyer`, `/buyer/orders/[id]`                 | PLANNED              |
+| Studio | Кабинет стримера                      | `/studio`, `/studio/widgets`                   | PLANNED/PARTIAL      |
+| Seller | Кабинет продавца                      | `/seller`, `/seller/products`                  | PLANNED              |
+| Admin  | Операционная панель                   | `/admin`, `/admin/users`                       | PARTIAL/PLANNED      |
+| Widget | OBS/browser source                    | `apps/widget /?token=`                         | PARTIAL              |
 
 ## Public Navigation
 
 Desktop topbar:
 
-- Brand: `/`.
-- Marketplace: `/marketplace` после v0.3.
+- Brand: `/`, открывает marketplace-first главную.
+- Marketplace: `/marketplace`, та же продуктовая поверхность без redirect.
 - Для стримеров: `/for-streamers` после v0.3.
 - Для продавцов: `/for-sellers` после v0.3.
 - FAQ: `/faq` после v1.0.
@@ -44,7 +44,8 @@ Mobile topbar:
 Правила:
 
 - Не показывать future pages в навигации, пока их status `FUTURE` или `DO_NOT_BUILD_YET`.
-- Если marketplace не реализован, главная может объяснять его как planned, но ссылка не должна вести на пустую страницу.
+- Покупательский режим главной всегда начальный; вкладки автора и продавца не назначают роли и не заменяют role-aware кабинеты.
+- Общий marketplace не ограничивается creator/streamer товарами.
 
 ## Auth Navigation
 

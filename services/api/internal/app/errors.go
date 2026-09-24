@@ -10,6 +10,7 @@ var (
 	errInvalidCredentials            = errors.New("invalid credentials")
 	errForbidden                     = errors.New("forbidden")
 	errNotFound                      = errors.New("not found")
+	errAttributionChoice             = errors.New("attribution choice required")
 	errValidation                    = errors.New("validation failed")
 	errConflict                      = errors.New("conflict")
 	errIdempotencyKey                = errors.New("idempotency key required")
@@ -56,6 +57,8 @@ func writeError(w http.ResponseWriter, status int, code string, message string, 
 
 func mapError(w http.ResponseWriter, err error) {
 	switch {
+	case errors.Is(err, errAttributionChoice):
+		writeError(w, 409, "attribution_choice_required", "attribution_choice_required", "errors.attributionChoiceRequired", nil)
 	case errors.Is(err, errInvalidCredentials):
 		writeError(w, http.StatusUnauthorized, "invalid_credentials", "invalid_credentials", "errors.invalidCredentials", nil)
 	case errors.Is(err, errForbidden):

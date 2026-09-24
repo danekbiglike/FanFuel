@@ -1,5 +1,7 @@
 # ROADMAP.md
 
+> Актуальное решение 2026-09-22: UX-TASK-040 (`docs/tasks/ui-ux/UX-TASK-040.md`) — утверждённая реализация marketplace-first, гостевых трёх вкладок, самостоятельных презентаций автора/продавца, лаймового бренда и лёгкого motion. При расхождении со старыми разделами Aurora и вкладками для всех действует UX-TASK-040. Статус: implemented_local; product review и интеграционная проверка ожидаются; маршруты /, /marketplace, /for-streamers, /for-sellers; API и финансовые сценарии не расширяются.
+
 Короткий индекс roadmap FanFuel. Детальные разделы вынесены в `docs/roadmap/`, чтобы не читать весь план при каждой задаче.
 
 ## Как читать
@@ -10,24 +12,37 @@
 
 ## Этапы
 
-| Этап                                                       | Статус                          | Детали                                                            |
-| ---------------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------- |
-| v0.0 — Foundation                                          | implemented.                    | [открыть](docs/roadmap/v0.0-foundation.md)                        |
-| v0.1 — Auth + Profiles                                     | implemented.                    | [открыть](docs/roadmap/v0.1-auth-profiles.md)                     |
-| v0.2 — Donate MVP                                          | implemented.                    | [открыть](docs/roadmap/v0.2-donate-mvp.md)                        |
-| v0.3 — Marketplace MVP                                     | implemented для mock/local MVP. | [открыть](docs/roadmap/v0.3-marketplace-mvp.md)                   |
-| v0.3.5 — Aurora Refresh + Universal Profile + Studio Skins | planned                         | [открыть](docs/roadmap/v0.3.5-universal-profile-studio.md)        |
-| v0.4 — Creator Store + Partners                            | planned                         | [открыть](docs/roadmap/v0.4-creator-store-partners.md)            |
-| v0.5 — Real Payment Provider Integration                   | planned                         | [открыть](docs/roadmap/v0.5-real-payment-provider-integration.md) |
-| v0.6 — Seller Balance + Payouts                            | planned                         | [открыть](docs/roadmap/v0.6-seller-balance-payouts.md)            |
-| v0.7 — Disputes + Arbitration                              | planned                         | [открыть](docs/roadmap/v0.7-disputes-arbitration.md)              |
-| v0.8 — Anti-fraud + Verification                           | planned                         | [открыть](docs/roadmap/v0.8-anti-fraud-verification.md)           |
-| v0.9 — Mobile Web / PWA                                    | planned                         | [открыть](docs/roadmap/v0.9-mobile-web-pwa.md)                    |
-| v1.0 — Public Beta                                         | planned                         | [открыть](docs/roadmap/v1.0-public-beta.md)                       |
-| Future                                                     | planned                         | [открыть](docs/roadmap/future.md)                                 |
+| Этап                                                    | Статус                          | Детали                                                            |
+| ------------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------- |
+| v0.0 — Foundation                                       | implemented.                    | [открыть](docs/roadmap/v0.0-foundation.md)                        |
+| v0.1 — Auth + Profiles                                  | implemented.                    | [открыть](docs/roadmap/v0.1-auth-profiles.md)                     |
+| v0.2 — Donate MVP                                       | implemented.                    | [открыть](docs/roadmap/v0.2-donate-mvp.md)                        |
+| v0.3 — Marketplace MVP                                  | implemented для mock/local MVP. | [открыть](docs/roadmap/v0.3-marketplace-mvp.md)                   |
+| v0.3.5 — Marketplace-first + Universal Profile + Studio | planned                         | [открыть](docs/roadmap/v0.3.5-universal-profile-studio.md)        |
+| Experience/Brand — живой UI, маскот, FanFuel World      | planned по этапам               | [открыть](docs/roadmap/experience-brand-world.md)                 |
+| v0.4 — Creator Store + Partners                         | planned                         | [открыть](docs/roadmap/v0.4-creator-store-partners.md)            |
+| v0.5 — Real Payment Provider Integration                | planned                         | [открыть](docs/roadmap/v0.5-real-payment-provider-integration.md) |
+| v0.6 — Seller Balance + Payouts                         | planned                         | [открыть](docs/roadmap/v0.6-seller-balance-payouts.md)            |
+| v0.7 — Disputes + Arbitration                           | planned                         | [открыть](docs/roadmap/v0.7-disputes-arbitration.md)              |
+| v0.8 — Anti-fraud + Verification                        | planned                         | [открыть](docs/roadmap/v0.8-anti-fraud-verification.md)           |
+| v0.9 — Mobile Web / PWA                                 | planned                         | [открыть](docs/roadmap/v0.9-mobile-web-pwa.md)                    |
+| v1.0 — Public Beta                                      | planned                         | [открыть](docs/roadmap/v1.0-public-beta.md)                       |
+| Future                                                  | planned                         | [открыть](docs/roadmap/future.md)                                 |
 
 ## Быстрые ссылки
 
 - [Принципы roadmap](docs/roadmap/principles.md)
 - [Текущий практический фокус](docs/roadmap/current-focus.md)
+- [Marketplace-first, живой UI, маскот и FanFuel World](docs/roadmap/experience-brand-world.md)
 - [Индекс папки roadmap](docs/roadmap/README.md)
+
+
+## Уточнение 22.09.2026 — UX-TASK-041
+
+В текущую работу включён commerce foundation: строгие варианты, витрины, promo, поиск и библиотека объяснимых алгоритмов. Реальные выплаты и рискованные категории сохраняют отдельный gate. См. [задачу](docs/tasks/ui-ux/UX-TASK-041.md).
+
+## Результат UX-TASK-041 — 22.09.2026
+
+Локальный v0.4 commerce foundation реализован: кабинет автора с визуальной витриной, собственными медиа и независимым промокодом; конфигурация продавцом точного варианта и двух ставок; поиск с группировкой эквивалентов, сравнение цен, серверный выбор одного автора, snapshot mock-заказа. Графитная версия дизайна исправляет отклонение UX-TASK-040 и ожидает review владельца.
+
+Следующие зависимости: durable storage вместо local adapter; проверяемый импорт canonical IDs/aliases; privacy-safe telemetry и экспериментальная лента; нагрузочная проверка поиска; production settlement/refund/ledger/provider/legal review. Полная игра Ойли не является условием этих этапов. Библиотека уже написанных правил и её точки подключения — docs/MARKETPLACE_ALGORITHMS.md.

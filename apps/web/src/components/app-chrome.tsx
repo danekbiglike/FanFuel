@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "re
 import type { ThemePreference } from "@fanfuel/ui";
 import type { CurrentUser, Locale } from "@fanfuel/types";
 import {
+  ApiError,
   clearStoredToken,
   getMe,
   getPreferences,
@@ -18,6 +19,9 @@ import {
   setStoredLocalePreference
 } from "../lib/i18n";
 import { useTheme } from "./theme-context";
+import { CanisterMark } from "./brand-art";
+import { MarketLists } from "./market-lists";
+import { useExperience } from "./experience-provider";
 
 type PreferenceMenuKind = "theme" | "language";
 type TopbarSearchMode = "all" | "products" | "creators" | "sellers";
@@ -44,6 +48,7 @@ export function AppTopBar({
   deferSearchUntilScroll?: boolean;
 } = {}) {
   const theme = useTheme();
+  const { copy: experience } = useExperience();
   const menuRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement | null>(null);
@@ -125,7 +130,8 @@ export function AppTopBar({
               setLocalePreference(getStoredLocalePreference());
             }
           });
-      } catch {
+      } catch (error) {
+        if (!(error instanceof ApiError) || error.code !== "unauthorized") return;
         clearStoredToken();
         if (isActive) {
           setCurrentUser(null);
@@ -136,12 +142,15 @@ export function AppTopBar({
 
     void syncAuthState();
 
-    window.addEventListener("storage", syncAuthState);
+    function handleAuthStorage(event: StorageEvent) {
+      if (event.key === "fanfuel_access_token" || event.key === null) void syncAuthState();
+    }
+    window.addEventListener("storage", handleAuthStorage);
     window.addEventListener("fanfuel-auth-changed", syncAuthState);
 
     return () => {
       isActive = false;
-      window.removeEventListener("storage", syncAuthState);
+      window.removeEventListener("storage", handleAuthStorage);
       window.removeEventListener("fanfuel-auth-changed", syncAuthState);
     };
   }, []);
@@ -432,9 +441,11 @@ export function AppTopBar({
   return (
     <header className={topbarClassName}>
       <a className="ff-brand" href="/" aria-label={common.projectName}>
-        <span>FF</span>
+        <CanisterMark />
         <strong>{common.projectName}</strong>
       </a>
+
+      <a className="fuel-header-catalog" href="/marketplace/catalog">{experience.nav.catalog}</a>
 
       <form
         className="ff-topbar-search"
@@ -459,10 +470,7 @@ export function AppTopBar({
       </form>
 
       <div className="ff-topbar-account-group">
-        <nav className="ff-topbar-nav" aria-label={common.primaryNavigation}>
-          <a href="/marketplace">{common.navMarketplace}</a>
-          <a href="/creators">{common.navAuthors}</a>
-        </nav>
+        <MarketLists />
 
         {isAuthenticated ? (
           <div className="ff-topbar-actions">
@@ -496,7 +504,6 @@ export function AppTopBar({
                   {initials}
                 </span>
                 <span className="ff-user-trigger-name">{displayName}</span>
-                <ChevronDownIcon />
               </button>
 
               {isUserMenuOpen ? (
@@ -560,14 +567,9 @@ export function AppTopBar({
                   {canStream ? (
                     <div className="ff-user-menu-group">
                       <div className="ff-user-menu-section">{common.fanfuelStudio}</div>
-                      <button
-                        className="ff-user-menu-item ff-user-menu-subitem"
-                        type="button"
-                        disabled
-                      >
+                      <a className="ff-user-menu-item ff-user-menu-subitem" href="/studio">
                         <span>{common.navStudio}</span>
-                        <span className="ff-user-menu-hint">{common.menuSoon}</span>
-                      </button>
+                      </a>
                       <button
                         className="ff-user-menu-item ff-user-menu-subitem"
                         type="button"
@@ -599,7 +601,6 @@ export function AppTopBar({
                       <span>{common.theme}</span>
                       <span className="ff-user-menu-value">
                         {currentThemeLabel}
-                        <ChevronDownIcon />
                       </span>
                     </button>
                     <button
@@ -612,7 +613,6 @@ export function AppTopBar({
                       <span>{common.navLanguage}</span>
                       <span className="ff-user-menu-value">
                         {currentLanguageLabel}
-                        <ChevronDownIcon />
                       </span>
                     </button>
                   </div>
@@ -643,7 +643,7 @@ export function AppTopBar({
               <SearchIcon />
             </button>
             <a className="ff-topbar-login" href="/auth">
-              {common.navAuth}
+              {experience.nav.login}
             </a>
             <div className="ff-user-menu-shell" ref={menuRef}>
               <button
@@ -692,7 +692,6 @@ export function AppTopBar({
                       <span>{common.theme}</span>
                       <span className="ff-user-menu-value">
                         {currentThemeLabel}
-                        <ChevronDownIcon />
                       </span>
                     </button>
                     <button
@@ -705,7 +704,6 @@ export function AppTopBar({
                       <span>{common.navLanguage}</span>
                       <span className="ff-user-menu-value">
                         {currentLanguageLabel}
-                        <ChevronDownIcon />
                       </span>
                     </button>
                   </div>
@@ -882,14 +880,6 @@ function MenuIcon() {
       <path d="M4 7h16" />
       <path d="M4 12h16" />
       <path d="M4 17h16" />
-    </svg>
-  );
-}
-
-function ChevronDownIcon() {
-  return (
-    <svg className="ff-topbar-icon ff-topbar-icon-small" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="m7 10 5 5 5-5" />
     </svg>
   );
 }

@@ -38,3 +38,15 @@ func TestVerificationEmailLocalizationAndMasking(t *testing.T) {
 		t.Fatalf("maskEmail = %q", got)
 	}
 }
+
+func TestValidChallengeID(t *testing.T) {
+	valid := "c7472a7e-6fc1-4c30-83ae-b7b6840f176b"
+	if !validChallengeID(valid) {
+		t.Fatalf("expected %q to be valid", valid)
+	}
+	for _, value := range []string{"", "not-a-uuid", "c7472a7e6fc14c3083aeb7b6840f176b", "z7472a7e-6fc1-4c30-83ae-b7b6840f176b"} {
+		if validChallengeID(value) {
+			t.Fatalf("expected %q to be invalid", value)
+		}
+	}
+}

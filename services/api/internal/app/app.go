@@ -12,13 +12,15 @@ import (
 )
 
 type App struct {
-	cfg          config.ServiceConfig
-	store        *Store
-	tokens       TokenService
-	authLimiter  *rateLimiter
-	publisher    events.Publisher
-	emailSender  EmailSender
-	verification emailVerificationService
+	mediaStorage    MediaStorage
+	cfg             config.ServiceConfig
+	store           *Store
+	tokens          TokenService
+	authLimiter     *rateLimiter
+	commerceLimiter *rateLimiter
+	publisher       events.Publisher
+	emailSender     EmailSender
+	verification    emailVerificationService
 }
 
 func New(cfg config.ServiceConfig, db *pgxpool.Pool) (*App, error) {
@@ -29,18 +31,27 @@ func New(cfg config.ServiceConfig, db *pgxpool.Pool) (*App, error) {
 		return nil, errors.New("SMTP_HOST must be configured in production")
 	}
 
+	var mediaStorage MediaStorage
+	if cfg.Environment != "production" {
+		mediaStorage = LocalMediaStorage{Root: "tmp/media"}
+	}
 	return &App{
-		cfg:          cfg,
-		store:        NewStore(db, cfg.AdminBootstrapEmail, cfg.Environment != "production", NewMockPaymentProvider()),
-		tokens:       NewTokenService(cfg.JWTSecret, cfg.AccessTokenTTL),
-		authLimiter:  newRateLimiter(20, time.Minute),
-		publisher:    events.NewRedisPublisher(cfg.RedisAddress),
-		emailSender:  newEmailSender(cfg),
-		verification: newEmailVerificationService(cfg.JWTSecret),
+		mediaStorage:    mediaStorage,
+		cfg:             cfg,
+		store:           NewStore(db, cfg.AdminBootstrapEmail, cfg.Environment != "production", NewMockPaymentProvider()),
+		tokens:          NewTokenService(cfg.JWTSecret, cfg.AccessTokenTTL),
+		authLimiter:     newRateLimiter(20, time.Minute),
+		commerceLimiter: newRateLimiter(120, time.Minute),
+		publisher:       events.NewRedisPublisher(cfg.RedisAddress),
+		emailSender:     newEmailSender(cfg),
+		verification:    newEmailVerificationService(cfg.JWTSecret),
 	}, nil
 }
 
 func (a *App) RegisterRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/api/v1/media/", a.handleMedia)
+	mux.HandleFunc("/api/v1/commerce/", a.handleCommerce)
+	mux.HandleFunc("/api/v1/studio/commerce", a.handleStudioCommerce)
 	mux.HandleFunc("/api/v1/foundation", method(http.MethodGet, a.handleFoundation))
 	mux.HandleFunc("/api/v1/auth/register", method(http.MethodPost, a.handleRegister))
 	mux.HandleFunc("/api/v1/auth/login", method(http.MethodPost, a.handleLogin))

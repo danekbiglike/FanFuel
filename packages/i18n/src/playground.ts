@@ -1,0 +1,55 @@
+export const messages = {
+  ru: {
+    announcement: "Экспериментальная площадка FanFuel",
+    announcementSuffix: "· товары и интерфейс — макет",
+    navCatalog: "Каталог", navCreators: "Авторы", navAbout: "О платформе",
+    navMock: "Разделы макета", searchMock: "Поиск недоступен в демоверсии", categoriesMock: "Категории макета", settingsAria: "Настройки Ойли", live: "Изменения применяются сразу",
+    searchPlaceholder: "Поиск пока не работает", login: "Войти",
+    eyebrow: "ФАНФЬЮЭЛ / ЦИФРОВАЯ ВИТРИНА",
+    heroLineOne: "Находки для", heroLineTwo: "новых идей.",
+    heroDescription: "Место, где интересные цифровые вещи находят своих людей. Пока это только эскиз витрины — зато Ойли здесь уже живой.",
+    heroNote: "Схватите Ойли, потяните и посадите на любую карточку",
+    catalogEyebrow: "ЧТО ВНУТРИ", catalogTitle: "Подборка для вдохновения", catalogAside: "Карточки вымышлены и нужны для проверки движения Ойли.",
+    categoryAll: "Все товары", categoryGames: "Игры", categoryCreative: "Творчество", categorySoftware: "Софт", categoryLearning: "Обучение",
+    productOneCategory: "Игры · макет", productOneTitle: "Сказочные миры: набор локаций", productOneSeller: "от studio mira",
+    productTwoCategory: "Творчество · макет", productTwoTitle: "Коллекция мягких кистей", productTwoSeller: "от madebyluna",
+    productThreeCategory: "Обучение · макет", productThreeTitle: "Цвет в цифровой иллюстрации", productThreeSeller: "от petra studio",
+    productFourCategory: "Софт · макет", productFourTitle: "Звуковые сцены для видео", productFourSeller: "от north sound",
+    closing: "Эта страница — площадка для экспериментов с Ойли и карандашным движком.", closingSign: "НЕ МАГАЗИН · ПОКА ЧТО",
+    footer: "Демонстрация без покупок и учётных записей", realSite: "Основной сайт",
+    oilyHit: "Перетащить Ойли. Стрелки на клавиатуре перемещают его.",
+    settingsToggle: "Настроить Ойли", settingsTitle: "Его характер — в ваших руках", settingsDescription: "Меняйте графит, нажим и упругость прямо во время игры.",
+    brush: "Карандаш", brushSoft: "Мягкий графит", brushClassic: "Классический",
+    width: "Толщина штриха", density: "Насыщенность", grain: "Зерно", pressure: "Нажим", variation: "Перепад нажима", randomness: "Неровность руки", taper: "Сужение краёв", softness: "Мягкость тела", boil: "Живое зерно",
+    resetOily: "Вернуть Ойли", resetSettings: "Сбросить настройки", settingsHint: "Перетаскивание · 24 к/с", themeToggle: "Сменить тему",
+    ready: "Ойли готов к игре", dragging: "Ойли тянут", landed: "Ойли сел на {name}", floor: "пол", rendering: "Штрих {ms} мс",
+    reduced: "Движение ограничено системной настройкой уменьшения анимации"
+  },
+  en: {
+    announcement: "FanFuel experimental playground", announcementSuffix: "· products and interface are mockups",
+    navCatalog: "Catalog", navCreators: "Creators", navAbout: "About",
+    navMock: "Mock navigation", searchMock: "Search is unavailable in this demo", categoriesMock: "Mock categories", settingsAria: "Oily settings", live: "Changes apply live",
+    searchPlaceholder: "Search is not available yet", login: "Sign in",
+    eyebrow: "FANFUEL / DIGITAL MARKETPLACE", heroLineOne: "Find something", heroLineTwo: "wonderful.",
+    heroDescription: "A place for interesting digital things to find their people. This storefront is a sketch for now, but Oily is already alive.",
+    heroNote: "Grab Oily, stretch him, and place him on any card",
+    catalogEyebrow: "EXPLORE", catalogTitle: "A little inspiration", catalogAside: "These products are fictional and help us test Oily’s movement.",
+    categoryAll: "All products", categoryGames: "Games", categoryCreative: "Creative", categorySoftware: "Software", categoryLearning: "Learning",
+    productOneCategory: "Games · mockup", productOneTitle: "Story worlds: location pack", productOneSeller: "by studio mira",
+    productTwoCategory: "Creative · mockup", productTwoTitle: "Soft brush collection", productTwoSeller: "by madebyluna",
+    productThreeCategory: "Learning · mockup", productThreeTitle: "Color in digital illustration", productThreeSeller: "by petra studio",
+    productFourCategory: "Software · mockup", productFourTitle: "Soundscapes for video", productFourSeller: "by north sound",
+    closing: "This page is a playground for Oily and the pencil engine.", closingSign: "NOT A SHOP · YET",
+    footer: "Demo without purchases or accounts", realSite: "Main site",
+    oilyHit: "Drag Oily. Arrow keys move him too.",
+    settingsToggle: "Tune Oily", settingsTitle: "Shape his character", settingsDescription: "Adjust graphite, pressure, and softness while you play.",
+    brush: "Pencil", brushSoft: "Soft graphite", brushClassic: "Classic",
+    width: "Stroke width", density: "Density", grain: "Grain", pressure: "Pressure", variation: "Pressure variation", randomness: "Hand variation", taper: "Edge taper", softness: "Body softness", boil: "Living grain",
+    resetOily: "Reset Oily", resetSettings: "Reset settings", settingsHint: "Drag · 24 fps", themeToggle: "Switch theme",
+    ready: "Oily is ready to play", dragging: "Dragging Oily", landed: "Oily landed on {name}", floor: "the floor", rendering: "Stroke {ms} ms",
+    reduced: "Movement is limited by your reduced motion setting"
+  }
+} as const;
+
+export type Locale = keyof typeof messages;
+export type MessageKey = keyof typeof messages.ru;

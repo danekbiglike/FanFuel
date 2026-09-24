@@ -11,11 +11,15 @@ import {
   getStoredToken,
   submitSellerProduct
 } from "../../../../lib/api";
+import { SellerCommerceEditor } from "../../../../components/seller-commerce-editor";
+import { useCommerceCopy } from "../../../../components/commerce-shared";
+import type { CommerceProduct } from "../../../../lib/commerce";
 import { dictionary } from "../../../../lib/i18n";
 
 const defaultCurrency = (process.env.NEXT_PUBLIC_DEFAULT_CURRENCY ?? "RUB") as CurrencyCode;
 
 export default function SellerNewProductPage() {
+  const { copy } = useCommerceCopy();
   const [token, setToken] = useState("");
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [createdProduct, setCreatedProduct] = useState<Product | null>(null);
@@ -28,7 +32,7 @@ export default function SellerNewProductPage() {
   const [terms, setTerms] = useState("");
   const [priceMajor, setPriceMajor] = useState("1000");
   const [currency, setCurrency] = useState<CurrencyCode>(defaultCurrency);
-  const [affiliatePercent, setAffiliatePercent] = useState("0");
+
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -76,7 +80,7 @@ export default function SellerNewProductPage() {
         price_amount_minor: Math.round(Number(priceMajor.replace(",", ".")) * 100),
         currency,
         delivery_type: deliveryType,
-        affiliate_percent_bps: Math.round(Number(affiliatePercent.replace(",", ".")) * 100)
+        affiliate_percent_bps: 0
       });
       setCreatedProduct(product);
       setMessage(dictionary.common.productCreatedMessage);
@@ -219,21 +223,13 @@ export default function SellerNewProductPage() {
                   <option value="session">{dictionary.common["deliveryType.session"]}</option>
                 </Select>
               </label>
-              <label className="ff-field">
-                <span>{dictionary.common.affiliatePercent}</span>
-                <input
-                  inputMode="decimal"
-                  value={affiliatePercent}
-                  onChange={(event) => setAffiliatePercent(event.target.value)}
-                />
-              </label>
             </div>
 
             <div className="ff-actions">
               <button
                 className="ff-button ff-button-primary"
                 type="submit"
-                disabled={isSubmitting || !canSubmit}
+                disabled={isSubmitting || !canSubmit || Boolean(createdProduct)}
               >
                 {isSubmitting ? dictionary.common.loading : dictionary.common.save}
               </button>
@@ -241,7 +237,11 @@ export default function SellerNewProductPage() {
                 <button
                   className="ff-button ff-button-secondary"
                   type="button"
-                  disabled={isSubmitting || createdProduct.status !== "draft"}
+                  disabled={
+                    isSubmitting ||
+                    createdProduct.status !== "draft" ||
+                    !(createdProduct as CommerceProduct).commission_configured
+                  }
                   onClick={() => void handleSubmitToModeration()}
                 >
                   {dictionary.common.submitToModeration}
@@ -254,6 +254,12 @@ export default function SellerNewProductPage() {
           </form>
         )}
 
+        {createdProduct && (
+          <>
+            <p className="commerce-note">{copy.configureBeforeSubmit}</p>
+            <SellerCommerceEditor product={createdProduct} onSaved={setCreatedProduct} />
+          </>
+        )}
         {error ? <Alert tone="danger">{error}</Alert> : null}
         {message ? <Alert tone="success">{message}</Alert> : null}
       </section>

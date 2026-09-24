@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow" id="study-eyebrow"></p>
+        <h1 id="study-title"></h1>
+        <p id="study-subtitle"></p>
+        <a id="study-back" href="./index.html"></a>
+        <a id="study-contour-link" href="./contour.html"></a>
+      </header>
+      <div class="controls">
+        <label for="study-scale" id="study-scale-label"></label>
+        <select id="study-scale"><option value="180">180 px</option><option value="512" selected>512 px</option><option value="1000">1000 px</option></select>
+        <label for="study-body-brush" id="study-body-label"></label>
+        <select id="study-body-brush"></select>
+        <label for="study-canister-brush" id="study-canister-label"></label>
+        <select id="study-canister-brush"></select>
+        <label for="study-import" id="study-import-label"></label>
+        <input id="study-import" type="file" accept=".gbr,application/octet-stream" />
+        <button id="study-animate" type="button" aria-pressed="false"></button>
+        <button id="study-theme" type="button"></button>
+      </div>
+      <div class="study-status" id="study-status" role="status"></div>
+      <div class="study-compare">
+        <figure><figcaption id="study-reference-label"></figcaption><img id="study-reference" alt="" /></figure>
+        <figure><figcaption id="study-render-label"></figcaption><canvas id="study-canvas"></canvas></figure>
+      </div>
+      <p class="note" id="study-note"></p>
+    </main>
+    <script type="module" src="./study.ts"></script>
+  </body>
+</html>

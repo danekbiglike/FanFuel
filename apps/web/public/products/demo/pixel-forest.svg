@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" fill="none">
+  <rect width="960" height="600" fill="#DDE8D4"/>
+  <path d="M0 423 154 330l117 69 160-146 153 139 148-91 228 127v172H0V423Z" fill="#9EB98B"/>
+  <path d="m0 482 184-103 130 67 141-96 184 122 119-88 202 95v121H0V482Z" fill="#799974"/>
+  <g fill="#26362D">
+    <path d="M112 335h32v32h-32zm-32 32h96v32H80zm32 32h32v64h-32zM701 305h32v32h-32zm-32 32h96v32h-96zm32 32h32v80h-32z"/>
+    <path d="M238 421h24v24h-24zm24 24h24v24h-24zm-48 24h24v24h-24zm72 0h24v24h-24z" fill="#C9FA39"/>
+  </g>
+  <rect x="56" y="52" width="260" height="46" rx="23" fill="#26362D"/>
+  <text x="82" y="82" fill="#F6F4EC" font-family="Arial,sans-serif" font-size="20" font-weight="700" letter-spacing="3">GAME ASSETS  /  01</text>
+  <text x="600" y="110" fill="#26362D" font-family="Arial,sans-serif" font-size="92" font-weight="800" letter-spacing="-5">PIXEL</text>
+  <text x="600" y="202" fill="#26362D" font-family="Arial,sans-serif" font-size="92" font-weight="800" letter-spacing="-5">FOREST</text>
+  <path d="M612 224c74-12 146-10 276 0" stroke="#C9FA39" stroke-width="15" stroke-linecap="round"/>
+  <text x="616" y="276" fill="#526254" font-family="Arial,sans-serif" font-size="23">24 tiles · plants · tiny details</text>
+  <g fill="#C9FA39"><rect x="515" y="337" width="24" height="24"/><rect x="539" y="361" width="24" height="24"/><rect x="491" y="361" width="24" height="24"/><rect x="515" y="385" width="24" height="24"/><rect x="851" y="325" width="20" height="20"/><rect x="871" y="345" width="20" height="20"/></g>
+</svg>

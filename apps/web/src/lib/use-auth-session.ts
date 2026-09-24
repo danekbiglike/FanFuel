@@ -13,6 +13,19 @@ export function useAuthSession() {
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    const sync = () => setAttempt((value) => value + 1);
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "fanfuel_access_token" || event.key === null) sync();
+    };
+    window.addEventListener("fanfuel-auth-changed", sync);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("fanfuel-auth-changed", sync);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
+
+  useEffect(() => {
     let active = true;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 12000);

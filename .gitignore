@@ -10,6 +10,7 @@ docs/SERVER_ACCESS.md
 node_modules/
 .next/
 dist/
+dist-playground/
 build/
 coverage/
 .turbo/

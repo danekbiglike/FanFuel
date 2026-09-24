@@ -556,7 +556,8 @@
 - price >= 0;
 - currency required;
 - affiliate percent в basis points;
-- risky categories disabled до legal review.
+- restricted категории недоступны до category-specific legal/payment/provider review;
+- владение цифровым аккаунтом само по себе не подтверждает право его передачи.
 
 Индексы:
 
@@ -614,6 +615,9 @@
 Бизнес-правила:
 
 - нельзя публиковать товары в restricted категории без явного разрешения;
+- разрешение выдаётся конкретной подкатегории и способу исполнения, а не всем аккаунтам, ключам или пополнениям сразу;
+- категория цифрового доступа остаётся restricted, если исходная платформа не разрешает передачу явно;
+- украденные, взломанные, совместно используемые и содержащие чужие персональные или платёжные данные аккаунты запрещены независимо от статуса категории;
 - названия категорий идут через i18n.
 
 ## ProductMedia
@@ -2416,3 +2420,25 @@ file_access_logs
 - `audit_logs`: entity/action/created_at.
 
 UX-TASK-031: существующий CreatorProfile теперь также создаётся из публичной анкеты после авторизации через onboarding. Начальный статус draft, роль streamer выдаётся атомарно; публичная выдача только published. Новых сущностей/миграций нет.
+
+## UX-TASK-041 — каталог, витрины и атрибуция
+
+`media_assets`: UUID, owner_user_id, purpose, status (`pending|ready`), created_at, updated_at. Объект хранится через MediaStorage по серверному ключу UUID; БД не содержит бинарные файлы. Design дополняется `avatar_media_id`, `banner_media_id`; save проверяет владельца, назначение и ready. Новые загрузки не становятся публичными до использования опубликованной витриной. Ограничения квоты и GC старых неиспользуемых объектов обязательны до production.
+
+`catalog_works`: UUID, уникальный source_key, title, created_at, updated_at. Автоматический upsert создаёт произведение/программный продукт, а не категорию. Ключ источника имеет namespace; неподтверждённые названия изолируются по продавцу. Известный внешний ID сам по себе не доказывает права продавца: модерация сохраняется.
+
+`products`: новые `identity_json`, `variant_key`, `work_id`, `promo_bps`, `storefront_bps`, `commission_configured`. Identity v1 включает source, external_id, work_title, format, platform, edition, region, language, duration_days, license, bundle. `unspecified` не равно известному формату. Key/gift/personal_account/shared_account никогда не эквивалентны. Форматы аккаунтов описаны для будущей модели; публикация по-прежнему запрещена без review.
+
+`creator_commerce`: UUID, creator_profile_id UNIQUE, storefront_enabled, promo_enabled, promo_code UNIQUE (ASCII uppercase), design_json, revision, created_at, updated_at. Каналы независимы. Design — разрешённые presets баннера/аватара, accent, layout, блоки с типами и ограниченными текстами; произвольные CSS/HTML/URL запрещены.
+
+`creator_store_products`: UUID, creator_profile_id, product_id, position, created_at, updated_at; UNIQUE creator/product. Товар сохраняет своего продавца и условия. Проверка публикации обязательна на чтении и checkout.
+
+Snapshot заказа дополняется полями creator_id, creator_name, channel, bps, creator_amount_minor, seller_amount_minor. Статистика считается по реальным заказам, отдельно от прогнозов. Недостаток данных — самостоятельный результат, не нулевая вероятность.
+
+### Уточнения UX-TASK-041
+
+Product.cover_url — вычисляемое необязательное поле ответа из существующей product_media (только visibility=public, kind=image|preview), новой таблицы обложек нет. Локальные cart/saved ref не являются сущностями финансового учёта. Creator design.avatar_media_id/banner_media_id ссылаются на принадлежащие пользователю ready media_assets нужного purpose. Поле identity.region пока одно; aliases/import и разделение activation/use region отложены до соответствующего этапа, автоматический merge по заголовку запрещён.
+
+### UX-TASK-042 — таксономия каталога
+
+Миграция 000011 добавляет `games`, `software`, `game-assets` в существующую `product_categories`; новых сущностей нет. Это навигационные направления, а не разрешение любой формы поставки. Игра или программа как объект остаётся в `catalog_works`, конкретный формат в `products.identity_json`/`variant_key`; ключ, gift, личный и общий аккаунт не становятся эквивалентами из-за общей категории. Категории сортируются прежде creator-направлений. Rollback после появления товаров требует явной переклассификации до удаления категорий.

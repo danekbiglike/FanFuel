@@ -1,5 +1,7 @@
 # TASKS.md
 
+> Актуальное решение 2026-09-22: UX-TASK-040 (`docs/tasks/ui-ux/UX-TASK-040.md`) — утверждённая реализация marketplace-first, гостевых трёх вкладок, самостоятельных презентаций автора/продавца, лаймового бренда и лёгкого motion. При расхождении со старыми разделами Aurora и вкладками для всех действует UX-TASK-040. Статус: implemented_local; product review и интеграционная проверка ожидаются; маршруты /, /marketplace, /for-streamers, /for-sellers; API и финансовые сценарии не расширяются.
+
 Короткий индекс задач FanFuel. Детальные описания вынесены в `docs/tasks/`, чтобы агент открывал только активный фокус и конкретные TASK-ID.
 
 ## Как читать
@@ -10,32 +12,40 @@
 
 ## Активный фокус
 
+- [UX-TASK-044](tasks/ui-ux/UX-TASK-044.md) — `IMPLEMENTED`: публичная тестовая главная `playground.fanfuel.ru` на существующем nginx, фиктивные карточки и рабочий интерактивный Ойли. Следующий шаг — художественный review и измерение на слабом устройстве.
+
+- [UX-TASK-043](tasks/ui-ux/UX-TASK-043.md) — карандашный движок: изолированный стенд уже показывает drag/drop Ойли, мягкую решётку и деформацию самих штрихов на двух карточках. Следующий этап — actor runtime с записанными пером частями и DOM-сцена поверх `/`/`/marketplace` со свободным выбором карточки, затем художественная и performance-проверка.
+
+- [UX-TASK-040](tasks/ui-ux/UX-TASK-040.md) — утверждённый marketplace-дизайн, гостевые вкладки, объясняющие страницы, SVG-Ойли и performance-aware UI (implemented_local; следующий шаг — product review и backend integration QA).
+
+- [UX-TASK-036](tasks/ui-ux/UX-TASK-036.md) — закрепить marketplace-first контракт главной (planned, P0, v0.3.5).
+- [UX-TASK-037](tasks/ui-ux/UX-TASK-037.md) — выбрать живой визуальный язык после стабилизации главной (planned, P1, experience track).
 - [UX-TASK-035](tasks/ui-ux/UX-TASK-035.md) — подтверждение почты и единая identifier-first авторизация (completed, P0, v0.3.5).
 - [UX-TASK-033](tasks/ui-ux/UX-TASK-033.md) — удобная авторизация и исследование единого входа (superseded by UX-TASK-035, P0, v0.3.5).
 - [UX-TASK-034](tasks/ui-ux/UX-TASK-034.md) — скрытый клиентский игровой режим и первая match-3 игра (completed, P2, v0.3.5).
 
 Короткая очередь после локальной реализации `v0.3 Marketplace MVP`:
 
-1. [UX-TASK-032](tasks/ui-ux/UX-TASK-032.md) — убрать роль и имя из регистрации, добавить шаг имени платформы (статус: completed, приоритет: P0, версия: v0.1/v0.3.5).
+1. [UX-TASK-036](tasks/ui-ux/UX-TASK-036.md) — закрепить marketplace-first контракт главной и regression QA.
 2. [FF-0307](tasks/v0.3/FF-0307.md) — стабилизировать Marketplace MVP проверками и smoke checklist.
-3. [UX-TASK-007](tasks/ui-ux/UX-TASK-007.md) — разделить `/me/profile` на account/settings и role-aware Studio/Seller/Buyer dashboards.
-4. [UX-TASK-010](tasks/ui-ux/UX-TASK-010.md) — проверить текущие web/admin/widget страницы на mobile и light/dark.
-5. [FF-0105](tasks/v0.1/FF-0105.md) — решить и выполнить upload avatar/banner flow или явно перенести его в storage milestone.
-6. [FF-0348](tasks/v0.3.5/FF-0348.md) — зафиксировать FanFuel Aurora design direction.
-7. [FF-0349](tasks/v0.3.5/FF-0349.md) — обновить shared UI tokens и primitives под Aurora.
-8. [FF-0350](tasks/v0.3.5/FF-0350.md) — обновить текущие экраны сайта под Aurora до новых v0.3.5 страниц.
-9. [FF-0351](tasks/v0.3.5/FF-0351.md) — спроектировать skin-ready дизайн и i18n-stable layouts.
-10. [FF-0352](tasks/v0.3.5/FF-0352.md) — разделить профиль пользователя и режимы автора/продавца.
-11. [FF-0353](tasks/v0.3.5/FF-0353.md) — добавить избранное, мои отзывы и пользовательские подборки.
-12. [FF-0354](tasks/v0.3.5/FF-0354.md) — реализовать настройки витрины автора и live-only блоки.
-13. [FF-0355](tasks/v0.3.5/FF-0355.md) — добавить widget trigger rules и asset-настройки.
-14. [FF-0356](tasks/v0.3.5/FF-0356.md) — добавить группы виджетов и OBS placement zones.
-15. [FF-0357](tasks/v0.3.5/FF-0357.md) — собрать Studio shell и вкладку статистики.
-16. [FF-0358](tasks/v0.3.5/FF-0358.md) — добавить последние события и bot-backed channel subscriptions.
-17. [FF-0359](tasks/v0.3.5/FF-0359.md) — добавить настройки донатов, модерацию и spam-фильтр.
-18. [FF-0360](tasks/v0.3.5/FF-0360.md) — добавить Studio products и авторские подборки.
-19. [FF-0361](tasks/v0.3.5/FF-0361.md) — расширить Studio widgets до каталога категорий и presets.
-20. [FF-0401](tasks/v0.4/FF-0401.md) — начинать Creator Store + Partners только после фиксации результатов пунктов выше в `docs/HANDOFF.md`.
+3. [UX-TASK-037](tasks/ui-ux/UX-TASK-037.md) — выбрать живой визуальный язык вместо generic corporate UI.
+4. [UX-TASK-007](tasks/ui-ux/UX-TASK-007.md) — разделить `/me/profile` на account/settings и role-aware Studio/Seller/Buyer dashboards.
+5. [UX-TASK-010](tasks/ui-ux/UX-TASK-010.md) — проверить текущие web/admin/widget страницы на mobile и light/dark.
+6. [FF-0105](tasks/v0.1/FF-0105.md) — решить upload avatar/banner flow или явно перенести его.
+7. [FF-0351](tasks/v0.3.5/FF-0351.md) — спроектировать skin-ready дизайн на утверждённом живом направлении.
+8. [FF-0352](tasks/v0.3.5/FF-0352.md) — разделить профиль пользователя и режимы автора/продавца.
+9. [FF-0353](tasks/v0.3.5/FF-0353.md) — добавить избранное, мои отзывы и пользовательские подборки.
+10. [FF-0354](tasks/v0.3.5/FF-0354.md) — реализовать настройки витрины автора и live-only блоки.
+11. [FF-0355](tasks/v0.3.5/FF-0355.md) — добавить widget trigger rules и asset-настройки.
+12. [FF-0356](tasks/v0.3.5/FF-0356.md) — добавить группы виджетов и OBS placement zones.
+13. [FF-0357](tasks/v0.3.5/FF-0357.md) — собрать Studio shell и вкладку статистики.
+14. [FF-0358](tasks/v0.3.5/FF-0358.md) — добавить последние события и bot-backed channel subscriptions.
+15. [FF-0359](tasks/v0.3.5/FF-0359.md) — добавить настройки донатов, модерацию и spam-фильтр.
+16. [FF-0360](tasks/v0.3.5/FF-0360.md) — добавить Studio products и авторские подборки.
+17. [FF-0361](tasks/v0.3.5/FF-0361.md) — расширить Studio widgets до каталога категорий и presets.
+18. [UX-TASK-038](tasks/ui-ux/UX-TASK-038.md) — исследовать и прототипировать живого маскота без экономики.
+19. [UX-TASK-039](tasks/ui-ux/UX-TASK-039.md) — провести discovery `world.fanfuel.ru`; production пока не строить.
+20. [FF-0401](tasks/v0.4/FF-0401.md) — начинать Creator Store + Partners после обязательной стабилизации; production-маскот и World не являются блокером.
 
 ## Индекс задач
 
@@ -158,6 +168,10 @@
 
 ### UI/UX задачи
 
+- [UX-TASK-039](tasks/ui-ux/UX-TASK-039.md) — Провести discovery `world.fanfuel.ru` (статус: future, приоритет: P2, версия: future/world discovery).
+- [UX-TASK-038](tasks/ui-ux/UX-TASK-038.md) — Исследовать и прототипировать маскота FanFuel (статус: planned, приоритет: P1, версия: brand track).
+- [UX-TASK-037](tasks/ui-ux/UX-TASK-037.md) — Спроектировать живой визуальный язык FanFuel (статус: planned, приоритет: P1, версия: experience track).
+- [UX-TASK-036](tasks/ui-ux/UX-TASK-036.md) — Закрепить marketplace-first контракт главной (статус: planned, приоритет: P0, версия: v0.3.5).
 - [UX-TASK-035](tasks/ui-ux/UX-TASK-035.md) — Подтверждение почты и единая identifier-first авторизация (статус: completed, приоритет: P0, версия: v0.3.5).
 
 - [UX-TASK-001](tasks/ui-ux/UX-TASK-001.md) — Создать UI/UX документацию и tracker статусов (статус: completed, приоритет: P0, версия: v0.2).
@@ -197,9 +211,9 @@
 3. Если задача относится к новому roadmap-этапу, добавить или обновить файл в `docs/roadmap/`.
 4. После работы обновить `docs/HANDOFF.md`; заметное изменение также добавить в `docs/CHANGELOG.md`.
 
-- [UX-TASK-029](tasks/ui-ux/UX-TASK-029.md) — Главная с переключением покупатель/автор/продавец и поиском в хэдере (completed, v0.3.5).
+- [UX-TASK-029](tasks/ui-ux/UX-TASK-029.md) — Историческая итерация главной с переключением аудиторий (superseded by UX-TASK-036, v0.3.5).
 
-- [UX-TASK-030](tasks/ui-ux/UX-TASK-030.md) — Полная переработка трёх режимов главной и центрирование поиска (completed, v0.3.5).
+- [UX-TASK-030](tasks/ui-ux/UX-TASK-030.md) — Историческая переработка трёх режимов главной (superseded by UX-TASK-036, v0.3.5).
 
 ## UX-TASK-031 — страница автора до регистрации
 
@@ -210,3 +224,16 @@ Acceptance criteria: ru/en, semantic light/dark, mobile/desktop, клавиат�
 ### UX-TASK-031: необязательные шаги анкеты
 
 По запросу пользователя: название → описание (можно пропустить) → аватар и баннер (необязательно, можно пропустить) → спонсорские товары (можно пропустить) → авторизация. Изображения хранятся только в IndexedDB браузера, привязаны к черновику вкладки; на сервер не отправляются. Выбор товаров из реального каталога с affiliate_percent_bps > 0, без вымышленных товаров или обещаний выплат. Публикация витрины и загрузка медиа на сервер не реализуются этой UI-итерацией; локальные дополнения не удаляются при сохранении названия/описания в аккаунт. Успешный экран явно сообщает об этом. При ошибке каталога доступны повтор и пропуск. Ввод, возврат, повторное открытие и смена auth-вкладки сохраняют локальный черновик.
+
+
+## UX-TASK-041 — in_progress
+
+[Карточка](tasks/ui-ux/UX-TASK-041.md): сравнение с макетом, graphite asset, строгие варианты, поиск, отчисления, кабинеты и библиотека алгоритмов. Зависимость реального запуска — legal/payment review.
+
+## UX-TASK-041 — завершена локальная реализация
+
+22.09.2026: IMPLEMENTED_LOCAL; дизайн и commerce доступны в коде, автоматические проверки пройдены. Подробности: tasks/ui-ux/UX-TASK-041.md, MARKETPLACE_ALGORITHMS.md, HANDOFF.md. Это не запуск production payment/payout. Следующая очередь: review владельца; FF-0105 durable media/product uploads; canonical-ID verification/aliases; telemetry и калибровка рекомендаций/цен; payment/legal review.
+
+## UX-TASK-042 — точечная переработка главной
+
+22.09.2026: READY_FOR_REVIEW по замечаниям владельца. Четыре discovery-карточки заменены указателем конкретных направлений; добавлены broad category navigation, карандашная обводка выбранной роли и единый actor Ойли с якорями для будущих реакций. Scope/acceptance: `docs/tasks/ui-ux/UX-TASK-042.md`. Проверены обе темы, 320–1440px, клавиатура и reduced motion.

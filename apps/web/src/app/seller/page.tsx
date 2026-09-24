@@ -6,9 +6,11 @@ import { Badge, EmptyState, Skeleton, StatCard } from "@fanfuel/ui";
 import type { CurrencyCode, OrderDetail, Product } from "@fanfuel/types";
 import { AppTopBar } from "../../components/app-chrome";
 import { ApiError, getSellerOrders, getSellerProducts, getStoredToken } from "../../lib/api";
+import { useCommerceCopy } from "../../components/commerce-shared";
 import { appLocale, dictionary } from "../../lib/i18n";
 
 export default function SellerDashboardPage() {
+  const { copy } = useCommerceCopy();
   const [token, setToken] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<OrderDetail[]>([]);
@@ -71,6 +73,14 @@ export default function SellerDashboardPage() {
               </a>
             </div>
 
+            <section className="commerce-panel">
+              <h2>{copy.sellerTools}</h2>
+              <p>{copy.sellerToolsLead}</p>
+              <p>{copy.ratesHelp}</p>
+              <a className="fuel-button fuel-button-outline" href="/seller/products">
+                {copy.configure}
+              </a>
+            </section>
             <div className="ff-stat-grid">
               <StatCard label={dictionary.common.sellerProductsCount} value={products.length} />
               <StatCard label={dictionary.common.sellerPendingProducts} value={pendingProducts} />

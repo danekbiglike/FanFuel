@@ -1,0 +1,91 @@
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 7px;
+  bottom: 5px;
+  height: 3px;
+  background: var(--accent);
+  clip-path: polygon(0 65%, 29% 12%, 73% 39%, 100% 0, 93% 83%, 39% 100%);
+  transform: rotate(-6deg);
+}
+
+.hero-note > span {
+  position: relative;
+  display: inline-block;
+}
+
+.hero-note > span::after {
+  content: "";
+  position: absolute;
+  left: 3%;
+  right: 16%;
+  bottom: -7px;
+  height: 5px;
+  background: var(--accent);
+  clip-path: polygon(0 51%, 27% 18%, 67% 38%, 100% 3%, 93% 81%, 39% 100%);
+  transform: rotate(-2deg);
+}
+
+.hero-art-ink {
+  position: absolute;
+  left: -3%;
+  bottom: 9%;
+  width: min(56%, 260px);
+  height: auto;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.38;
+  transform: rotate(-8deg);
+}
+
+.hero-art-ink path:last-child {
+  stroke-width: 1.1;
+  opacity: 0.65;
+}
+
+.window-front span {
+  display: block;
+  color: inherit;
+  font-weight: 900;
+  font-size: 33px;
+  letter-spacing: -0.12em;
+  transform: rotate(-7deg);
+}
+
+.closing-note {
+  position: relative;
+  padding-left: 40px;
+}
+
+.closing-note::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 18px;
+  bottom: 18px;
+  width: 5px;
+  background: var(--accent);
+  clip-path: polygon(12% 0, 100% 8%, 75% 42%, 100% 89%, 16% 100%, 0 51%);
+  transform: rotate(-7deg);
+}
+
+.settings-toggle::before {
+  content: "";
+  display: block;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--accent);
+  border-radius: 52% 48% 58% 42%;
+  transform: rotate(-13deg);
+}
+
+@media (max-width: 760px) {
+  .hero-art-ink {
+    left: -1%;
+    bottom: 5%;
+    width: 47%;
+  }
+}

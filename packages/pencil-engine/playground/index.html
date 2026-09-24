@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="theme-color" content="#f7f6f0" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>FanFuel — площадка Ойли</title>
+  </head>
+  <body>
+    <div class="announcement"><span class="announcement-dot"></span><span data-i18n="announcement"></span><span class="announcement-suffix" data-i18n="announcementSuffix"></span></div>
+    <header class="site-header">
+      <a class="brand" href="https://fanfuel.ru/" aria-label="FanFuel"><span class="brand-mark">F</span><span class="brand-word">FanFuel<span class="brand-period">.</span></span></a>
+      <nav class="desktop-nav" data-i18n-aria="navMock">
+        <span data-i18n="navCatalog"></span><span data-i18n="navCreators"></span><span data-i18n="navAbout"></span>
+      </nav>
+      <div class="header-actions">
+        <label class="search-shell"><span class="search-icon" aria-hidden="true">⌕</span><input type="search" disabled data-i18n-placeholder="searchPlaceholder" data-i18n-aria="searchMock" /></label>
+        <button class="login-button" type="button" disabled data-i18n="login"></button>
+      </div>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="eyebrow"></span></p>
+          <h1 id="hero-title"><span data-i18n="heroLineOne"></span><br /><em data-i18n="heroLineTwo"></em></h1>
+          <p class="hero-description" data-i18n="heroDescription"></p>
+          <div class="hero-note"><span data-i18n="heroNote"></span></div>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="hero-art-disc"></div><div class="hero-art-ring"></div><div class="hero-art-orbit"></div><svg class="hero-art-ink" viewBox="0 0 260 135" fill="none"><path d="M10 93 C38 57 56 61 76 36 C96 12 137 15 160 34 C186 56 210 50 250 20"/><path d="M23 108 C63 91 83 95 108 76 C134 57 171 78 201 64"/></svg><span class="hero-art-tag">OILY / 01</span></div>
+        <div class="hero-index">01 — 03</div>
+      </section>
+
+      <section class="catalog-section" aria-labelledby="catalog-title">
+        <div class="section-heading"><div><p class="eyebrow" data-i18n="catalogEyebrow"></p><h2 id="catalog-title" data-i18n="catalogTitle"></h2></div><p class="section-aside" data-i18n="catalogAside"></p></div>
+        <div class="category-row" data-i18n-aria="categoriesMock"><span class="category-chip selected" data-i18n="categoryAll"></span><span class="category-chip" data-i18n="categoryGames"></span><span class="category-chip" data-i18n="categoryCreative"></span><span class="category-chip" data-i18n="categorySoftware"></span><span class="category-chip" data-i18n="categoryLearning"></span></div>
+        <div class="product-grid">
+          <article class="product-card" data-oily-surface="card-1"><div class="product-art art-lime"><span class="art-orbit orbit-one"></span><span class="art-orbit orbit-two"></span><span class="art-glyph">◈</span><span class="art-code">FF / 001</span></div><div class="product-info"><span class="product-category" data-i18n="productOneCategory"></span><h3 data-i18n="productOneTitle"></h3><div class="product-footer"><span data-i18n="productOneSeller"></span><strong data-price="149000"></strong></div></div></article>
+          <article class="product-card" data-oily-surface="card-2"><div class="product-art art-lavender"><span class="art-window window-back"></span><span class="art-window window-front"><span aria-hidden="true">FF</span></span><span class="art-code">FF / 002</span></div><div class="product-info"><span class="product-category" data-i18n="productTwoCategory"></span><h3 data-i18n="productTwoTitle"></h3><div class="product-footer"><span data-i18n="productTwoSeller"></span><strong data-price="219000"></strong></div></div></article>
+          <article class="product-card" data-oily-surface="card-3"><div class="product-art art-peach"><span class="art-petal petal-one"></span><span class="art-petal petal-two"></span><span class="art-petal petal-three"></span><span class="art-petal petal-four"></span><span class="art-petal-center"></span><span class="art-code">FF / 003</span></div><div class="product-info"><span class="product-category" data-i18n="productThreeCategory"></span><h3 data-i18n="productThreeTitle"></h3><div class="product-footer"><span data-i18n="productThreeSeller"></span><strong data-price="89000"></strong></div></div></article>
+          <article class="product-card" data-oily-surface="card-4"><div class="product-art art-blue"><span class="art-ribbon ribbon-one"></span><span class="art-ribbon ribbon-two"></span><span class="art-code">FF / 004</span></div><div class="product-info"><span class="product-category" data-i18n="productFourCategory"></span><h3 data-i18n="productFourTitle"></h3><div class="product-footer"><span data-i18n="productFourSeller"></span><strong data-price="179000"></strong></div></div></article>
+        </div>
+      </section>
+      <section class="closing-note"><p data-i18n="closing"></p><span data-i18n="closingSign"></span></section>
+    </main>
+    <footer class="site-footer"><span>FanFuel Playground © 2026</span><span data-i18n="footer"></span><a href="https://fanfuel.ru/" data-i18n="realSite"></a></footer>
+
+    <canvas id="oily-canvas" class="oily-canvas" aria-hidden="true"></canvas>
+    <button id="oily-hit" class="oily-hit" type="button" data-i18n-aria="oilyHit"></button>
+    <div id="oily-status" class="sr-only" role="status"></div>
+
+    <aside class="settings" id="settings" data-i18n-aria="settingsAria">
+      <button id="settings-toggle" class="settings-toggle" type="button" aria-controls="settings-content" aria-expanded="false"><span data-i18n="settingsToggle"></span></button>
+      <div id="settings-content" class="settings-content">
+        <div class="settings-header"><div><span class="settings-kicker">OILY / LAB</span><h2 data-i18n="settingsTitle"></h2></div><span class="live-dot" data-i18n-title="live"></span></div>
+        <p class="settings-description" data-i18n="settingsDescription"></p>
+        <div class="setting-select"><label for="setting-brush" data-i18n="brush"></label><select id="setting-brush"><option value="soft" data-i18n="brushSoft"></option><option value="classic" data-i18n="brushClassic"></option></select></div>
+        <div id="settings-sliders"></div>
+        <div class="settings-actions"><button id="reset-oily" type="button" data-i18n="resetOily"></button><button id="reset-settings" type="button" data-i18n="resetSettings"></button></div>
+        <div class="settings-bottom"><span id="render-timing"></span><span data-i18n="settingsHint"></span></div>
+        <div class="settings-preferences"><button id="theme-toggle" type="button" data-i18n="themeToggle"></button><button id="language-toggle" type="button">EN</button></div>
+      </div>
+    </aside>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

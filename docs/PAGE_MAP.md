@@ -1,12 +1,15 @@
 # Page Map
 
+> Решение 2026-09-22: актуальный контракт — UX-TASK-040 (`docs/tasks/ui-ux/UX-TASK-040.md`), статус implemented_local; product review и интеграционная проверка ожидаются. / и /marketplace: три вкладки только гостям, после входа — marketplace. /for-streamers и /for-sellers: полноценные презентации в гостевых вкладках и самостоятельные страницы через footer/поиск. Утверждён графит/лайм #cafa39, SVG-Ойли, лёгкий motion и стабильные skeleton. Этот контракт заменяет противоречащие указания Aurora и вкладок для всех ниже. Полная игра World остаётся FUTURE.
+
 Карта страниц FanFuel фиксирует целевую информационную архитектуру. Наличие страницы в карте не означает разрешение немедленно создавать её в коде. Статус, версия и запреты на реализацию ведутся в `docs/UI_UX_TRACKER.md`.
 
 ## Текущие реализованные routes
 
 | Приложение    | Route                          | Назначение                                                | Статус       |
 | ------------- | ------------------------------ | --------------------------------------------------------- | ------------ |
-| `apps/web`    | `/`                            | Та же главная витрина, что и `/marketplace`, без redirect | IMPLEMENTED  |
+| `apps/web`    | `/`                            | Та же marketplace-first поверхность, что `/marketplace`   | NEEDS_REWORK |
+| `pencil-engine` | `https://playground.fanfuel.ru/` | Тестовая статическая главная с интерактивным Ойли        | IMPLEMENTED  |
 | `apps/web`    | `/gaming`                      | Скрытый локальный игровой режим без backend               | IMPLEMENTED  |
 | `apps/web`    | `/for-buyers`                  | Ролевой лендинг для покупателей                           | IMPLEMENTED  |
 | `apps/web`    | `/for-streamers`               | Ролевой лендинг для стримеров                             | IMPLEMENTED  |
@@ -16,7 +19,7 @@
 | `apps/web`    | `/auth/register`               | Совместимый redirect на `/auth`                           | DEPRECATED   |
 | `apps/web`    | `/me/profile`                  | Профиль, временный mini studio и seller settings          | NEEDS_REWORK |
 | `apps/web`    | `/creators/[slug]`             | Публичная страница автора с донат-формой                  | PARTIAL      |
-| `apps/web`    | `/marketplace`                 | Маркетплейс товаров                                       | IMPLEMENTED  |
+| `apps/web`    | `/marketplace`                 | Маркетплейс обычных цифровых товаров                      | NEEDS_REWORK |
 | `apps/web`    | `/marketplace/catalog`         | Каталог товаров и точка входа для поиска/фильтров         | PARTIAL      |
 | `apps/web`    | `/marketplace/categories`      | Навигация по направлениям маркетплейса                    | PARTIAL      |
 | `apps/web`    | `/marketplace/category/[slug]` | Страница конкретной категории                             | PARTIAL      |
@@ -38,12 +41,13 @@
 
 | ID                          | Страница                    | Route                          | Версия | Статус       |
 | --------------------------- | --------------------------- | ------------------------------ | ------ | ------------ |
-| PAGE-HOME                   | Главная                     | `/`                            | v0.3   | IMPLEMENTED  |
+| PAGE-HOME                   | Главная marketplace         | `/`                            | v0.3.5 | NEEDS_REWORK |
+| PAGE-PLAYGROUND             | Тестовая главная Ойли       | `https://playground.fanfuel.ru/` | playground-v0.1 | IMPLEMENTED |
 | PAGE-GAMING                 | Скрытый игровой режим       | `/gaming`                      | v0.3.5 | IMPLEMENTED  |
 | PAGE-FOR-STREAMERS          | Для стримеров               | `/for-streamers`               | v0.3   | IMPLEMENTED  |
 | PAGE-FOR-SELLERS            | Для продавцов               | `/for-sellers`                 | v0.3   | IMPLEMENTED  |
 | PAGE-FOR-BUYERS             | Для покупателей             | `/for-buyers`                  | v0.3   | IMPLEMENTED  |
-| PAGE-MARKETPLACE            | Маркетплейс                 | `/marketplace`                 | v0.3   | IMPLEMENTED  |
+| PAGE-MARKETPLACE            | Маркетплейс                 | `/marketplace`                 | v0.3.5 | NEEDS_REWORK |
 | PAGE-MARKETPLACE-CATALOG    | Каталог товаров             | `/marketplace/catalog`         | v0.3.5 | PARTIAL      |
 | PAGE-MARKETPLACE-CATEGORIES | Категории маркетплейса      | `/marketplace/categories`      | v0.3.5 | PARTIAL      |
 | PAGE-MARKETPLACE-CATEGORY   | Категория маркетплейса      | `/marketplace/category/[slug]` | v0.3.5 | PARTIAL      |
@@ -57,25 +61,33 @@
 | PAGE-SAFE-DEAL              | Страница безопасной сделки  | `/safe-deal`                   | v0.3.5 | PARTIAL      |
 | PAGE-FAQ                    | FAQ                         | `/faq`                         | v1.0   | PLANNED      |
 | PAGE-TERMS                  | Terms placeholder           | `/legal/terms`                 | v1.0   | LEGAL_REVIEW |
-| PAGE-PRIVACY                | Privacy policy placeholder  | `/legal/privacy`               | v1.0   | LEGAL_REVIEW |
+
+## FanFuel World
+
+| ID              | Страница      | Route                       | Версия | Статус |
+| --------------- | ------------- | --------------------------- | ------ | ------ |
+| PAGE-WORLD-HOME | FanFuel World | `https://world.fanfuel.ru/` | future | FUTURE |
+
+`PAGE-WORLD-HOME` существует только как объект discovery `UX-TASK-039`. Production route, отдельное приложение и backend не создавать до снятия `DO_NOT_BUILD_YET`, product/security/privacy review и архитектурного решения.
+| PAGE-PRIVACY | Privacy policy placeholder | `/legal/privacy` | v1.0 | LEGAL_REVIEW |
 
 ## Auth Pages
 
-| ID                  | Страница                     | Route                  | Версия | Статус       |
-| ------------------- | ---------------------------- | ---------------------- | ------ | ------------ |
-| PAGE-AUTH           | Единая авторизация           | `/auth`                | v0.3.5 | IMPLEMENTED  |
-| PAGE-AUTH-LOGIN     | Совместимый redirect входа   | `/auth/login`          | v0.1   | DEPRECATED   |
-| PAGE-AUTH-REGISTER  | Совместимый redirect регистрации | `/auth/register`   | v0.1   | DEPRECATED   |
-| PAGE-AUTH-NAME      | Имя после регистрации        | `/auth/name`           | v0.1   | IMPLEMENTED  |
-| PAGE-AUTH-RESET     | Восстановление пароля        | `/auth/reset-password` | v0.3   | BLOCKED      |
-| PAGE-AUTH-VERIFY    | Подтверждение почты          | `/auth` (inline state) | v0.3.5 | IMPLEMENTED  |
-| PAGE-AUTH-ROLE      | Выбор роли после регистрации | `/auth/role`           | v0.3   | PLANNED      |
-| PAGE-ONBOARDING     | Onboarding                   | `/onboarding`          | v0.3   | PLANNED      |
-| PAGE-ME-PROFILE     | Профиль пользователя         | `/me/profile`          | v0.3.5 | NEEDS_REWORK |
-| PAGE-ME-SETTINGS    | Настройки аккаунта           | `/me/settings`         | v0.3.5 | PLANNED      |
-| PAGE-ME-FAVORITES   | Избранное пользователя       | `/me/favorites`        | v0.3.5 | PLANNED      |
-| PAGE-ME-REVIEWS     | Мои отзывы                   | `/me/reviews`          | v0.3.5 | PLANNED      |
-| PAGE-ME-COLLECTIONS | Мои подборки                 | `/me/collections`      | v0.3.5 | PLANNED      |
+| ID                  | Страница                         | Route                  | Версия | Статус       |
+| ------------------- | -------------------------------- | ---------------------- | ------ | ------------ |
+| PAGE-AUTH           | Единая авторизация               | `/auth`                | v0.3.5 | IMPLEMENTED  |
+| PAGE-AUTH-LOGIN     | Совместимый redirect входа       | `/auth/login`          | v0.1   | DEPRECATED   |
+| PAGE-AUTH-REGISTER  | Совместимый redirect регистрации | `/auth/register`       | v0.1   | DEPRECATED   |
+| PAGE-AUTH-NAME      | Имя после регистрации            | `/auth/name`           | v0.1   | IMPLEMENTED  |
+| PAGE-AUTH-RESET     | Восстановление пароля            | `/auth/reset-password` | v0.3   | BLOCKED      |
+| PAGE-AUTH-VERIFY    | Подтверждение почты              | `/auth` (inline state) | v0.3.5 | IMPLEMENTED  |
+| PAGE-AUTH-ROLE      | Выбор роли после регистрации     | `/auth/role`           | v0.3   | PLANNED      |
+| PAGE-ONBOARDING     | Onboarding                       | `/onboarding`          | v0.3   | PLANNED      |
+| PAGE-ME-PROFILE     | Профиль пользователя             | `/me/profile`          | v0.3.5 | NEEDS_REWORK |
+| PAGE-ME-SETTINGS    | Настройки аккаунта               | `/me/settings`         | v0.3.5 | PLANNED      |
+| PAGE-ME-FAVORITES   | Избранное пользователя           | `/me/favorites`        | v0.3.5 | PLANNED      |
+| PAGE-ME-REVIEWS     | Мои отзывы                       | `/me/reviews`          | v0.3.5 | PLANNED      |
+| PAGE-ME-COLLECTIONS | Мои подборки                     | `/me/collections`      | v0.3.5 | PLANNED      |
 
 ## Buyer Pages
 
@@ -169,12 +181,17 @@
 - Если страница добавляет пользовательский текст, сначала добавить i18n keys.
 - Если page map и код расходятся, зафиксировать расхождение в `docs/DESIGN_AUDIT.md` или `docs/UX_IMPLEMENTATION_STATUS.md`.
 
-## Уточнение UX-TASK-029
+## Актуальный контракт UX-TASK-036
 
-`/` и `/marketplace` — единая главная с тремя режимами аудитории. Покупатель выбран по умолчанию; режимы не создают новые routes.
+`/` и `/marketplace` — единая marketplace-first главная с тремя режимами аудитории. Покупатель всегда выбран по умолчанию; автор и продавец доступны как вторичные вкладки и не создают новые routes или account roles. Общий каталог не ограничивается товарами для стримеров/авторов.
 
 ## UX-TASK-031 — страница автора до регистрации
 
 Версия: v0.3.5. Статус: IMPLEMENTED. Route: /create. По прямому запросу пользователя добавляется публичная анкета автора: название → описание → предпросмотр и авторизация. Данные сохраняются в sessionStorage текущей вкладки; email и пароль в черновик не входят. После входа возврат только на фиксированный /create, сохранение по явной кнопке. Новый авторский профиль создаётся как draft; существующий не перезаписывается этим сценарием. Покупатель может добавить роль автора. В хедере только вход, без отдельной регистрации/создания страницы; регистрация доступна вкладкой на auth-странице.
 
 Acceptance criteria: ru/en, semantic light/dark, mobile/desktop, клавиатура, валидация полей, восстановление черновика, сохранение при ошибке API, обе auth-вкладки сохраняют контекст, успешное сохранение через API, без автопубликации.
+
+
+## UX-TASK-041
+
+Добавляются `/studio` → creator commerce editor и `/creators/[slug]` → публичная витрина; `/seller` сохраняет заказы и получает commerce-инструменты. Редактор товара, product и checkout расширяются без удаления прежних маршрутов.

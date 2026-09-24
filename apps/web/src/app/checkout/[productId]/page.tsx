@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { formatMoney } from "@fanfuel/i18n";
 import { Alert, Badge, EmptyState, Skeleton } from "@fanfuel/ui";
@@ -13,19 +13,25 @@ import {
   getProduct,
   getStoredToken
 } from "../../../lib/api";
+import { SupportPicker, useCommerceCopy } from "../../../components/commerce-shared";
+import { initialAttribution, type Quote } from "../../../lib/commerce";
 import { appLocale, dictionary } from "../../../lib/i18n";
 
 export default function CheckoutPage() {
+  const { copy } = useCommerceCopy();
+  const [attribution, setAttribution] = useState(initialAttribution);
+  const [quote, setQuote] = useState<Quote | null>(null);
   const params = useParams<{ productId: string }>();
   const [token, setToken] = useState("");
   const [product, setProduct] = useState<Product | null>(null);
   const [order, setOrder] = useState<OrderDetail | null>(null);
-  const [acceptedTerms, setAcceptedTerms] = useState(true);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const pendingRequest = useRef<{ body: string; key: string } | null>(null);
 
   useEffect(() => {
     setToken(getStoredToken());
@@ -36,28 +42,47 @@ export default function CheckoutPage() {
   }, [params.productId]);
 
   async function handleCreateOrder() {
-    if (!product) {
+    if (!product || !quote || quote.choice_required) {
       return;
     }
     setError("");
     setMessage("");
     setIsSubmitting(true);
-
+    const payload = {
+      product_id: product.id,
+      quantity: 1,
+      accepted_terms: acceptedTerms,
+      quote_fingerprint: quote.fingerprint,
+      ...attribution
+    };
+    const body = JSON.stringify(payload);
+    if (pendingRequest.current?.body !== body)
+      pendingRequest.current = { body, key: newIdempotencyKey() };
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 20000);
     try {
       const response = await createOrder(
         token,
-        {
-          product_id: product.id,
-          quantity: 1,
-          accepted_terms: acceptedTerms
-        },
-        newIdempotencyKey()
+        payload,
+        pendingRequest.current.key,
+        controller.signal
       );
       setOrder(response);
       setMessage(dictionary.common.checkoutOrderCreated);
     } catch (err) {
-      setError(getErrorText(err));
+      if (err instanceof ApiError && err.code === "conflict") {
+        setError(copy.quoteChanged);
+        setAcceptedTerms(false);
+        setQuote(null);
+        setAttribution((value) => ({ ...value }));
+        try {
+          setProduct(await getProduct(product.id, controller.signal));
+        } catch {
+          setProduct(null);
+        }
+      } else setError(getErrorText(err));
     } finally {
+      window.clearTimeout(timeout);
       setIsSubmitting(false);
     }
   }
@@ -123,6 +148,13 @@ export default function CheckoutPage() {
                 </strong>
               </div>
               <Alert tone="info">{dictionary.common.safeDealMockText}</Alert>
+              <SupportPicker
+                id={product.id}
+                value={attribution}
+                onChange={setAttribution}
+                onResolved={setQuote}
+                disabled={Boolean(order) || isSubmitting}
+              />
               <label className="ff-check">
                 <input
                   type="checkbox"
@@ -135,7 +167,13 @@ export default function CheckoutPage() {
                 <button
                   className="ff-button ff-button-primary"
                   type="button"
-                  disabled={isSubmitting || Boolean(order) || !acceptedTerms}
+                  disabled={
+                    isSubmitting ||
+                    Boolean(order) ||
+                    !acceptedTerms ||
+                    !quote ||
+                    quote.choice_required
+                  }
                   onClick={() => void handleCreateOrder()}
                 >
                   {isSubmitting ? dictionary.common.loading : dictionary.common.checkoutCreateOrder}

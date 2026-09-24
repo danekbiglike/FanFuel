@@ -14,6 +14,7 @@ FanFuel проектируется как monorepo с независимыми �
 - `packages/ui` — общий UI kit.
 - `packages/sdk` — клиентский SDK для виджетов и интеграций.
 - `packages/i18n` — словари и helpers локализации.
+- `packages/pencil-engine` — прототип векторного карандашного Canvas-рендерера; формат сцен, анимация и ограничения описаны в `docs/PENCIL_ENGINE.md`. Его статическая площадка опубликована на `playground.fanfuel.ru` через существующий nginx; основной Next.js сайт пока не использует этот движок.
 - `infra` — Docker, nginx, migrations, scripts.
 
 Архитектура должна быть модульной, но не преждевременно микросервисной. На раннем этапе достаточно отдельных Go-сервисов для API, WebSocket и workers, общей PostgreSQL БД и Redis.

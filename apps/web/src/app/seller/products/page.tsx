@@ -6,9 +6,12 @@ import { Alert, Badge, EmptyState, ProductCard, Skeleton } from "@fanfuel/ui";
 import type { Product } from "@fanfuel/types";
 import { AppTopBar } from "../../../components/app-chrome";
 import { ApiError, getSellerProducts, getStoredToken, submitSellerProduct } from "../../../lib/api";
+import { useCommerceCopy } from "../../../components/commerce-shared";
+import type { CommerceProduct } from "../../../lib/commerce";
 import { appLocale, dictionary } from "../../../lib/i18n";
 
 export default function SellerProductsPage() {
+  const { copy } = useCommerceCopy();
   const [token, setToken] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState("");
@@ -108,11 +111,20 @@ export default function SellerProductsPage() {
                   </strong>
                   <span>{kindLabel(product.kind)}</span>
                 </div>
+                <a
+                  className="fuel-button fuel-button-outline"
+                  href={"/seller/products/" + product.id}
+                >
+                  {copy.configure}
+                </a>
                 {product.status === "draft" || product.status === "rejected" ? (
                   <button
                     className="ff-button ff-button-primary"
                     type="button"
-                    disabled={submittingId === product.id}
+                    disabled={
+                      submittingId === product.id ||
+                      !(product as CommerceProduct).commission_configured
+                    }
                     onClick={() => void handleSubmit(product)}
                   >
                     {submittingId === product.id

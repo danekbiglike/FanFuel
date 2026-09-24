@@ -141,6 +141,7 @@ export interface SellerSummary {
 }
 
 export interface Product {
+  cover_url?: string;
   id: string;
   seller_profile_id: string;
   category_id: string;

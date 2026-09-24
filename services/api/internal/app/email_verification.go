@@ -71,6 +71,24 @@ func validVerificationCode(code string) bool {
 	return err == nil
 }
 
+func validChallengeID(value string) bool {
+	if len(value) != 36 {
+		return false
+	}
+	for index, character := range []byte(value) {
+		if index == 8 || index == 13 || index == 18 || index == 23 {
+			if character != '-' {
+				return false
+			}
+			continue
+		}
+		if !((character >= '0' && character <= '9') || (character >= 'a' && character <= 'f') || (character >= 'A' && character <= 'F')) {
+			return false
+		}
+	}
+	return true
+}
+
 func randomUUID() (string, error) {
 	var value [16]byte
 	if _, err := rand.Read(value[:]); err != nil {

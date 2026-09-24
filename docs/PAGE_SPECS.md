@@ -1,10 +1,34 @@
 # Page Specs
 
+## Дополнение к PAGE-HOME / PAGE-MARKETPLACE: живой графический ритм
+
+Маршруты: `/`, `/marketplace`. Версия: v0.3.5 / Experience. TASK-ID: `UX-TASK-040`. После удаления звездочек и стрелок выбранная категория, переходы между смысловыми секциями, карточки без медиа и пустые состояния получают дозированные неровные карандашные линии. У каждой категории заглушки свой контурный мотив; подпись честно сообщает об отсутствии обложки. Крупное название товара не дублируется внутри медиа. В light/dark сохраняются контраст и читаемость, на 390/1440 px нет наложения на цену, подпись или действия. При reduced motion и Save-Data рисунки остаются статичными.
+
+## PAGE-PLAYGROUND: тестовая главная Ойли
+
+Route: `https://playground.fanfuel.ru/`. Версия: `playground-v0.1`. Статус: `IMPLEMENTED`. TASK-ID: `UX-TASK-044`. Отдельная статическая сборка обслуживается тем же nginx FanFuel VM и не меняет реальный маршрут `/`.
+
+Страница показывает демонстрационный header, hero и четыре фиктивные карточки. Вход и поиск отключены; категории не являются ссылками, карточки не открывают checkout. Страница явно сообщает, что это макет. Доступны ru/en и light/dark через semantic tokens.
+
+Ойли рисуется карандашными контурами поверх страницы. Пользователь может схватить и отпустить его на любой видимой карточке; модель деформируется от скорости рывка и контакта. Панель позволяет менять кисть, толщину, насыщенность, зерно, нажим, его размах, неровность, сужение, мягкость тела и силу покадрового зерна. Есть сброс. Слой персонажа не перехватывает ввод вне его видимого силуэта.
+
+Acceptance criteria: HTTPS и корректный сертификат; основной домен без регрессии; без API/покупок/аккаунтов; перетаскивание мышью и touch, клавиатурный сдвиг, контакты с карточками и полом; настройка в реальном времени; отсутствие горизонтального переполнения на 390 и 1440 px; reduced-motion даёт статический кадр; нет runtime-ошибок; noindex и ограничивающий CSP. Художественное принятие контура не входит в технический статус страницы.
+
+## Дополнение к PAGE-HOME / PAGE-MARKETPLACE: SiteStage Ойли
+
+Маршруты: `/`, `/marketplace`. Версия: brand/experience pilot. Статус: `DESIGN_REVIEW`; текущие страницы остаются `NEEDS_REWORK`, а их торговая структура сохраняется. TASK-ID: `UX-TASK-038`, `UX-TASK-043`. Это добавление к существующему `OilyStage`, без нового route и без FanFuel World.
+
+Сцена первого появления привязана к смысловой точке у хедера и видимой нижней поверхности первого экрана. Ойли проходит короткую последовательность `intro-fall → land → idle` один раз за согласованный период посещения. После появления пользователь может схватить Ойли и отпустить на любой видимой разрешённой карточке. Быстрое движение растягивает корпус, слабое падение смягчается деформацией, сильный удар запускает подготовленную реакцию по скорости контакта. Карточка остаётся товарной ссылкой; реакция не меняет цену, контент или layout. При отсутствии поверхности, вне viewport или под модальным окном взаимодействие спокойно завершается. Никакой реакции столкновения на checkout и финансовых состояниях.
+
+Acceptance criteria пилота: один actor без дубликатов при переключении вкладок и навигации; корректные поверхности после scroll/resize и загрузки карточек; произвольная видимая карточка принимает Ойли после drag/drop, а клик по остальной её площади работает; быстрый и медленный захват дают различимое растяжение; мягкий и сильный контакт различаются по скорости; нет перекрытия CTA, цены и фокуса; пользователь может скрыть Ойли; доступные подписи `ru/en`, управление с клавиатуры, light/dark, видимый фокус; reduced-motion/static fallback без падения и удара; скриншоты/QA на 320/390/768/1440; отдельно измерены подготовка карандашного слоя, время кадра и память на слабом устройстве. Техническая модель и границы: `docs/PENCIL_ENGINE_WEB_STAGE.md`.
+
+> Решение 2026-09-22: актуальный контракт — UX-TASK-040 (`docs/tasks/ui-ux/UX-TASK-040.md`), статус implemented_local; product review и интеграционная проверка ожидаются. / и /marketplace: три вкладки только гостям, после входа — marketplace. /for-streamers и /for-sellers: полноценные презентации в гостевых вкладках и самостоятельные страницы через footer/поиск. Утверждён графит/лайм #cafa39, SVG-Ойли, лёгкий motion и стабильные skeleton. Этот контракт заменяет противоречащие указания Aurora и вкладок для всех ниже. Полная игра World остаётся FUTURE.
+
 Источник истины для целевого UI/UX страниц FanFuel. Если страница есть в `docs/PAGE_MAP.md`, она должна иметь spec здесь или в таблице кратких specs. Страница со статусом `FUTURE`, `PAYMENT_REVIEW`, `LEGAL_REVIEW` или пометкой `DO_NOT_BUILD_YET` не создаётся в коде без отдельной задачи на изменение статуса.
 
 ## PAGE-GAMING: Скрытый игровой режим
 
-Статус: IMPLEMENTED
+Статус: NEEDS_REWORK
 
 Версия: v0.3.5
 
@@ -477,23 +501,23 @@ Acceptance criteria:
 Статус: IMPLEMENTED
 Route: `/`
 Раздел: Public
-Роль пользователя: guest, buyer, streamer, seller
-Версия появления: v0.2
+Роль пользователя: guest, buyer, creator, seller
+Версия текущего spec: v0.3.5, UX-TASK-036
 Не создавать до: —
 Связанные документы: `README.md`, `ROADMAP.md`, `docs/UX_PLAN.md`, `docs/UI_UX_TRACKER.md`
 Связанные компоненты: `AppTopBar`, `Button`, `Badge`, `Panel`, `ThemeSwitcher`
 
 ### Назначение страницы
 
-Открывать FanFuel сразу с marketplace как главной продуктовой точки входа.
+Открывать FanFuel сразу как marketplace обычных цифровых товаров. Creator-commerce механики усиливают покупку, но не превращают главную в лендинг для авторов или магазин только для стримеров.
 
 ### Пользовательская цель
 
-Сразу попасть в каталог, где видны товары, продавцы, условия и преимущества покупки через FanFuel.
+Сразу искать и выбирать цифровые товары, видеть реальные категории, продавцов и условия. При желании пользователь переключается на вкладки автора или продавца, не покидая страницу.
 
 ### Бизнес-цель
 
-Сформировать первое доверие и направить пользователя в регистрацию, marketplace или публичный пример автора.
+Довести покупателя до поиска, категории и карточки товара; отдельно объяснить авторам и продавцам их пути во вторичных вкладках.
 
 ### Когда пользователь попадает сюда
 
@@ -501,36 +525,39 @@ Route: `/`
 
 ### Основные блоки страницы
 
-- `/` рендерит ту же marketplace-витрину, что и `/marketplace`, без HTTP/client redirect.
-- Главная marketplace-витрина содержит торговый hero без внутренней search-form, поиск в topbar, быстрые категории, товарные ленты, подборки авторов и спокойные empty states.
-- UX-TASK-029: презентации автора и продавца доступны через переключатель под хэдером на той же странице. Старые ролевые маршруты сохранены для прямых ссылок.
+- `/` рендерит ту же marketplace-поверхность, что и `/marketplace`, без HTTP/client redirect.
+- Под хэдером расположен доступный переключатель `Покупатель / Автор / Продавец`; начальное состояние всегда `Покупатель`, независимо от ролей аккаунта.
+- Покупательский режим начинается с торговой навигации: поиск или явный путь к поиску, общие категории цифровых товаров, реальные товарные карточки и редакционные направления.
+- Товары для стримеров, OBS и creator assets остаются важным направлением, но не определяют весь ассортимент.
+- Вкладки автора и продавца содержат краткие специализированные пути и честно обозначают ещё не реализованные возможности.
+- Большой platform explainer, role-first hero, длинная цепочка маркетинговых секций и общий финальный CTA не входят в покупательский режим.
 
 ### Основные действия пользователя
 
-- Зарегистрироваться.
-- Войти.
-- Открыть профиль.
-- В будущей версии открыть marketplace или страницу для роли.
+- Искать товар.
+- Открыть категорию или товар.
+- Переключить вкладку аудитории.
+- Войти или открыть профиль из хедера.
 
 ### Данные, которые нужны странице
 
-- i18n copy.
-- Не требует API данных в v0.2.
-- В будущем: featured categories/products только после marketplace API.
+- Категории и реальные опубликованные товары из marketplace API.
+- i18n copy для трёх режимов и состояний.
+- Никаких frontend-only fake products, fake metrics, fake reviews, fake promocodes или fake collections.
 
 ### Состояния страницы
 
 #### Loading
 
-Не требуется для статического v0.2. Для будущих featured products использовать skeleton cards.
+Skeleton торговых блоков без подмены страницы лендингом.
 
 #### Empty
 
-Если нет featured products, показывать нейтральный блок "Маркетплейс готовится", не фальшивые товары.
+Показать честное пустое состояние с переходом к категориям или seller onboarding, не фальшивые товары.
 
 #### Error
 
-Ошибки загрузки внешних блоков не должны ломать главную.
+Сохранить навигацию, переключатель и retry; не заменять ошибку маркетинговым лендингом.
 
 #### Success
 
@@ -546,38 +573,40 @@ Route: `/`
 
 #### Mobile
 
-Первый экран должен показывать название, ценность и один главный CTA без горизонтального скролла.
+Первый экран должен показывать marketplace-навигацию и начало реального ассортимента без горизонтального overflow.
 
 #### Desktop
 
-Использовать два смысловых столбца: copy + product/control preview.
+Не фиксировать hero в схему `copy + декоративный preview`; композиция должна приоритизировать поиск, категории и реальные товары.
 
 ### UX-правила
 
-Не использовать агрессивную монетизационную риторику. Не обещать безопасную сделку как абсолютную гарантию.
+Не использовать агрессивную монетизационную риторику. Не обещать safe deal как абсолютную гарантию. Не давить поддержкой автора на покупку.
 
 ### UI-правила
 
-Semantic tokens, неон и glow не использовать. Не превращать страницу в generic SaaS landing.
+Semantic tokens, light/dark и доступность обязательны. Не превращать страницу в generic SaaS landing, промо авторов или streamer-only каталог.
 
 ### Что уже реализовано
 
-Корневой route `/` рендерит тот же marketplace screen, что и `/marketplace`, без redirect; отдельные ролевые лендинги реализованы для покупателей, стримеров и продавцов.
+Корневой route `/` уже переиспользует marketplace screen, переключатель аудиторий и часть торговых блоков. По обратной связи продуктовый контракт считается выполненным лишь частично.
 
 ### Что нужно изменить
 
-Провести screenshot QA для `/marketplace` и ролевых лендингов на mobile/light/dark.
+Выполнить UX-TASK-036: убрать landing/streamer-only дрейф, закрепить обычного покупателя и общий ассортимент, синхронизировать `/` и `/marketplace`, затем провести product review и regression QA.
 
 ### Что не нужно делать сейчас
 
-Не возвращать generic SaaS landing на `/` без отдельного изменения IA.
+Не возвращать generic SaaS landing, общую презентацию FanFuel или каталог только для авторов/стримеров. Не начинать полный визуальный редизайн до UX-TASK-037.
 
 ### Acceptance criteria
 
-- Пользователь за 5 секунд понимает, что FanFuel связан с авторами, донатами и цифровыми товарами.
-- CTA не спорят между собой.
-- Тексты через i18n.
-- Light/dark/mobile работают.
+- За 5 секунд обычный покупатель понимает, что перед ним marketplace цифровых товаров, а не лендинг.
+- Покупатель выбран по умолчанию; вкладки автора и продавца доступны с клавиатуры и не назначают роли.
+- В первом viewport видны поиск/путь к поиску, категории или реальные товары.
+- Минимум одно видимое направление каталога не зависит от creator/streamer use case.
+- Нет фиктивных товаров, метрик, отзывов, промокодов и подборок.
+- `ru/en`, light/dark, reduced motion и 320/390/768/1440 работают с данными, empty и error.
 
 ### Зависимости
 
@@ -831,7 +860,7 @@ PAGE-AUTH и email verification backend реализованы; раздел с�
 
 ## PAGE-AUTH-NAME: Имя после регистрации
 
-Статус: IMPLEMENTED
+Статус: NEEDS_REWORK
 Route: `/auth/name`
 Раздел: Auth
 Роль пользователя: authenticated
@@ -1297,14 +1326,14 @@ Donate MVP, payment provider abstraction.
 Route: `/marketplace`
 Раздел: Marketplace
 Роль пользователя: guest, buyer
-Версия появления: v0.3
+Версия текущего spec: v0.3.5, UX-TASK-036
 Не создавать до: реализовано в v0.3
 Связанные документы: `docs/DOMAIN_MODEL.md`, `docs/API_PLAN.md`, `docs/UX_RULES.md`
 Связанные компоненты: `AppTopBar`, `ProductCard`, `Tabs`, `Badge`, `EmptyState`, `Skeleton`, `Pagination`
 
 ### Назначение страницы
 
-Дать покупателю каталог цифровых товаров и услуг с понятной безопасностью и авторской поддержкой.
+Дать обычному покупателю общий каталог цифровых товаров и услуг с понятными продавцами, условиями и аккуратной creator attribution там, где она реально есть.
 
 ### Пользовательская цель
 
@@ -1320,19 +1349,18 @@ Route: `/marketplace`
 
 ### Основные блоки страницы
 
-- Hero: большой поиск по товарам/авторам/категориям, короткий заголовок, nav chips, CTA и demo покупки через витрину автора с целью, промокодом и тремя шагами.
-- "Покупка может быть поддержкой": ранний блок сразу после hero, объясняющий механику товар → автор/промокод → польза покупателю, продавцу и автору.
-- "Что можно найти на FanFuel": 8 кликабельных категорий ассортимента с preview chips.
-- "Популярно в витринах авторов": крупная карточка товара и список авторов/промокодов, у которых товар находится в витрине.
-- "Популярные товары": 5 более крупных карточек из API с превью, названием, описанием, ценой, рейтингом, продавцом и 1-2 бейджами.
-- "Витрины авторов": 2-3 showcase-блока автора с целью, промокодом, CTA и мини-товарами.
-- Компактные блоки "Для авторов", "Для продавцов", "Безопасность" и финальный CTA.
-- Empty/search no results.
-- Legal/category warning для restricted категорий.
+- Общий переключатель `Покупатель / Автор / Продавец`, покупатель по умолчанию.
+- В покупательском режиме: компактная marketplace-навигация, поиск/переход к поиску, реальные категории, реальные product shelves/cards и редакционные направления покупок.
+- Ассортимент описывается как цифровые товары в целом; creator/OBS assets — одна из категорий.
+- Creator attribution, поддержка автора и safe deal показываются в релевантном контексте карточки/товара, а не как длинная обязательная презентация до каталога.
+- Вкладка автора: краткий путь к витрине, рекомендациям, донатам, целям и OBS с честной маркировкой planned-функций.
+- Вкладка продавца: краткий путь от публикации товара к заказу, модерации и будущему каналу через авторов.
+- Loading, empty, error и search no results.
+- Legal/category warning для restricted категорий без показа внутренних маркеров пользователю.
 
 ### Основные действия пользователя
 
-Искать через hero search или topbar search, открыть товар, перейти в явную категорию, открыть страницу автора или витрину автора. Фильтры живут в каталоге, а не скрыто на главной.
+Искать через доступный в первом viewport вход, открыть товар, перейти в категорию или переключить аудиторию. Фильтры живут в каталоге, а не скрыто на главной.
 
 ### Данные, которые нужны странице
 
@@ -1366,11 +1394,11 @@ Restricted category hidden or explained.
 
 #### Mobile
 
-Первый экран показывает заголовок, большой поиск, быстрые направления и demo покупки через автора. Горизонтальные ленты листаются вправо; витрины авторов складываются в одну колонку.
+Первый экран показывает переключатель, marketplace-навигацию и начало реального ассортимента. Никакая role-презентация не выталкивает товары ниже экрана.
 
 #### Desktop
 
-Hero в две колонки, большой поиск слева и demo-механика справа. Desktop topbar search на `/marketplace` скрыт до прокрутки ниже hero, чтобы не дублировать главный поиск.
+Композиция приоритизирует торговую навигацию и реальные товары. Не закреплять обязательную схему `copy + demo автора`; не дублировать поиск.
 
 ### UX-правила
 
@@ -1382,21 +1410,24 @@ Hero в две колонки, большой поиск слева и demo-ме
 
 ### Что уже реализовано
 
-Реализованы каталог `/marketplace` и такая же главная на `/`, загрузка товаров из API, большой hero search с подсказками и переходом в `/marketplace/catalog`, topbar search с отложенным появлением на desktop ниже hero, demo покупки через витрину автора, ранний блок "Покупка может быть поддержкой", 8 категорий ассортимента, featured-блок "Популярно в витринах авторов" с товаром и списком авторов/промокодов, крупные product cards без повторяющейся кнопки "Подробнее" или hover CTA, showcase-блоки "Витрины авторов", компактные блоки для авторов/продавцов/безопасности и финальный CTA. Добавлены лёгкие destination routes `/marketplace/catalog`, `/marketplace/categories`, `/marketplace/category/[slug]`, `/marketplace/promocodes`, `/creators`, `/safe-deal`, чтобы навигация с главной не вела в скрытые фильтры или 404.
+Реализованы общий screen для `/` и `/marketplace`, API-загрузка товаров, marketplace destinations, product cards, состояния и переключатель аудитории. Текущая композиция считается частично соответствующей: накопленные creator-commerce/landing блоки допускают неверное чтение главной.
 
 ### Что нужно изменить
 
-Провести screenshot QA для мобильной версии и light/dark тем; позже улучшить мобильные фильтры как drawer, заменить лёгкие destination routes `/marketplace/catalog`, `/marketplace/categories`, `/marketplace/category/[slug]`, `/marketplace/promocodes`, `/creators` на полноценные списки с поиском/фильтрами. `/safe-deal` сейчас содержит только короткое пользовательское объяснение без provider-specific обещаний; подробные правила, статусы споров и юридические ограничения требуют payment/legal review.
+Выполнить UX-TASK-036 и product review. После стабилизации позже улучшить мобильные фильтры и destination routes. `/safe-deal` остаётся коротким пользовательским объяснением без provider-specific обещаний; подробные правила требуют payment/legal review.
 
 ### Что не нужно делать сейчас
 
-Не делать статический каталог без backend. Не создавать `/creators` list, creator store, promo pages, real safe deal page или category routes без изменения статуса в tracker.
+Не делать статический каталог без backend. Не возвращать landing-first или streamer-only структуру. Не создавать creator store, реальный promo flow или real safe deal page без изменения статуса и зависимостей.
 
 ### Acceptance criteria
 
-- Поиск и фильтры не ломают mobile.
-- Empty/error/loading states есть.
-- Risky categories не доступны без review.
+- `/marketplace` и `/` имеют одинаковый marketplace-first контракт.
+- Покупатель выбран по умолчанию, author/seller tabs вторичны и доступны.
+- Общий ассортимент не ограничен creator/streamer товарами.
+- Поиск и категории доступны в первом viewport, реальные товары появляются без длинной презентации платформы.
+- Empty/error/loading states есть; risky categories недоступны без review.
+- Product review и regression QA UX-TASK-036 пройдены.
 
 ### Зависимости
 
@@ -2194,80 +2225,80 @@ Widget settings API, preview fixtures.
 
 Эти specs краткие, потому что страницы ещё не должны реализовываться или зависят от будущих доменных слоёв. Перед началом работы по любой из них нужно раскрыть spec до полного формата выше.
 
-| ID                            | Статус         | Route                              | Роль пользователя  | Назначение и основные блоки                                        | Состояния и UX-правила                                 | Что уже реализовано                                                     | Что не делать сейчас                   | Acceptance criteria                  | Зависимости                  |
-| ----------------------------- | -------------- | ---------------------------------- | ------------------ | ------------------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------------- | -------------------------------------- | ------------------------------------ | ---------------------------- |
-| PAGE-FOR-STREAMERS            | IMPLEMENTED    | `/for-streamers`                   | guest/streamer     | Объяснить донаты, OBS, страницу автора, мягкую монетизацию.        | Static loading не нужен; mobile hero с одним CTA.      | Ролевой landing с preview flow и CTA регистрации.                       | Не делать generic SaaS.                | Стример понимает next action.        | i18n, role onboarding.       |
-| PAGE-FOR-SELLERS              | IMPLEMENTED    | `/for-sellers`                     | guest/seller       | Объяснить продажи через авторов, Seller Lite/Pro, модерацию.       | LEGAL_REVIEW для налоговых формулировок.               | Ролевой landing с preview flow и осторожным текстом про выплаты/review. | Не обещать выплаты/налоги.             | Seller понимает ограничения MVP.     | seller profile, marketplace. |
-| PAGE-FOR-BUYERS               | IMPLEMENTED    | `/for-buyers`                      | guest/buyer        | Объяснить безопасную покупку, поддержку автора, историю заказов.   | Safe deal без абсолютных гарантий.                     | Ролевой landing про преимущества marketplace и buyer order path.        | Не делать страховые обещания.          | Buyer понимает, что покупает.        | marketplace/order.           |
-| PAGE-MARKETPLACE-CATEGORY     | PLANNED        | `/marketplace/categories/[slug]`   | guest/buyer        | Breadcrumbs, category description, filters, product grid.          | Empty category, restricted category warning.           | Нет.                                                                    | Не включать risky categories.          | Фильтры работают на mobile.          | categories/products.         |
-| PAGE-CREATOR-STORE            | PLANNED        | `/creators/[slug]/store`           | guest/buyer        | Live-only витрина автора, карточки и подборки.                     | Offline/live/paused states.                            | Нет.                                                                    | Не делать сложную партнёрскую сеть.    | Live-only блоки видны только live.   | CreatorStore, StoreItem.     |
-| PAGE-SAFE-DEAL                | PAYMENT_REVIEW | `/safe-deal`                       | guest/buyer/seller | Объяснить hold, confirmation, disputes, refunds.                   | LEGAL_REVIEW_REQUIRED для гарантий.                    | Нет.                                                                    | Не обещать абсолютную защиту.          | Текст проверен legal/payment.        | provider/legal review.       |
-| PAGE-FAQ                      | PLANNED        | `/faq`                             | all                | Ответы по донатам, покупкам, ролям, поддержке.                     | Search/no result future.                               | Нет.                                                                    | Не писать финальный legal copy.        | FAQ покрывает support top questions. | support workflows.           |
-| PAGE-TERMS                    | LEGAL_REVIEW   | `/legal/terms`                     | all                | Legal placeholder.                                                 | Clearly marked placeholder.                            | Нет.                                                                    | Не писать финальный договор.           | LEGAL_REVIEW_REQUIRED виден в docs.  | legal review.                |
-| PAGE-PRIVACY                  | LEGAL_REVIEW   | `/legal/privacy`                   | all                | Privacy placeholder.                                               | Clearly marked placeholder.                            | Нет.                                                                    | Не писать финальную политику.          | LEGAL_REVIEW_REQUIRED виден в docs.  | legal review.                |
-| PAGE-AUTH-RESET               | BLOCKED        | `/auth/reset-password`             | guest              | Email request, token form, success.                                | Token expired/error states.                            | Нет.                                                                    | Не делать UI без backend.              | Flow one-time and limited.           | password reset backend.      |
-| PAGE-AUTH-VERIFY              | IMPLEMENTED    | `/auth` (inline state)             | guest              | Код подтверждения нового email до создания аккаунта.               | Pending/expired/resend/exhausted states.               | Реализовано в PAGE-AUTH.                                                   | Телефон не добавлять без отдельного flow. | Verification status clear.         | SMTP configuration.          |
-| PAGE-AUTH-ROLE                | PLANNED        | `/auth/role`                       | authenticated      | Выбор/добавление роли после регистрации.                           | Multi-role explanation.                                | Нет.                                                                    | Не добавлять admin role.               | Роль ведёт в нужный onboarding.      | role APIs.                   |
-| PAGE-ONBOARDING               | PLANNED        | `/onboarding`                      | authenticated      | Checklist by role.                                                 | Empty/new user states.                                 | Нет.                                                                    | Не строить длинный wizard без данных.  | User reaches next dashboard.         | role switcher.               |
-| PAGE-ME-SETTINGS              | PLANNED        | `/me/settings`                     | authenticated      | Account preferences, theme, locale, notifications, security links. | Save/error/unauthorized; mobile compact settings list. | Нет; часть настроек временно в `/me/profile`.                           | Не смешивать Studio/Seller controls.   | Settings separated from profile.     | user preferences.            |
-| PAGE-ME-FAVORITES             | PLANNED        | `/me/favorites`                    | authenticated      | User-owned saved products/creators/collections.                    | Empty first save, unavailable target.                  | Нет.                                                                    | Не дублировать buyer-only логику.      | Saved items scoped to user.          | Favorite.                    |
-| PAGE-ME-REVIEWS               | PLANNED        | `/me/reviews`                      | authenticated      | Reviews authored by current user.                                  | Empty, hidden/flagged state.                           | Нет.                                                                    | Не раскрывать moderation internals.    | User sees own reviews.               | Review.                      |
-| PAGE-ME-COLLECTIONS           | PLANNED        | `/me/collections`                  | authenticated      | User-created collections.                                          | Empty first collection, private/public states.         | Нет.                                                                    | Не делать социальную сеть.             | Any user can create collections.     | UserCollection.              |
-| PAGE-BUYER-DASHBOARD          | IMPLEMENTED    | `/buyer`                           | buyer              | Overview orders, statuses, mock totals.                            | Empty first purchase.                                  | Да.                                                                     | Не добавлять fake recommendations.     | Next action clear.                   | orders.                      |
-| PAGE-BUYER-PURCHASES          | PLANNED        | `/buyer/purchases`                 | buyer              | Purchases list with statuses.                                      | Empty/history, filters.                                | Нет.                                                                    | Не показывать чужие orders.            | Buyer sees own purchases.            | orders.                      |
-| PAGE-BUYER-DISPUTE            | FUTURE         | `/buyer/disputes/[id]`             | buyer              | Dispute timeline/evidence/deadlines.                               | LEGAL_REVIEW wording.                                  | Нет.                                                                    | DO_NOT_BUILD_YET до v0.7.              | Buyer sees deadlines/evidence.       | disputes, files.             |
-| PAGE-BUYER-FAVORITES          | PLANNED        | `/buyer/favorites`                 | buyer              | Alias/entry to user-owned favorites.                               | Empty favorites.                                       | Нет.                                                                    | Не дублировать `/me/favorites`.        | Saved items list.                    | Favorite.                    |
-| PAGE-BUYER-PROMOCODES         | FUTURE         | `/buyer/promocodes`                | buyer              | Active/used promo codes.                                           | Expired/empty states.                                  | Нет.                                                                    | Не делать до PromoCode.                | Promo status clear.                  | PromoCode.                   |
-| PAGE-BUYER-SETTINGS           | PLANNED        | `/buyer/settings`                  | buyer              | Buyer profile, locale, notifications.                              | Save/error/unauthorized.                               | Частично в `/me/profile`.                                               | Не смешивать seller/studio.            | Settings scoped to buyer.            | user preferences.            |
-| PAGE-STUDIO-DASHBOARD         | PLANNED        | `/studio`                          | streamer           | Studio shell with tabs.                                            | Empty setup, forbidden, mobile tabs.                   | Частично в `/me/profile`.                                               | Не смешивать account settings.         | Studio IA stable.                    | creator profile.             |
-| PAGE-STUDIO-STATISTICS        | PLANNED        | `/studio/statistics`               | streamer           | Earnings chart with source filters.                                | No data, loading chart, error retry.                   | Нет.                                                                    | Не показывать fake balance.            | Metrics traceable.                   | CreatorMetricSnapshot.       |
-| PAGE-STUDIO-EVENTS            | PLANNED        | `/studio/events`                   | streamer           | Recent events feed with subtabs.                                   | Empty integrations, delayed events.                    | Нет.                                                                    | Не показывать raw bot payload.         | Events deduped.                      | CreatorActivityEvent.        |
-| PAGE-STUDIO-DONATION-SETTINGS | PLANNED        | `/studio/donation-settings`        | streamer           | Amounts, message limits, audio/TTS, moderation, spam filter.       | Validation, hold-for-review.                           | Нет.                                                                    | Не менять payment statuses.            | Donation rules applied.              | CreatorDonationSettings.     |
-| PAGE-STUDIO-PUBLIC-PAGE       | PLANNED        | `/studio/page`                     | streamer           | Public title/description/status/avatar/banner.                     | Preview, hidden/blocked states.                        | Частично в `/me/profile`.                                               | Не делать drag-and-drop editor.        | Public page settings clear.          | storage upload.              |
-| PAGE-STUDIO-DONATIONS         | PLANNED        | `/studio/donations`                | streamer           | Donation list, filters, totals.                                    | Empty, loading, error.                                 | API есть, UI нет.                                                       | Не добавлять payouts.                  | Creator sees donation history.       | studio donations API.        |
-| PAGE-STUDIO-GOALS             | PARTIAL        | `/studio/goals`                    | streamer           | Goals list/create/edit/pause.                                      | Empty first goal, validation.                          | Частично в `/me/profile`.                                               | Не добавлять complex campaigns.        | Goal lifecycle clear.                | goals API.                   |
-| PAGE-STUDIO-ALERTS            | PLANNED        | `/studio/alerts`                   | streamer           | Alert style settings, preview.                                     | Preview fallback.                                      | Нет.                                                                    | Не делать custom designer.             | Alert preview before OBS.            | widget config.               |
-| PAGE-STUDIO-WIDGETS           | PLANNED        | `/studio/widgets`                  | streamer           | Widget catalog, presets, trigger rules, token create/rotate.       | Token visible once, rule conflict, revoked state.      | Частично в `/me/profile`.                                               | Не показывать token повторно.          | OBS setup understandable.            | widgets API.                 |
-| PAGE-STUDIO-WIDGET-GROUPS     | PLANNED        | `/studio/widget-groups`            | streamer           | Widget groups and placement zones.                                 | Token visible once, zone overlap warning.              | Нет.                                                                    | Не делать drag-and-drop scene editor.  | Alerts can be placed by type.        | WidgetGroup.                 |
-| PAGE-STUDIO-STORE             | PLANNED        | `/studio/store`                    | streamer           | Manage creator store appearance and live-only sections.            | Empty store setup, offline/live preview.               | Нет.                                                                    | Не делать сложную партнёрскую сеть.    | Store sections ordered.              | marketplace.                 |
-| PAGE-STUDIO-PRODUCTS          | PLANNED        | `/studio/products`                 | streamer           | Select eligible products for creator store.                        | Empty catalog, hidden product.                         | Нет.                                                                    | Не обходить moderation.                | Product eligibility clear.           | Product, StoreItem.          |
-| PAGE-STUDIO-COLLECTIONS       | PLANNED        | `/studio/collections`              | streamer           | Build author collections for store sections.                       | Empty collection, hidden target.                       | Нет.                                                                    | Не смешивать private user collections. | Collections reusable.                | UserCollection.              |
-| PAGE-STUDIO-PARTNERS          | FUTURE         | `/studio/partners`                 | streamer           | Partner products and attribution.                                  | Empty partner catalog.                                 | Нет.                                                                    | Не делать ad exchange.                 | Disclosure clear.                    | AffiliateLink.               |
-| PAGE-STUDIO-PROMOCODES        | FUTURE         | `/studio/promocodes`               | streamer           | Creator promo codes.                                               | Expired/usage states.                                  | Нет.                                                                    | До PromoCode domain не делать.         | Promo use transparent.               | PromoCode.                   |
-| PAGE-STUDIO-ANALYTICS         | FUTURE         | `/studio/analytics`                | streamer           | Advanced analytics after v0.3.5 statistics.                        | No data state.                                         | Нет.                                                                    | Не дублировать `/studio/statistics`.   | Metrics traceable.                   | analytics snapshots.         |
-| PAGE-STUDIO-PAYOUTS           | PAYMENT_REVIEW | `/studio/payouts`                  | streamer           | Balance/payout requests.                                           | Pending/failed/held states.                            | Нет.                                                                    | Не делать до v0.6 review.              | Money states accurate.               | wallet/payout provider.      |
-| PAGE-STUDIO-SETTINGS          | PLANNED        | `/studio/settings`                 | streamer           | Creator settings, privacy, notifications.                          | Save/error states.                                     | Частично в `/me/profile`.                                               | Не смешивать account settings.         | Scoped settings.                     | user/creator APIs.           |
-| PAGE-SELLER-PRODUCTS          | IMPLEMENTED    | `/seller/products`                 | seller             | Products list, moderation statuses.                                | Empty first product.                                   | Да.                                                                     | Не делать risky categories.            | Seller sees product status.          | products.                    |
-| PAGE-SELLER-PRODUCT-NEW       | IMPLEMENTED    | `/seller/products/new`             | seller             | Product creation form.                                             | Validation, draft save.                                | Да.                                                                     | Не автопубликовать без moderation.     | Product draft created.               | products/categories.         |
-| PAGE-SELLER-PRODUCT-EDIT      | PLANNED        | `/seller/products/[id]/edit`       | seller             | Edit product details.                                              | Published/pending restrictions.                        | Нет.                                                                    | Не менять old order snapshots.         | Changes versioned/safe.              | products.                    |
-| PAGE-SELLER-ORDERS            | IMPLEMENTED    | `/seller/orders`                   | seller             | Orders queue.                                                      | Empty and action states.                               | Да.                                                                     | Не смешивать payouts.                  | Seller sees next action.             | orders.                      |
-| PAGE-SELLER-DEALS             | PAYMENT_REVIEW | `/seller/deals`                    | seller             | Safe deal statuses.                                                | Held/disputed/deadline states.                         | Нет.                                                                    | Не делать до v0.5.                     | Deal status clear.                   | safe deal.                   |
-| PAGE-SELLER-DISPUTES          | FUTURE         | `/seller/disputes`                 | seller             | Dispute queue and evidence.                                        | Deadline states.                                       | Нет.                                                                    | DO_NOT_BUILD_YET до v0.7.              | Seller sees response deadline.       | disputes.                    |
-| PAGE-SELLER-PROMOCODES        | FUTURE         | `/seller/promocodes`               | seller             | Promo code creation and usage.                                     | Limit/expired states.                                  | Нет.                                                                    | Не делать до PromoCode.                | Promo conflicts handled.             | PromoCode.                   |
-| PAGE-SELLER-AFFILIATE         | FUTURE         | `/seller/partners`                 | seller             | Partner percent/campaigns.                                         | Empty creator partners.                                | Нет.                                                                    | Не делать ad exchange.                 | Attribution transparent.             | affiliate model.             |
-| PAGE-SELLER-ANALYTICS         | FUTURE         | `/seller/analytics`                | seller             | Sales/product/creator analytics.                                   | No data state.                                         | Нет.                                                                    | No fake metrics.                       | Metrics sourced.                     | orders/events.               |
-| PAGE-SELLER-PAYOUTS           | PAYMENT_REVIEW | `/seller/payouts`                  | seller             | Available/frozen/pending payout.                                   | Pending/rejected/failed.                               | Нет.                                                                    | Не называть банковским счётом.         | Ledger matches UI.                   | wallet/payouts.              |
-| PAGE-SELLER-SETTINGS          | PLANNED        | `/seller/settings`                 | seller             | Seller profile and policies.                                       | Save/error states.                                     | Частично в `/me/profile`.                                               | Не добавлять Pro verification здесь.   | Settings scoped.                     | seller profile.              |
-| PAGE-SELLER-VERIFY-PRO        | LEGAL_REVIEW   | `/seller/verification/pro`         | seller             | Pro request and document placeholders.                             | Pending/rejected states.                               | Нет.                                                                    | Не собирать лишние данные.             | LEGAL_REVIEW before fields.          | legal/file security.         |
-| PAGE-ADMIN-DASHBOARD          | PLANNED        | `/admin`                           | admin              | Overview queues and risks.                                         | Empty queues.                                          | Частично root admin app.                                                | Не делать vanity metrics.              | Admin sees priority queues.          | admin APIs.                  |
-| PAGE-ADMIN-SELLERS            | PLANNED        | `/admin/sellers`                   | admin              | Seller moderation/list.                                            | Empty/filter states.                                   | Нет.                                                                    | Не блокировать без audit.              | Seller actions auditable.            | seller profiles.             |
-| PAGE-ADMIN-STREAMERS          | PLANNED        | `/admin/streamers`                 | admin              | Creator moderation/list.                                           | Empty/filter states.                                   | Нет.                                                                    | Не менять public pages без audit.      | Actions auditable.                   | creator profiles.            |
-| PAGE-ADMIN-PRODUCTS           | PARTIAL        | `/admin/products`                  | admin              | Product moderation.                                                | Pending/rejected states.                               | Частично в root admin app.                                              | Не approve risky categories.           | Moderation reason captured.          | products/categories.         |
-| PAGE-ADMIN-CATEGORIES         | PLANNED        | `/admin/categories`                | admin              | Category management.                                               | Restricted/legal flags.                                | Нет.                                                                    | Не открывать risky categories.         | Flags visible.                       | category model.              |
-| PAGE-ADMIN-ORDERS             | PLANNED        | `/admin/orders`                    | admin              | Order lookup/read-only.                                            | Not found/permission.                                  | Нет.                                                                    | Не добавлять manual money changes.     | Data minimal.                        | orders.                      |
-| PAGE-ADMIN-DEALS              | PAYMENT_REVIEW | `/admin/deals`                     | admin              | Deal overview/actions later.                                       | Held/disputed states.                                  | Нет.                                                                    | Не менять money statuses без review.   | Provider-agnostic.                   | safe deal/ledger.            |
-| PAGE-ADMIN-DISPUTES           | FUTURE         | `/admin/disputes`                  | admin              | Arbitration queue.                                                 | Evidence/deadline states.                              | Нет.                                                                    | DO_NOT_BUILD_YET до v0.7.              | Decision audited.                    | disputes/refunds.            |
-| PAGE-ADMIN-PAYOUTS            | PAYMENT_REVIEW | `/admin/payouts`                   | admin              | Payout review queue.                                               | Pending/processing/failed.                             | Нет.                                                                    | Не approve real payouts.               | Audit mandatory.                     | payout provider.             |
-| PAGE-ADMIN-PAYMENTS           | PAYMENT_REVIEW | `/admin/payments`                  | admin              | Payment list/status.                                               | Provider webhook states.                               | Нет.                                                                    | Не показывать secrets.                 | Status mapping clear.                | payment provider.            |
-| PAGE-ADMIN-MODERATION         | PLANNED        | `/admin/moderation`                | admin              | Unified moderation queues.                                         | Empty queues.                                          | Нет.                                                                    | Не делать auto-ban.                    | Next action visible.                 | products/profiles.           |
-| PAGE-ADMIN-ANTIFRAUD          | FUTURE         | `/admin/anti-fraud`                | admin              | Risk flags queue.                                                  | Severity/open/resolved.                                | Нет.                                                                    | Не делать ML scoring.                  | Manual review clear.                 | RiskFlag.                    |
-| PAGE-ADMIN-AUDIT              | PLANNED        | `/admin/audit-log`                 | admin              | Audit log viewer.                                                  | Empty/filter/no access.                                | Нет.                                                                    | Не редактировать audit.                | Mask sensitive data.                 | audit logs.                  |
-| PAGE-ADMIN-SETTINGS           | FUTURE         | `/admin/settings`                  | admin              | Platform settings.                                                 | Confirmation states.                                   | Нет.                                                                    | Не хранить provider secrets в UI.      | Dangerous changes confirmed.         | provider config policy.      |
-| PAGE-WIDGET-GOAL              | PLANNED        | `/goal?token=...`                  | OBS                | Donation goal overlay.                                             | Waiting/no goal/reconnect.                             | Нет.                                                                    | Не делать без goal config.             | Goal updates realtime.               | goals WS event.              |
-| PAGE-WIDGET-PURCHASE          | FUTURE         | `/purchase-alert?token=...`        | OBS                | Purchase alert.                                                    | Waiting/live/error.                                    | Нет.                                                                    | DO_NOT_BUILD_YET до purchase events.   | Purchase event dedupe.               | marketplace events.          |
-| PAGE-WIDGET-FEED              | FUTURE         | `/activity-feed?token=...`         | OBS                | Activity feed overlay.                                             | Empty/feed overflow.                                   | Нет.                                                                    | Не делать unified feed без model.      | Events ordered/deduped.              | activity model.              |
-| PAGE-WIDGET-PREVIEW           | PLANNED        | `/studio/widgets/preview`          | streamer           | Studio preview of widgets.                                         | Mock event states.                                     | Нет.                                                                    | Не использовать real token in preview. | Preview matches OBS.                 | widget config.               |
-| PAGE-WIDGET-SETTINGS-PREVIEW  | PLANNED        | `/studio/widgets/settings-preview` | streamer           | Settings preview panel.                                            | Save/error preview.                                    | Нет.                                                                    | Не делать drag-and-drop editor.        | Changes visible before save.         | widget config.               |
+| ID                            | Статус         | Route                              | Роль пользователя  | Назначение и основные блоки                                        | Состояния и UX-правила                                 | Что уже реализовано                                                     | Что не делать сейчас                      | Acceptance criteria                  | Зависимости                  |
+| ----------------------------- | -------------- | ---------------------------------- | ------------------ | ------------------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------ | ---------------------------- |
+| PAGE-FOR-STREAMERS            | IMPLEMENTED    | `/for-streamers`                   | guest/streamer     | Объяснить донаты, OBS, страницу автора, мягкую монетизацию.        | Static loading не нужен; mobile hero с одним CTA.      | Ролевой landing с preview flow и CTA регистрации.                       | Не делать generic SaaS.                   | Стример понимает next action.        | i18n, role onboarding.       |
+| PAGE-FOR-SELLERS              | IMPLEMENTED    | `/for-sellers`                     | guest/seller       | Объяснить продажи через авторов, Seller Lite/Pro, модерацию.       | LEGAL_REVIEW для налоговых формулировок.               | Ролевой landing с preview flow и осторожным текстом про выплаты/review. | Не обещать выплаты/налоги.                | Seller понимает ограничения MVP.     | seller profile, marketplace. |
+| PAGE-FOR-BUYERS               | IMPLEMENTED    | `/for-buyers`                      | guest/buyer        | Объяснить безопасную покупку, поддержку автора, историю заказов.   | Safe deal без абсолютных гарантий.                     | Ролевой landing про преимущества marketplace и buyer order path.        | Не делать страховые обещания.             | Buyer понимает, что покупает.        | marketplace/order.           |
+| PAGE-MARKETPLACE-CATEGORY     | PLANNED        | `/marketplace/categories/[slug]`   | guest/buyer        | Breadcrumbs, category description, filters, product grid.          | Empty category, restricted category warning.           | Нет.                                                                    | Не включать risky categories.             | Фильтры работают на mobile.          | categories/products.         |
+| PAGE-CREATOR-STORE            | PLANNED        | `/creators/[slug]/store`           | guest/buyer        | Live-only витрина автора, карточки и подборки.                     | Offline/live/paused states.                            | Нет.                                                                    | Не делать сложную партнёрскую сеть.       | Live-only блоки видны только live.   | CreatorStore, StoreItem.     |
+| PAGE-SAFE-DEAL                | PAYMENT_REVIEW | `/safe-deal`                       | guest/buyer/seller | Объяснить hold, confirmation, disputes, refunds.                   | LEGAL_REVIEW_REQUIRED для гарантий.                    | Нет.                                                                    | Не обещать абсолютную защиту.             | Текст проверен legal/payment.        | provider/legal review.       |
+| PAGE-FAQ                      | PLANNED        | `/faq`                             | all                | Ответы по донатам, покупкам, ролям, поддержке.                     | Search/no result future.                               | Нет.                                                                    | Не писать финальный legal copy.           | FAQ покрывает support top questions. | support workflows.           |
+| PAGE-TERMS                    | LEGAL_REVIEW   | `/legal/terms`                     | all                | Legal placeholder.                                                 | Clearly marked placeholder.                            | Нет.                                                                    | Не писать финальный договор.              | LEGAL_REVIEW_REQUIRED виден в docs.  | legal review.                |
+| PAGE-PRIVACY                  | LEGAL_REVIEW   | `/legal/privacy`                   | all                | Privacy placeholder.                                               | Clearly marked placeholder.                            | Нет.                                                                    | Не писать финальную политику.             | LEGAL_REVIEW_REQUIRED виден в docs.  | legal review.                |
+| PAGE-AUTH-RESET               | BLOCKED        | `/auth/reset-password`             | guest              | Email request, token form, success.                                | Token expired/error states.                            | Нет.                                                                    | Не делать UI без backend.                 | Flow one-time and limited.           | password reset backend.      |
+| PAGE-AUTH-VERIFY              | IMPLEMENTED    | `/auth` (inline state)             | guest              | Код подтверждения нового email до создания аккаунта.               | Pending/expired/resend/exhausted states.               | Реализовано в PAGE-AUTH.                                                | Телефон не добавлять без отдельного flow. | Verification status clear.           | SMTP configuration.          |
+| PAGE-AUTH-ROLE                | PLANNED        | `/auth/role`                       | authenticated      | Выбор/добавление роли после регистрации.                           | Multi-role explanation.                                | Нет.                                                                    | Не добавлять admin role.                  | Роль ведёт в нужный onboarding.      | role APIs.                   |
+| PAGE-ONBOARDING               | PLANNED        | `/onboarding`                      | authenticated      | Checklist by role.                                                 | Empty/new user states.                                 | Нет.                                                                    | Не строить длинный wizard без данных.     | User reaches next dashboard.         | role switcher.               |
+| PAGE-ME-SETTINGS              | PLANNED        | `/me/settings`                     | authenticated      | Account preferences, theme, locale, notifications, security links. | Save/error/unauthorized; mobile compact settings list. | Нет; часть настроек временно в `/me/profile`.                           | Не смешивать Studio/Seller controls.      | Settings separated from profile.     | user preferences.            |
+| PAGE-ME-FAVORITES             | PLANNED        | `/me/favorites`                    | authenticated      | User-owned saved products/creators/collections.                    | Empty first save, unavailable target.                  | Нет.                                                                    | Не дублировать buyer-only логику.         | Saved items scoped to user.          | Favorite.                    |
+| PAGE-ME-REVIEWS               | PLANNED        | `/me/reviews`                      | authenticated      | Reviews authored by current user.                                  | Empty, hidden/flagged state.                           | Нет.                                                                    | Не раскрывать moderation internals.       | User sees own reviews.               | Review.                      |
+| PAGE-ME-COLLECTIONS           | PLANNED        | `/me/collections`                  | authenticated      | User-created collections.                                          | Empty first collection, private/public states.         | Нет.                                                                    | Не делать социальную сеть.                | Any user can create collections.     | UserCollection.              |
+| PAGE-BUYER-DASHBOARD          | IMPLEMENTED    | `/buyer`                           | buyer              | Overview orders, statuses, mock totals.                            | Empty first purchase.                                  | Да.                                                                     | Не добавлять fake recommendations.        | Next action clear.                   | orders.                      |
+| PAGE-BUYER-PURCHASES          | PLANNED        | `/buyer/purchases`                 | buyer              | Purchases list with statuses.                                      | Empty/history, filters.                                | Нет.                                                                    | Не показывать чужие orders.               | Buyer sees own purchases.            | orders.                      |
+| PAGE-BUYER-DISPUTE            | FUTURE         | `/buyer/disputes/[id]`             | buyer              | Dispute timeline/evidence/deadlines.                               | LEGAL_REVIEW wording.                                  | Нет.                                                                    | DO_NOT_BUILD_YET до v0.7.                 | Buyer sees deadlines/evidence.       | disputes, files.             |
+| PAGE-BUYER-FAVORITES          | PLANNED        | `/buyer/favorites`                 | buyer              | Alias/entry to user-owned favorites.                               | Empty favorites.                                       | Нет.                                                                    | Не дублировать `/me/favorites`.           | Saved items list.                    | Favorite.                    |
+| PAGE-BUYER-PROMOCODES         | FUTURE         | `/buyer/promocodes`                | buyer              | Active/used promo codes.                                           | Expired/empty states.                                  | Нет.                                                                    | Не делать до PromoCode.                   | Promo status clear.                  | PromoCode.                   |
+| PAGE-BUYER-SETTINGS           | PLANNED        | `/buyer/settings`                  | buyer              | Buyer profile, locale, notifications.                              | Save/error/unauthorized.                               | Частично в `/me/profile`.                                               | Не смешивать seller/studio.               | Settings scoped to buyer.            | user preferences.            |
+| PAGE-STUDIO-DASHBOARD         | PLANNED        | `/studio`                          | streamer           | Studio shell with tabs.                                            | Empty setup, forbidden, mobile tabs.                   | Частично в `/me/profile`.                                               | Не смешивать account settings.            | Studio IA stable.                    | creator profile.             |
+| PAGE-STUDIO-STATISTICS        | PLANNED        | `/studio/statistics`               | streamer           | Earnings chart with source filters.                                | No data, loading chart, error retry.                   | Нет.                                                                    | Не показывать fake balance.               | Metrics traceable.                   | CreatorMetricSnapshot.       |
+| PAGE-STUDIO-EVENTS            | PLANNED        | `/studio/events`                   | streamer           | Recent events feed with subtabs.                                   | Empty integrations, delayed events.                    | Нет.                                                                    | Не показывать raw bot payload.            | Events deduped.                      | CreatorActivityEvent.        |
+| PAGE-STUDIO-DONATION-SETTINGS | PLANNED        | `/studio/donation-settings`        | streamer           | Amounts, message limits, audio/TTS, moderation, spam filter.       | Validation, hold-for-review.                           | Нет.                                                                    | Не менять payment statuses.               | Donation rules applied.              | CreatorDonationSettings.     |
+| PAGE-STUDIO-PUBLIC-PAGE       | PLANNED        | `/studio/page`                     | streamer           | Public title/description/status/avatar/banner.                     | Preview, hidden/blocked states.                        | Частично в `/me/profile`.                                               | Не делать drag-and-drop editor.           | Public page settings clear.          | storage upload.              |
+| PAGE-STUDIO-DONATIONS         | PLANNED        | `/studio/donations`                | streamer           | Donation list, filters, totals.                                    | Empty, loading, error.                                 | API есть, UI нет.                                                       | Не добавлять payouts.                     | Creator sees donation history.       | studio donations API.        |
+| PAGE-STUDIO-GOALS             | PARTIAL        | `/studio/goals`                    | streamer           | Goals list/create/edit/pause.                                      | Empty first goal, validation.                          | Частично в `/me/profile`.                                               | Не добавлять complex campaigns.           | Goal lifecycle clear.                | goals API.                   |
+| PAGE-STUDIO-ALERTS            | PLANNED        | `/studio/alerts`                   | streamer           | Alert style settings, preview.                                     | Preview fallback.                                      | Нет.                                                                    | Не делать custom designer.                | Alert preview before OBS.            | widget config.               |
+| PAGE-STUDIO-WIDGETS           | PLANNED        | `/studio/widgets`                  | streamer           | Widget catalog, presets, trigger rules, token create/rotate.       | Token visible once, rule conflict, revoked state.      | Частично в `/me/profile`.                                               | Не показывать token повторно.             | OBS setup understandable.            | widgets API.                 |
+| PAGE-STUDIO-WIDGET-GROUPS     | PLANNED        | `/studio/widget-groups`            | streamer           | Widget groups and placement zones.                                 | Token visible once, zone overlap warning.              | Нет.                                                                    | Не делать drag-and-drop scene editor.     | Alerts can be placed by type.        | WidgetGroup.                 |
+| PAGE-STUDIO-STORE             | PLANNED        | `/studio/store`                    | streamer           | Manage creator store appearance and live-only sections.            | Empty store setup, offline/live preview.               | Нет.                                                                    | Не делать сложную партнёрскую сеть.       | Store sections ordered.              | marketplace.                 |
+| PAGE-STUDIO-PRODUCTS          | PLANNED        | `/studio/products`                 | streamer           | Select eligible products for creator store.                        | Empty catalog, hidden product.                         | Нет.                                                                    | Не обходить moderation.                   | Product eligibility clear.           | Product, StoreItem.          |
+| PAGE-STUDIO-COLLECTIONS       | PLANNED        | `/studio/collections`              | streamer           | Build author collections for store sections.                       | Empty collection, hidden target.                       | Нет.                                                                    | Не смешивать private user collections.    | Collections reusable.                | UserCollection.              |
+| PAGE-STUDIO-PARTNERS          | FUTURE         | `/studio/partners`                 | streamer           | Partner products and attribution.                                  | Empty partner catalog.                                 | Нет.                                                                    | Не делать ad exchange.                    | Disclosure clear.                    | AffiliateLink.               |
+| PAGE-STUDIO-PROMOCODES        | FUTURE         | `/studio/promocodes`               | streamer           | Creator promo codes.                                               | Expired/usage states.                                  | Нет.                                                                    | До PromoCode domain не делать.            | Promo use transparent.               | PromoCode.                   |
+| PAGE-STUDIO-ANALYTICS         | FUTURE         | `/studio/analytics`                | streamer           | Advanced analytics after v0.3.5 statistics.                        | No data state.                                         | Нет.                                                                    | Не дублировать `/studio/statistics`.      | Metrics traceable.                   | analytics snapshots.         |
+| PAGE-STUDIO-PAYOUTS           | PAYMENT_REVIEW | `/studio/payouts`                  | streamer           | Balance/payout requests.                                           | Pending/failed/held states.                            | Нет.                                                                    | Не делать до v0.6 review.                 | Money states accurate.               | wallet/payout provider.      |
+| PAGE-STUDIO-SETTINGS          | PLANNED        | `/studio/settings`                 | streamer           | Creator settings, privacy, notifications.                          | Save/error states.                                     | Частично в `/me/profile`.                                               | Не смешивать account settings.            | Scoped settings.                     | user/creator APIs.           |
+| PAGE-SELLER-PRODUCTS          | IMPLEMENTED    | `/seller/products`                 | seller             | Products list, moderation statuses.                                | Empty first product.                                   | Да.                                                                     | Не делать risky categories.               | Seller sees product status.          | products.                    |
+| PAGE-SELLER-PRODUCT-NEW       | IMPLEMENTED    | `/seller/products/new`             | seller             | Product creation form.                                             | Validation, draft save.                                | Да.                                                                     | Не автопубликовать без moderation.        | Product draft created.               | products/categories.         |
+| PAGE-SELLER-PRODUCT-EDIT      | PLANNED        | `/seller/products/[id]/edit`       | seller             | Edit product details.                                              | Published/pending restrictions.                        | Нет.                                                                    | Не менять old order snapshots.            | Changes versioned/safe.              | products.                    |
+| PAGE-SELLER-ORDERS            | IMPLEMENTED    | `/seller/orders`                   | seller             | Orders queue.                                                      | Empty and action states.                               | Да.                                                                     | Не смешивать payouts.                     | Seller sees next action.             | orders.                      |
+| PAGE-SELLER-DEALS             | PAYMENT_REVIEW | `/seller/deals`                    | seller             | Safe deal statuses.                                                | Held/disputed/deadline states.                         | Нет.                                                                    | Не делать до v0.5.                        | Deal status clear.                   | safe deal.                   |
+| PAGE-SELLER-DISPUTES          | FUTURE         | `/seller/disputes`                 | seller             | Dispute queue and evidence.                                        | Deadline states.                                       | Нет.                                                                    | DO_NOT_BUILD_YET до v0.7.                 | Seller sees response deadline.       | disputes.                    |
+| PAGE-SELLER-PROMOCODES        | FUTURE         | `/seller/promocodes`               | seller             | Promo code creation and usage.                                     | Limit/expired states.                                  | Нет.                                                                    | Не делать до PromoCode.                   | Promo conflicts handled.             | PromoCode.                   |
+| PAGE-SELLER-AFFILIATE         | FUTURE         | `/seller/partners`                 | seller             | Partner percent/campaigns.                                         | Empty creator partners.                                | Нет.                                                                    | Не делать ad exchange.                    | Attribution transparent.             | affiliate model.             |
+| PAGE-SELLER-ANALYTICS         | FUTURE         | `/seller/analytics`                | seller             | Sales/product/creator analytics.                                   | No data state.                                         | Нет.                                                                    | No fake metrics.                          | Metrics sourced.                     | orders/events.               |
+| PAGE-SELLER-PAYOUTS           | PAYMENT_REVIEW | `/seller/payouts`                  | seller             | Available/frozen/pending payout.                                   | Pending/rejected/failed.                               | Нет.                                                                    | Не называть банковским счётом.            | Ledger matches UI.                   | wallet/payouts.              |
+| PAGE-SELLER-SETTINGS          | PLANNED        | `/seller/settings`                 | seller             | Seller profile and policies.                                       | Save/error states.                                     | Частично в `/me/profile`.                                               | Не добавлять Pro verification здесь.      | Settings scoped.                     | seller profile.              |
+| PAGE-SELLER-VERIFY-PRO        | LEGAL_REVIEW   | `/seller/verification/pro`         | seller             | Pro request and document placeholders.                             | Pending/rejected states.                               | Нет.                                                                    | Не собирать лишние данные.                | LEGAL_REVIEW before fields.          | legal/file security.         |
+| PAGE-ADMIN-DASHBOARD          | PLANNED        | `/admin`                           | admin              | Overview queues and risks.                                         | Empty queues.                                          | Частично root admin app.                                                | Не делать vanity metrics.                 | Admin sees priority queues.          | admin APIs.                  |
+| PAGE-ADMIN-SELLERS            | PLANNED        | `/admin/sellers`                   | admin              | Seller moderation/list.                                            | Empty/filter states.                                   | Нет.                                                                    | Не блокировать без audit.                 | Seller actions auditable.            | seller profiles.             |
+| PAGE-ADMIN-STREAMERS          | PLANNED        | `/admin/streamers`                 | admin              | Creator moderation/list.                                           | Empty/filter states.                                   | Нет.                                                                    | Не менять public pages без audit.         | Actions auditable.                   | creator profiles.            |
+| PAGE-ADMIN-PRODUCTS           | PARTIAL        | `/admin/products`                  | admin              | Product moderation.                                                | Pending/rejected states.                               | Частично в root admin app.                                              | Не approve risky categories.              | Moderation reason captured.          | products/categories.         |
+| PAGE-ADMIN-CATEGORIES         | PLANNED        | `/admin/categories`                | admin              | Category management.                                               | Restricted/legal flags.                                | Нет.                                                                    | Не открывать risky categories.            | Flags visible.                       | category model.              |
+| PAGE-ADMIN-ORDERS             | PLANNED        | `/admin/orders`                    | admin              | Order lookup/read-only.                                            | Not found/permission.                                  | Нет.                                                                    | Не добавлять manual money changes.        | Data minimal.                        | orders.                      |
+| PAGE-ADMIN-DEALS              | PAYMENT_REVIEW | `/admin/deals`                     | admin              | Deal overview/actions later.                                       | Held/disputed states.                                  | Нет.                                                                    | Не менять money statuses без review.      | Provider-agnostic.                   | safe deal/ledger.            |
+| PAGE-ADMIN-DISPUTES           | FUTURE         | `/admin/disputes`                  | admin              | Arbitration queue.                                                 | Evidence/deadline states.                              | Нет.                                                                    | DO_NOT_BUILD_YET до v0.7.                 | Decision audited.                    | disputes/refunds.            |
+| PAGE-ADMIN-PAYOUTS            | PAYMENT_REVIEW | `/admin/payouts`                   | admin              | Payout review queue.                                               | Pending/processing/failed.                             | Нет.                                                                    | Не approve real payouts.                  | Audit mandatory.                     | payout provider.             |
+| PAGE-ADMIN-PAYMENTS           | PAYMENT_REVIEW | `/admin/payments`                  | admin              | Payment list/status.                                               | Provider webhook states.                               | Нет.                                                                    | Не показывать secrets.                    | Status mapping clear.                | payment provider.            |
+| PAGE-ADMIN-MODERATION         | PLANNED        | `/admin/moderation`                | admin              | Unified moderation queues.                                         | Empty queues.                                          | Нет.                                                                    | Не делать auto-ban.                       | Next action visible.                 | products/profiles.           |
+| PAGE-ADMIN-ANTIFRAUD          | FUTURE         | `/admin/anti-fraud`                | admin              | Risk flags queue.                                                  | Severity/open/resolved.                                | Нет.                                                                    | Не делать ML scoring.                     | Manual review clear.                 | RiskFlag.                    |
+| PAGE-ADMIN-AUDIT              | PLANNED        | `/admin/audit-log`                 | admin              | Audit log viewer.                                                  | Empty/filter/no access.                                | Нет.                                                                    | Не редактировать audit.                   | Mask sensitive data.                 | audit logs.                  |
+| PAGE-ADMIN-SETTINGS           | FUTURE         | `/admin/settings`                  | admin              | Platform settings.                                                 | Confirmation states.                                   | Нет.                                                                    | Не хранить provider secrets в UI.         | Dangerous changes confirmed.         | provider config policy.      |
+| PAGE-WIDGET-GOAL              | PLANNED        | `/goal?token=...`                  | OBS                | Donation goal overlay.                                             | Waiting/no goal/reconnect.                             | Нет.                                                                    | Не делать без goal config.                | Goal updates realtime.               | goals WS event.              |
+| PAGE-WIDGET-PURCHASE          | FUTURE         | `/purchase-alert?token=...`        | OBS                | Purchase alert.                                                    | Waiting/live/error.                                    | Нет.                                                                    | DO_NOT_BUILD_YET до purchase events.      | Purchase event dedupe.               | marketplace events.          |
+| PAGE-WIDGET-FEED              | FUTURE         | `/activity-feed?token=...`         | OBS                | Activity feed overlay.                                             | Empty/feed overflow.                                   | Нет.                                                                    | Не делать unified feed без model.         | Events ordered/deduped.              | activity model.              |
+| PAGE-WIDGET-PREVIEW           | PLANNED        | `/studio/widgets/preview`          | streamer           | Studio preview of widgets.                                         | Mock event states.                                     | Нет.                                                                    | Не использовать real token in preview.    | Preview matches OBS.                 | widget config.               |
+| PAGE-WIDGET-SETTINGS-PREVIEW  | PLANNED        | `/studio/widgets/settings-preview` | streamer           | Settings preview panel.                                            | Save/error preview.                                    | Нет.                                                                    | Не делать drag-and-drop editor.           | Changes visible before save.         | widget config.               |
 
 ## Дополнение PAGE-MARKETPLACE: UX-TASK-026
 
@@ -2325,9 +2356,41 @@ Acceptance criteria:
 - Product cards остаются кликабельными целиком и не показывают повторяющиеся CTA.
 - Быстрые направления ведут на route, а не применяют скрытые фильтры на главной.
 
+## PAGE-WORLD-HOME: FanFuel World
+
+Статус: FUTURE
+Route: `https://world.fanfuel.ru/`
+Раздел: World
+Версия: future / discovery
+Не создавать до: UX-TASK-039, product/security/privacy review, снятие `DO_NOT_BUILD_YET`
+
+### Назначение страницы
+
+Будущий отдельный дом/студия маскота с лёгкими взаимодействиями и мини-играми, не заменяющий marketplace и кабинеты FanFuel.
+
+### Первый допустимый vertical slice
+
+- одна личная комната;
+- базовое взаимодействие с маскотом;
+- одна короткая мини-игра;
+- несколько cosmetic-only предметов без денежной ценности;
+- local/mock progress до утверждения account/domain модели;
+- явный возврат в основной FanFuel.
+
+### Acceptance criteria для выхода из discovery
+
+- есть one-page product brief, core loop и прототип первой сессии;
+- определены auth/session, privacy, age, storage, deployment и cross-domain security риски;
+- нет валюты, NFT, loot boxes, платных случайных наград, multiplayer и привязки прогресса к сумме покупок/донатов;
+- владелец продукта отдельно одобрил production vertical slice и необходимые ADR/domain/API updates.
+
+### Что не делать сейчас
+
+Не создавать route, приложение, API или сущности БД. Не переносить игровую механику на основную marketplace-страницу.
+
 ## UX-TASK-029: Главная с переключателем аудитории (v0.3.5)
 
-Актуальный spec для PAGE-HOME и PAGE-MARKETPLACE; заменяет прежнее требование общей презентации creator-commerce на первом экране. Статус: IMPLEMENTED.
+Исторический spec для PAGE-HOME и PAGE-MARKETPLACE. Статус: SUPERSEDED_BY_UX_TASK_036.
 
 - Под хэдером по центру расположен ползунок «Я покупатель / Я автор / Я продавец». По умолчанию покупатель, переключение меняет содержимое без навигации и назначения account roles.
 - Покупатель: компактный заголовок, категории, товары, затем авторские подборки; особенности платформы передаются спокойной подписью и деталями карточек. Большие объяснения, презентации ролей и общий CTA убраны из покупательского режима.
@@ -2337,7 +2400,7 @@ Acceptance criteria:
 
 ## UX-TASK-030: полная переработка режимов главной
 
-Статус: IMPLEMENTED. Версия: v0.3.5. Маршруты: `/`, `/marketplace`.
+Статус: SUPERSEDED_BY_UX_TASK_036. Версия: v0.3.5. Маршруты: `/`, `/marketplace`.
 Пользователь отклонил содержание и визуальную подачу всех трёх режимов UX-TASK-029, но одобрил переключатель. Разрешена полная переработка содержимого.
 
 - Сохранить переключатель аудитории и смену режимов на одном URL.
@@ -2347,6 +2410,16 @@ Acceptance criteria:
 - Продавец: показать общий каталог и будущий канал через авторов, обязанности продавца, путь от товара до выполненного заказа. Визуальная композиция отличается от авторской.
 - Не расширять ассортимент рискованными категориями; API, БД и платёжную модель не менять.
 - Acceptance criteria: ru/en, light/dark, mobile 320/390px, desktop, клавиатурные tabs, reduced motion, поиск с реальным переходом, отсутствие фиктивных товаров/доходов и работающий retry загрузки.
+
+## UX-TASK-036: marketplace-first контракт главной
+
+Статус: PLANNED. Версия: v0.3.5. Маршруты: `/`, `/marketplace`.
+
+- Покупатель всегда выбран по умолчанию; автор и продавец остаются вторичными вкладками.
+- Первый экран решает задачу поиска и выбора реальных цифровых товаров, а не презентации всей платформы.
+- Общий каталог не ограничивается товарами для стримеров/авторов.
+- Большие role/platform landing блоки не возвращаются в покупательский режим.
+- Результат требует явного product review и regression QA на `ru/en`, light/dark, reduced motion и 320/390/768/1440.
 
 ## UX-TASK-031 — страница автора до регистрации
 
@@ -2383,3 +2456,29 @@ Acceptance criteria: ru/en, semantic light/dark, mobile/desktop, клавиат�
 ## UX-TASK-035 — единая авторизация и подтверждение email, 2026-09-17
 
 PAGE-AUTH реализует email-first развилку: существующий аккаунт продолжает парольным входом, новый email подтверждается одноразовым кодом до задания пароля и создания аккаунта. Телефон и username отложены до отдельной модели идентификаторов и восстановления доступа.
+
+## UX-TASK-041 / v1.1
+
+`/studio` (CREATOR-COMMERCE-01): настройка витрины, независимо включаемый promo, live preview, перестановка блоков, banner/avatar presets, выбор товаров через поиск, реальные суммы поддержки и подсказки о цене. Требует входа и creator profile. Сохранение серверное, ошибки/revision conflict видимы; не терять черновик при сетевой ошибке.
+
+`/creators/[slug]` (CREATOR-STORE-01): публичный preview/design, включённые блоки, товары с ref storefront, донат только при donations_enabled; disabled storefront не открывается.
+
+`/seller` и `/seller/products/[id]` (SELLER-COMMERCE-01): существующие заказы сохраняются; настройки identity/rates и объяснимый ориентир цены. Конфиг перед submit обязателен. Форматы аккаунтов явно различимы, но публикация не открывается.
+
+`/marketplace/products/[slug]` и checkout: вариант, точные аналоги, сумма/имя получателя, явный выбор при конфликте. Никакого увеличения цены покупателя.
+
+Общие acceptance: ru/en, semantic light/dark, клавиатура, mobile 320px+, reduced motion, fixed media aspect-ratio, честные empty/error states; нет фиктивных товаров, статистики или вероятностей.
+
+### Дополнение реализации UX-TASK-041 / v1.1
+
+Статус перечисленных commerce-страниц: IMPLEMENTED_LOCAL, mock; review владельца ожидается. В /studio доступны реальные signed uploads PNG/JPEG для своего баннера и аватара, пресеты, live preview, grid/list, порядок блоков, отдельное размещение доната. Сбой сохранения/конфликт не очищает форму. /seller/products/[id] — отдельный маршрут редактора принадлежащего продавцу товара, включая ориентиры для неопубликованного черновика через owner API.
+
+Acceptance подтверждено автоматическими проверками: независимость promo/storefront, сохранение оформления/порядка, выбор единственного получателя в checkout, невозможность равных ставок, перенос ref через локальную корзину, widths 320/390/768/1440. Главная и каталог используют общий группирующий поиск. Карточка продукта явно показывает формат/платформу/регион; обложка с фиксированным размером использует только public media и fallback при ошибке. Аналитика без событий просмотров не показывает выдуманную конверсию.
+
+## UX-TASK-042 / marketplace v1.2 — NEEDS_REWORK
+
+Маршруты: `/`, `/marketplace`, `/marketplace/catalog`; guest buyer/creator/seller tabs. Область изменения: только нижний блок discovery, список основных направлений, контур активной вкладки и размещение/состояние Ойли. Product feed, header, checkout, платежи и авторские настройки остаются вне rework. Четыре карточки с общими лозунгами заменить редакционным указателем направлений. Ключевые направления: игры, программы, для игр, графика/шаблоны, услуги, затем для авторов/эфира/обучения. До продаж считать порядок гипотезой.
+
+Ойли — один actor на главной с anchor ID и командой `visit`, поддержкой resize/scroll и перехода в reduced-motion. Переключение guest role может вызвать перемещение к блоку роли. У empty/error нет собственного персонажа. Вызов на страницах презентаций без общего actor допускает отдельный экземпляр только вне главной.
+
+Acceptance: см. `docs/tasks/ui-ux/UX-TASK-042.md` — рабочие ссылки/пустое состояние, SVG-обводка с ARIA tablist и reduced-motion, один actor, отсутствие перекрытий, ru/en и 320/390/768/1440.

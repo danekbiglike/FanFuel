@@ -287,6 +287,9 @@ func (s *Store) SubmitSellerProduct(ctx context.Context, userID string, productI
 		return nil, errValidation
 	}
 
+	if !product.CommissionConfigured || !product.Identity.AllowedForPublication() {
+		return nil, errValidation
+	}
 	if err := s.validateCategoryForSellerProductTx(ctx, tx, product.CategoryID); err != nil {
 		return nil, err
 	}
@@ -375,6 +378,9 @@ func (s *Store) moderateProduct(ctx context.Context, actorUserID string, product
 		return nil, errValidation
 	}
 	if status == "published" {
+		if !product.CommissionConfigured || !product.Identity.AllowedForPublication() {
+			return nil, errValidation
+		}
 		if err := s.validateCategoryForSellerProductTx(ctx, tx, product.CategoryID); err != nil {
 			return nil, err
 		}
@@ -382,6 +388,9 @@ func (s *Store) moderateProduct(ctx context.Context, actorUserID string, product
 
 	publishedAtSQL := "published_at"
 	if status == "published" {
+		if !product.CommissionConfigured || !product.Identity.AllowedForPublication() {
+			return nil, errValidation
+		}
 		publishedAtSQL = "now()"
 	}
 
@@ -413,7 +422,7 @@ func (s *Store) moderateProduct(ctx context.Context, actorUserID string, product
 
 func (s *Store) CreateOrder(ctx context.Context, buyerUserID string, req CreateOrderRequest, idempotencyKey string, requestHash string) (*OrderDetail, error) {
 	idempotencyKey = strings.TrimSpace(idempotencyKey)
-	if idempotencyKey == "" {
+	if idempotencyKey == "" || len(idempotencyKey) > 128 {
 		return nil, errIdempotencyKey
 	}
 	if !validQuantity(req.Quantity) || !req.AcceptedTerms {
@@ -422,12 +431,38 @@ func (s *Store) CreateOrder(ctx context.Context, buyerUserID string, req CreateO
 	if existing, err := s.getIdempotentOrder(ctx, buyerUserID, idempotencyKey, requestHash); err != nil || existing != nil {
 		return existing, err
 	}
+	idempotencyKey = "orders:" + buyerUserID + ":" + idempotencyKey
 
-	product, err := s.getProduct(ctx, req.ProductID, true)
+	tx, err := s.db.Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
-	total := product.PriceAmountMinor * int64(req.Quantity)
+	defer rollbackTx(ctx, tx)
+	// Один ключ запроса сериализуется до обращения к провайдеру; разные товары тоже защищены.
+	if _, err = tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "orders:"+buyerUserID+":"+idempotencyKey); err != nil {
+		return nil, err
+	}
+	if existing, err := s.getIdempotentOrderTx(ctx, tx, buyerUserID, idempotencyKey, requestHash); err != nil || existing != nil {
+		return existing, err
+	}
+	product, err := s.getProductForUpdate(ctx, tx, req.ProductID)
+	if err != nil {
+		return nil, err
+	}
+	if product.Status != "published" || product.Category.Status != "active" || product.Seller.Status != "active" {
+		return nil, errNotFound
+	}
+	quote, err := s.quoteTx(ctx, tx, product, buyerUserID, req)
+	if err != nil {
+		return nil, err
+	}
+	if quote.ChoiceRequired {
+		return nil, errAttributionChoice
+	}
+	if req.QuoteFingerprint != "" && req.QuoteFingerprint != quote.Fingerprint {
+		return nil, errConflict
+	}
+	total := quote.Allocation.Buyer
 	paymentResult, err := s.paymentProvider.CreatePayment(ctx, CreatePaymentRequest{
 		AmountMinor:    total,
 		Currency:       product.Currency,
@@ -446,16 +481,11 @@ func (s *Store) CreateOrder(ctx context.Context, buyerUserID string, req CreateO
 		"currency":      product.Currency,
 		"delivery_type": product.DeliveryType,
 		"seller_id":     product.SellerProfileID,
+		"identity":      product.Identity, "support": quote,
 	})
 	if err != nil {
 		return nil, err
 	}
-
-	tx, err := s.db.Begin(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer rollbackTx(ctx, tx)
 
 	var paymentID string
 	if err := tx.QueryRow(ctx, `
@@ -476,8 +506,8 @@ func (s *Store) CreateOrder(ctx context.Context, buyerUserID string, req CreateO
 	}
 
 	var creatorID *string
-	if strings.TrimSpace(req.CreatorProfileID) != "" {
-		value := strings.TrimSpace(req.CreatorProfileID)
+	if quote.Selected != nil {
+		value := quote.Selected.CreatorID
 		creatorID = &value
 	}
 
@@ -490,7 +520,7 @@ func (s *Store) CreateOrder(ctx context.Context, buyerUserID string, req CreateO
 		)
 		VALUES ($1, $2, $3, $4, 'awaiting_payment', $5, $6, $6, $7, $8::jsonb, $9, $10, $11)
 		RETURNING id
-	`, buyerUserID, product.SellerProfileID, product.ID, paymentID, req.Quantity, total, product.Currency, string(snapshot), creatorID, strings.TrimSpace(req.PromoCode), idempotencyKey).Scan(&orderID); err != nil {
+	`, buyerUserID, product.SellerProfileID, product.ID, paymentID, req.Quantity, total, product.Currency, string(snapshot), creatorID, quote.PromoCode, idempotencyKey).Scan(&orderID); err != nil {
 		if isUniqueViolation(err) {
 			return nil, errConflict
 		}
@@ -499,10 +529,10 @@ func (s *Store) CreateOrder(ctx context.Context, buyerUserID string, req CreateO
 
 	var dealID string
 	if err := tx.QueryRow(ctx, `
-		INSERT INTO deals (order_id, status, gross_amount_minor, seller_amount_minor, currency)
-		VALUES ($1, 'awaiting_payment', $2, $2, $3)
+		INSERT INTO deals (order_id, status, gross_amount_minor, seller_amount_minor, currency,creator_amount_minor)
+		VALUES ($1, 'awaiting_payment', $2, $4, $3,$5)
 		RETURNING id
-	`, orderID, total, product.Currency).Scan(&dealID); err != nil {
+	`, orderID, total, product.Currency, quote.Allocation.Seller, quote.Allocation.Creator).Scan(&dealID); err != nil {
 		return nil, err
 	}
 
@@ -817,13 +847,21 @@ func (s *Store) listOrders(ctx context.Context, whereSQL string, arg string, lim
 }
 
 func (s *Store) getIdempotentOrder(ctx context.Context, buyerUserID string, idempotencyKey string, requestHash string) (*OrderDetail, error) {
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rollbackTx(ctx, tx)
+	return s.getIdempotentOrderTx(ctx, tx, buyerUserID, idempotencyKey, requestHash)
+}
+func (s *Store) getIdempotentOrderTx(ctx context.Context, tx pgx.Tx, buyerUserID, idempotencyKey, requestHash string) (*OrderDetail, error) {
 	var storedHash string
 	var orderID string
-	err := s.db.QueryRow(ctx, `
-		SELECT request_hash, order_id
-		FROM idempotency_keys
-		WHERE scope = 'orders.create' AND idempotency_key = $1
-	`, idempotencyKey).Scan(&storedHash, &orderID)
+	err := tx.QueryRow(ctx, `
+		SELECT k.request_hash, k.order_id
+ FROM idempotency_keys k JOIN orders o ON o.id=k.order_id
+ WHERE k.scope='orders.create' AND k.idempotency_key=$1 AND o.buyer_user_id=$2
+	`, idempotencyKey, buyerUserID).Scan(&storedHash, &orderID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -834,7 +872,7 @@ func (s *Store) getIdempotentOrder(ctx context.Context, buyerUserID string, idem
 		return nil, errIdempotencyConflict
 	}
 
-	detail, err := s.getOrderDetail(ctx, orderID)
+	detail, err := s.getOrderDetailTx(ctx, tx, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -1236,6 +1274,8 @@ func productSelectSQL() string {
 			p.description, p.terms, p.price_amount_minor, p.currency, p.delivery_type,
 			p.affiliate_percent_bps, p.safe_deal_required, p.moderation_note,
 			p.published_at, p.created_at, p.updated_at,
+ p.identity_json,p.variant_key,p.promo_bps,p.storefront_bps,p.commission_configured,
+ COALESCE((SELECT m.url FROM product_media m WHERE m.product_id=p.id AND m.visibility='public' AND m.kind IN ('image','preview') AND m.url<>'' ORDER BY m.sort_order,m.id LIMIT 1),''),
 			c.id, COALESCE(c.parent_id::text, ''), c.slug, c.name_i18n_key, c.description_i18n_key,
 			c.status, c.requires_legal_review, c.sort_order, c.created_at, c.updated_at,
 			s.id, s.display_name, s.seller_type, s.status, s.verification_status,
@@ -1271,6 +1311,8 @@ func productScanTargets(product *Product) []any {
 		&product.PublishedAt,
 		&product.CreatedAt,
 		&product.UpdatedAt,
+		&product.Identity, &product.VariantKey, &product.PromoBPS, &product.StorefrontBPS, &product.CommissionConfigured,
+		&product.CoverURL,
 		&category.ID,
 		&category.ParentID,
 		&category.Slug,

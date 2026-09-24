@@ -3,6 +3,10 @@ import { ThemeProvider } from "../components/theme-provider";
 import { ThemeScript } from "../components/theme-script";
 import { appLocale, dictionary } from "../lib/i18n";
 import "./globals.css";
+import "./experience.css";
+import "./editorial.css";
+import "./commerce.css";
+import { ExperienceProvider } from "../components/experience-provider";
 
 export const metadata: Metadata = {
   title: dictionary.common.projectName,
@@ -18,10 +22,19 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       suppressHydrationWarning
     >
       <head>
+        <link
+          rel="preload"
+          href="/fonts/golos.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <ThemeScript />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <ExperienceProvider>{children}</ExperienceProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -16,9 +16,13 @@ export function getStoredLocalePreference(): Locale {
     return appLocale;
   }
 
-  return resolveLocale(
-    window.localStorage.getItem(localeStorageKey) ?? readCookie(localeStorageKey) ?? appLocale
-  );
+  try {
+    return resolveLocale(
+      window.localStorage.getItem(localeStorageKey) ?? readCookie(localeStorageKey) ?? appLocale
+    );
+  } catch {
+    return appLocale;
+  }
 }
 
 export function setStoredLocalePreference(locale: Locale) {
@@ -26,7 +30,11 @@ export function setStoredLocalePreference(locale: Locale) {
     return;
   }
 
-  window.localStorage.setItem(localeStorageKey, locale);
+  try {
+    window.localStorage.setItem(localeStorageKey, locale);
+  } catch {
+    /* Cookie остаётся резервным хранилищем. */
+  }
   document.cookie = `${localeStorageKey}=${locale}; path=/; max-age=${localeCookieMaxAge}; SameSite=Lax`;
 }
 

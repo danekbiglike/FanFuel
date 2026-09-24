@@ -1,0 +1,199 @@
+{
+  "nav": {
+    "catalog": "Catalog",
+    "login": "Sign in / Register",
+    "saved": "Saved",
+    "cart": "Cart",
+    "close": "Close",
+    "remove": "Remove",
+    "checkout": "Buy this item",
+    "local": "Saved in this browser. Each item is checked out separately.",
+    "memory": "Browser storage is unavailable: your list will last until this page closes.",
+    "emptySaved": "Your next finds belong here",
+    "emptyCart": "Room for something good",
+    "emptyText": "Save what catches your eye. Come back whenever you like.",
+    "unavailable": "This item is currently unavailable",
+    "loading": "Loading items",
+    "retry": "Try again",
+    "limit": "Your list has 100 items. Remove one to add something new."
+  },
+  "home": {
+    "eyebrow": "DIGITAL GOODS. REAL FINDS.",
+    "title": "Find your next thing.",
+    "note": "just looking is fine",
+    "lead": "For games, new skills, your projects and ideas.",
+    "all": "Explore the catalog",
+    "fresh": "Fresh finds",
+    "new": "Newest first",
+    "cheap": "Lowest price",
+    "expensive": "Highest price",
+    "more": "Show more",
+    "empty": "Your first find is still ahead",
+    "emptyText": "No published items here yet. Take a look at another category.",
+    "error": "Couldn't load the items",
+    "errorText": "Check your connection or try again. Your lists will stay put.",
+    "catalogTitle": "What are we looking for?",
+    "results": "Search results",
+    "search": "Search products",
+    "searchPlaceholder": "A product, skill or idea",
+    "filter": "Category",
+    "any": "All categories",
+    "discover": "Browse by type",
+    "discoverLead": "Open a catalog section",
+    "games": "Games",
+    "software": "Software",
+    "gameAssets": "For games",
+    "designAssets": "Graphics & templates",
+    "services": "Services",
+    "creatorAssets": "Creator assets",
+    "obsPacks": "For streams",
+    "coaching": "Learning",
+    "design": "Make it your own",
+    "designText": "Graphics, design and digital materials.",
+    "learn": "Learn something new",
+    "learnText": "Lessons and one-to-one coaching.",
+    "play": "A hand with your project",
+    "playText": "Digital services for your ideas.",
+    "stream": "Build your broadcast",
+    "streamText": "OBS packs, alerts and stream design.",
+    "buyer": "Buyer",
+    "creator": "Creator",
+    "seller": "Seller",
+    "audience": "What brings you here?",
+    "session": "Checking sign-in",
+    "browse": "Your next finds",
+    "sessionError": "We couldn't check your sign-in yet.",
+    "feed": "Feed",
+    "reset": "Reset filters",
+    "preview": "No cover uploaded",
+    "save": "Save item",
+    "saved": "Saved",
+    "add": "Add to cart",
+    "added": "In cart",
+    "digital_file": "Digital file",
+    "manual": "Delivered by seller",
+    "sessionDelivery": "By arrangement",
+    "unknownSeller": "Seller",
+    "safe": "Protected transaction process",
+    "searchSubmit": "Search"
+  },
+  "footer": {
+    "line": "Fuel for your ideas.",
+    "authors": "For creators",
+    "sellers": "For sellers",
+    "help": "For buyers",
+    "safe": "How transactions work",
+    "market": "Marketplace",
+    "brand": "FanFuel"
+  },
+  "oily": {
+    "name": "Oily",
+    "hello": "I've had a little idea.",
+    "action": "What's Oily up to?",
+    "messages": [
+      "All those ‘laters’ add up to a very long Monday.",
+      "I'm pretending to be a productive droplet today. Convincing?",
+      "Today's idea: open an old project and change one tiny thing.",
+      "I'm not frozen. I'm thinking in low resolution."
+    ],
+    "caption": "little drop, big plans",
+    "hide": "Hide Oily",
+    "show": "Bring Oily back"
+  },
+  "roles": {
+    "creator": {
+      "label": "FOR CREATORS AND STREAMERS",
+      "title": "You make the world more interesting.",
+      "note": "we help you keep going",
+      "lead": "Build a page where your audience can support you. Donations, goals and OBS alerts alongside your creative work.",
+      "cta": "Create your creator page",
+      "strip": "CREATORS MAKE THE WORLD MORE INTERESTING",
+      "preview": "A little preview",
+      "previewTitle": "Your place in FanFuel",
+      "previewText": "Support, a goal and stream events in one place.",
+      "stepsTitle": "From an idea to your first stream",
+      "steps": [
+        {
+          "title": "Make it yours",
+          "text": "Your name, description and link help your audience recognize you."
+        },
+        {
+          "title": "Set up support",
+          "text": "Add a goal and style your OBS alerts. Try everything in test mode."
+        },
+        {
+          "title": "Share your link",
+          "text": "Your audience chooses when and how to support you."
+        }
+      ],
+      "futureTitle": "A useful purchase. Support for you.",
+      "futureText": "Curate a storefront or enable just a promo code. Codes work across eligible marketplace products; your storefront contains selected products with higher support rates. The buyer pays the ordinary price. Configure it in your studio; payments remain in testing.",
+      "faq": [
+        {
+          "q": "Do I have to stream?",
+          "a": "No. Public pages work for different kinds of creators. OBS tools are only needed for live broadcasts."
+        },
+        {
+          "q": "Can I accept real money yet?",
+          "a": "Payments in the current local MVP are simulated. Real payments and payouts require provider integration and review."
+        },
+        {
+          "q": "Where do I manage my page?",
+          "a": "In your dashboard after setting up your profile. The homepage still stays a marketplace."
+        }
+      ]
+    },
+    "seller": {
+      "label": "FOR DIGITAL GOODS SELLERS",
+      "title": "Made something good? Bring it here.",
+      "note": "from your folder to the world",
+      "lead": "Digital assets, design, lessons or services. Explain what buyers get, set clear terms and manage orders in one place.",
+      "cta": "Set up your seller profile",
+      "strip": "SOMEBODY COULD USE WHAT YOU MADE",
+      "preview": "Your product's journey",
+      "previewTitle": "From an idea to the catalog",
+      "previewText": "Description, terms, moderation and a clear order process.",
+      "stepsTitle": "Every item has a journey",
+      "steps": [
+        {
+          "title": "Set up your profile",
+          "text": "Introduce yourself and your work. Buyers want to know who made it."
+        },
+        {
+          "title": "Add your product",
+          "text": "Set the price, contents, timing and delivery method. Then submit it for moderation."
+        },
+        {
+          "title": "Manage your orders",
+          "text": "Follow order statuses, meet your terms and deliver through the existing order process."
+        }
+      ],
+      "futureTitle": "Your products in creator storefronts",
+      "futureText": "Set two support rates from your proceeds: higher for storefronts, lower for promo codes. Price comparisons respect the exact variant. Configure rates in the editor; live payouts require a separate launch.",
+      "faq": [
+        {
+          "q": "What can I sell?",
+          "a": "Digital goods and services in the catalog's permitted categories. Products need clear descriptions and terms and go through moderation."
+        },
+        {
+          "q": "How do buyers receive their order?",
+          "a": "The listing specifies delivery: digital file, manual delivery or a session. Explain your terms and timing in advance."
+        },
+        {
+          "q": "Can I receive real payouts?",
+          "a": "The local MVP currently uses test payments. Real payments and payouts are separate launch stages following provider review."
+        }
+      ]
+    }
+  },
+  "shared": {
+    "faq": "A few useful answers",
+    "planned": "Support through purchases",
+    "demo": "Illustration, not live data",
+    "back": "Explore the marketplace",
+    "step": "Step",
+    "roleFooter": "At your own pace. No promises of easy money.",
+    "continue": "Get started",
+    "selected": "Selected"
+  }
+}

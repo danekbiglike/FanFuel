@@ -1,0 +1,743 @@
+/* UX-TASK-041: композиция и типографика по утверждённому макету. */
+@font-face {
+  font-family: Golos;
+  src: url("/fonts/golos.woff2") format("woff2");
+  font-weight: 400 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: Caveat;
+  src: url("/fonts/caveat.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+body {
+  font-family: Golos, Arial, sans-serif;
+}
+.fuel-hand {
+  font-family: Caveat, cursive;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 29px;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+.fuel-wrap {
+  max-width: 1392px;
+  width: calc(100% - 64px);
+}
+.ff-brand {
+  font-weight: 850;
+  letter-spacing: -0.7px;
+}
+.fuel-header-catalog {
+  border-radius: 14px;
+}
+.fuel-audience-slot {
+  height: 58px;
+  border: 0;
+  justify-content: center;
+}
+.fuel-audience {
+  gap: 24px;
+}
+.fuel-audience button {
+  border-radius: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 8px 4px;
+  min-height: 44px;
+}
+.fuel-audience button[aria-selected="true"] {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid var(--color-foreground);
+  font-weight: 750;
+}
+.fuel-category-strip {
+  scrollbar-width: none;
+  padding: 8px 0 12px;
+  gap: 28px;
+  border-bottom: 1px solid var(--color-border);
+}
+.fuel-category-strip a {
+  border: 0;
+  border-radius: 0;
+  padding: 8px 0;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fuel-category-strip a.is-active {
+  background: none;
+  color: var(--color-foreground);
+  border: 0;
+  font-weight: 750;
+}
+.fuel-market-intro {
+  padding: 38px 0 30px;
+  gap: 32px;
+}
+.fuel-market-intro h1 {
+  font-size: clamp(38px, 5.5vw, 80px);
+  font-weight: 820;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  margin-bottom: 18px;
+}
+.fuel-market-intro h1 span {
+  position: relative;
+  isolation: isolate;
+}
+.fuel-market-intro h1 span:after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 4%;
+  right: 0;
+  bottom: 1px;
+  height: 8px;
+  background: var(--brand-lime);
+  clip-path: polygon(0 20%, 80% 0, 100% 35%, 96% 77%, 20% 100%, 2% 70%);
+  transform: rotate(-1deg);
+}
+.fuel-market-intro .fuel-eyebrow {
+  font-size: 9px;
+  margin-bottom: 14px;
+}
+.fuel-intro-note {
+  width: 210px;
+  transform: rotate(-7deg);
+  margin-right: 20px;
+}
+.fuel-intro-note .fuel-hand {
+  font-size: 33px;
+}
+.fuel-section-head {
+  margin: 18px 0;
+}
+.fuel-section-head h2 {
+  font-size: 24px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+.fuel-feed-content {
+  --fuel-card-height: calc((100cqw - 60px) / 6.4 + 174px);
+  min-height: var(--fuel-card-height);
+}
+.fuel-product-art {
+  aspect-ratio: 8/5;
+  border-radius: 16px;
+  align-items: flex-start;
+  padding: 22px;
+}
+.fuel-product-meta {
+  min-height: 24px;
+}
+.fuel-product-skeleton .fuel-skeleton-line:nth-child(2) {
+  height: 24px;
+}
+.fuel-product h3 {
+  font-weight: 650;
+}
+.fuel-product-actions .fuel-add {
+  background: transparent;
+  flex: 0 1 auto;
+  margin-left: auto;
+  border-color: var(--color-border-strong);
+}
+.fuel-product-actions .fuel-add:hover,
+.fuel-product-actions .fuel-add[aria-pressed="true"] {
+  background: var(--brand-lime);
+  color: var(--brand-ink);
+}
+.fuel-product-actions .fuel-save {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: var(--color-surface);
+  width: 36px;
+  min-height: 36px;
+}
+.fuel-empty,
+.fuel-empty[role="status"] {
+  min-height: var(--fuel-card-height);
+  border-radius: 16px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  padding: 20px 6%;
+  gap: 30px;
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+  background: var(--color-surface);
+}
+.fuel-empty .oily-art {
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+.fuel-empty h3 {
+  font-size: 27px;
+  line-height: 1.1;
+  font-weight: 800;
+}
+.fuel-empty p {
+  margin-bottom: 18px;
+}
+.oily-pencil {
+  object-fit: contain;
+  transform: rotate(var(--oily-tilt, 0deg));
+  transition: transform 200ms ease;
+}
+[data-theme="dark"] .oily-pencil {
+  filter: drop-shadow(0 0 1px var(--brand-paper));
+}
+.fuel-discover {
+  margin-top: 36px;
+}
+.fuel-discover-grid {
+  grid-template-columns: 1.3fr 1fr 1fr 1fr;
+  gap: 16px;
+}
+.fuel-discover-card {
+  min-height: 240px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+.fuel-discover-card:first-child {
+  background: var(--brand-lime);
+  color: var(--brand-ink);
+  border-color: var(--brand-lime);
+}
+.fuel-discover-card:first-child p,
+.fuel-discover-card:first-child .fuel-eyebrow {
+  color: var(--brand-ink);
+}
+.fuel-discover-card h3 {
+  font-weight: 800;
+  font-size: 25px;
+  max-width: 210px;
+}
+.fuel-discover-card p {
+  min-height: 0;
+}
+.fuel-category-glyph {
+  font-weight: 850;
+  font-size: 64px;
+  letter-spacing: -7px;
+  line-height: 1;
+  margin-top: auto;
+  transform: rotate(-8deg);
+  align-self: flex-start;
+}
+.fuel-discover-card:nth-child(3) .fuel-category-glyph {
+  font-family: Caveat, cursive;
+  font-size: 100px;
+  font-weight: 600;
+}
+.fuel-oily {
+  justify-content: flex-start;
+  min-height: 215px;
+  padding: 12px 24px;
+  gap: 18px;
+  border-bottom: 1px solid var(--color-border);
+  margin-top: 28px;
+}
+.fuel-oily .fuel-hand {
+  font-size: 27px;
+}
+.fuel-oily-character {
+  width: 170px;
+  flex-shrink: 0;
+}
+.fuel-oily-character .oily-art {
+  width: 170px;
+  height: 170px;
+}
+.fuel-oily p {
+  min-height: 44px;
+}
+@media (max-width: 1199px) {
+  .fuel-feed-content {
+    --fuel-card-height: calc((100cqw - 20px) / 3.2 + 174px);
+    min-height: var(--fuel-card-height);
+  }
+  .fuel-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fuel-product-skeleton:nth-last-child(-n + 2) {
+    display: none;
+  }
+  .fuel-discover-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fuel-market-intro h1 {
+    font-size: clamp(40px, 6vw, 68px);
+  }
+}
+@media (max-width: 767px) {
+  .fuel-wrap {
+    width: calc(100% - 32px);
+  }
+  .fuel-audience-slot {
+    height: 54px;
+  }
+  .fuel-audience {
+    gap: 22px;
+  }
+  .fuel-category-strip {
+    gap: 22px;
+    padding: 4px 0 9px;
+  }
+  .fuel-market-intro {
+    padding: 24px 0 18px;
+    display: block;
+  }
+  .fuel-market-intro h1 {
+    font-size: clamp(35px, 7.4vw, 54px);
+    max-width: 630px;
+    margin-bottom: 15px;
+  }
+  .fuel-market-intro .fuel-eyebrow {
+    font-size: 8px;
+  }
+  .fuel-market-intro p:last-child {
+    font-size: 13px;
+  }
+  .fuel-intro-note {
+    display: block;
+    width: auto;
+    margin: 12px 6px 0 0;
+    transform: rotate(-3deg);
+    text-align: right;
+  }
+  .fuel-intro-note .fuel-hand {
+    font-size: 25px;
+  }
+  .fuel-intro-note svg {
+    display: none;
+  }
+  .fuel-feed-content {
+    --fuel-card-height: calc((100cqw - 16px) / 3.2 + 180px);
+    min-height: var(--fuel-card-height);
+  }
+  .fuel-product-grid {
+    gap: 24px 16px;
+  }
+  .fuel-empty,
+  .fuel-empty[role="status"] {
+    padding: 20px;
+    gap: 8px;
+  }
+  .fuel-empty .oily-art {
+    width: 110px;
+    height: 150px;
+  }
+  .fuel-empty h3 {
+    font-size: 23px;
+  }
+  .fuel-empty p {
+    font-size: 12px;
+  }
+  .fuel-empty .fuel-button {
+    font-size: 12px;
+    padding: 10px 14px;
+  }
+  .fuel-section-head h2 {
+    font-size: 22px;
+  }
+  .fuel-feed-tools {
+    gap: 10px;
+  }
+  .fuel-product-art {
+    padding: 16px;
+  }
+  .fuel-discover-card {
+    min-height: 225px;
+    padding: 18px;
+  }
+  .fuel-discover-card h3 {
+    font-size: 23px;
+  }
+  .fuel-discover-card p {
+    font-size: 12px;
+  }
+  .fuel-category-glyph {
+    font-size: 56px;
+  }
+  .fuel-oily {
+    padding: 12px 0;
+    min-height: 205px;
+    gap: 8px;
+  }
+  .fuel-oily-character,
+  .fuel-oily-character .oily-art {
+    width: 130px;
+    height: 150px;
+  }
+  .fuel-oily .fuel-hand {
+    font-size: 25px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .oily-pencil {
+    transition: none;
+  }
+}
+[data-low-data="true"] .oily-pencil {
+  transition: none;
+}
+
+/* UX-TASK-042: нарисованный выбор роли, редакционный указатель, один Ойли. */
+.fuel-audience {
+  gap: clamp(4px, 2vw, 20px);
+}
+.fuel-audience button,
+.fuel-audience button[aria-selected="true"] {
+  position: relative;
+  min-width: clamp(88px, 12vw, 150px);
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-foreground);
+}
+.fuel-audience button[aria-selected="false"] { color: var(--color-muted-foreground); }
+.fuel-audience button span { position: relative; z-index: 1; }
+.fuel-audience-sketch {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: var(--color-foreground);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: rotate(-1.2deg);
+}
+.fuel-audience-sketch path:first-child {
+  stroke-dasharray: 580;
+  stroke-dashoffset: 580;
+  animation: fuel-outline-draw 430ms ease-out forwards;
+}
+.fuel-audience-sketch path:last-child {
+  opacity: .56;
+  stroke-width: 1.1;
+  stroke-dasharray: 360;
+  stroke-dashoffset: 360;
+  animation: fuel-outline-draw 350ms 180ms ease-out forwards;
+}
+@keyframes fuel-outline-draw { to { stroke-dashoffset: 0; } }
+.fuel-audience button:focus-visible { outline: 2px solid var(--brand-lime); outline-offset: 4px; }
+
+.fuel-intro-note { position: relative; min-height: 122px; }
+.fuel-oily-anchor { display: block; position: absolute; width: 90px; height: 90px; pointer-events: none; }
+.fuel-oily-anchor-welcome { top: 42px; left: 74px; }
+.fuel-oily-anchor-role { right: 10px; bottom: 10px; }
+.fuel-oily-anchor-step { right: 4px; bottom: 4px; }
+.fuel-direction-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(24px, 5vw, 88px);
+  border-top: 1px solid var(--color-border-strong);
+}
+.fuel-direction {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 20px 2px 22px;
+  min-height: 76px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-foreground);
+  text-decoration: none;
+}
+.fuel-direction:hover .fuel-direction-name,
+.fuel-direction:focus-visible .fuel-direction-name { text-decoration: underline; text-decoration-color: var(--brand-lime); text-decoration-thickness: 4px; text-underline-offset: 4px; }
+.fuel-direction-number { font-size: 11px; color: var(--color-muted-foreground); font-variant-numeric: tabular-nums; }
+.fuel-direction-name { font-size: clamp(21px, 2.5vw, 33px); font-weight: 740; letter-spacing: -.035em; line-height: 1.08; }
+
+.fuel-oily-actor {
+  position: fixed;
+  z-index: 24;
+  width: 88px;
+  height: 88px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: left 380ms ease, top 380ms ease, opacity 160ms ease, visibility 160ms;
+}
+.fuel-oily-actor[data-visible="true"] { opacity: 1; visibility: visible; }
+.fuel-oily-figure { display: block; width: 88px; height: 88px; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; }
+.fuel-oily-figure .oily-art { display: block; width: 88px; height: 88px; }
+.fuel-oily-figure:focus-visible { outline: 2px solid var(--brand-lime); outline-offset: 2px; }
+.fuel-oily-speech {
+  position: absolute;
+  right: 70px;
+  bottom: 66px;
+  width: min(220px, calc(100vw - 130px));
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 16px 16px 4px 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .1);
+  pointer-events: auto;
+  display: none;
+  font-size: 12px;
+}
+.fuel-oily-actor[data-speaking="true"] .fuel-oily-speech { display: block; }
+.fuel-oily-speech p { margin: 0 0 4px; }
+.fuel-oily-return { pointer-events: auto; border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-foreground); border-radius: 20px; padding: 6px 10px; font-size: 11px; }
+@media (max-width: 767px) {
+  .fuel-audience button, .fuel-audience button[aria-selected="true"] { min-width: 88px; padding: 10px 8px; }
+  .fuel-intro-note { min-height: 92px; margin-right: 72px; }
+  .fuel-oily-anchor-welcome { left: auto; right: -71px; top: 8px; }
+  .fuel-direction-list { grid-template-columns: 1fr; }
+  .fuel-direction { min-height: 64px; padding: 14px 2px; }
+  .fuel-oily-actor, .fuel-oily-figure, .fuel-oily-figure .oily-art { width: 72px; height: 72px; }
+  .fuel-oily-speech { right: 52px; bottom: 54px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fuel-audience-sketch path { animation: none !important; stroke-dashoffset: 0 !important; }
+  .fuel-oily-actor { transition: none; }
+}
+[data-low-data="true"] .fuel-audience-sketch path { animation: none; stroke-dashoffset: 0; }
+[data-low-data="true"] .fuel-oily-actor { transition: none; }
+
+.fuel-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
+/* Короткие следы карандаша поддерживают действия без декоративных символов. */
+.fuel-header-catalog,
+.fuel-category-strip a,
+.fuel-direction,
+.fuel-step-buttons button {
+  position: relative;
+}
+.fuel-header-catalog::after,
+.fuel-category-strip a::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 4px;
+  height: 4px;
+  background: var(--brand-lime);
+  clip-path: polygon(0 58%, 22% 22%, 62% 40%, 100% 8%, 98% 78%, 56% 100%, 17% 72%);
+  transform: scaleX(0) rotate(-2deg);
+  transform-origin: left center;
+  transition: transform 160ms ease;
+  pointer-events: none;
+}
+.fuel-header-catalog:hover::after,
+.fuel-header-catalog:focus-visible::after,
+.fuel-category-strip a:hover::after,
+.fuel-category-strip a:focus-visible::after,
+.fuel-category-strip a.is-active::after {
+  transform: scaleX(1) rotate(-2deg);
+}
+.fuel-category-strip a::after {
+  left: 3px;
+  right: 3px;
+  bottom: -2px;
+  height: 5px;
+}
+.fuel-session-line::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border: 2px solid var(--brand-lime);
+  border-radius: 47% 53% 62% 38%;
+  transform: rotate(-12deg);
+}
+.fuel-intro-note svg {
+  width: 190px;
+  height: 38px;
+  max-width: 100%;
+  color: var(--brand-lime);
+  transform: rotate(2deg);
+}
+.fuel-direction {
+  grid-template-columns: 38px minmax(0, 1fr) 48px;
+  transition: padding-left 160ms ease;
+}
+.fuel-direction::after {
+  content: "";
+  justify-self: end;
+  align-self: center;
+  width: 27px;
+  height: 9px;
+  background: var(--color-foreground);
+  opacity: 0.32;
+  clip-path: polygon(0 34%, 85% 4%, 100% 25%, 91% 75%, 12% 100%, 2% 77%);
+  transform: rotate(-8deg);
+  transition: width 160ms ease, transform 160ms ease, opacity 160ms ease, background 160ms ease;
+}
+.fuel-direction:nth-child(3n + 2)::after {
+  width: 19px;
+  transform: rotate(5deg);
+}
+.fuel-direction:nth-child(4n + 3)::after {
+  width: 33px;
+  opacity: 0.22;
+}
+.fuel-direction:hover,
+.fuel-direction:focus-visible {
+  padding-left: 6px;
+}
+.fuel-direction:hover::after,
+.fuel-direction:focus-visible::after {
+  width: 42px;
+  background: var(--brand-lime);
+  opacity: 1;
+  transform: rotate(-3deg);
+}
+.fuel-direction:focus-visible {
+  outline: 2px solid var(--brand-lime);
+  outline-offset: 3px;
+}
+.fuel-cover-ink {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(84%, 310px);
+  height: 84%;
+  color: var(--color-foreground);
+  opacity: 0.46;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(4deg);
+  transition: transform 180ms ease;
+}
+.fuel-cover-ink .fuel-cover-ink-main {
+  stroke-width: 4;
+}
+.fuel-product-art:hover .fuel-cover-ink,
+.fuel-product-art:focus-visible .fuel-cover-ink {
+  transform: translate(-50%, -50%) rotate(1deg) scale(1.03);
+}
+.fuel-art-caption {
+  z-index: 1;
+  font-size: 10px;
+}
+.fuel-empty {
+  position: relative;
+  overflow: hidden;
+}
+.fuel-empty > div {
+  position: relative;
+  z-index: 1;
+}
+.fuel-empty-ink {
+  position: absolute;
+  right: clamp(22px, 9vw, 130px);
+  top: calc(50% - 72px);
+  width: clamp(120px, 20vw, 210px);
+  height: auto;
+  color: var(--color-foreground);
+  opacity: 0.16;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  pointer-events: none;
+  transform: rotate(-7deg);
+}
+.fuel-paper-ink {
+  width: clamp(90px, 17vw, 160px);
+  flex: 0 0 auto;
+  color: currentColor;
+  stroke: currentColor;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  transform: rotate(-6deg);
+}
+.fuel-step-buttons button {
+  isolation: isolate;
+  overflow: hidden;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+.fuel-step-buttons button::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 10px;
+  bottom: 10px;
+  width: 6px;
+  background: var(--brand-lime);
+  clip-path: polygon(16% 0, 100% 5%, 80% 48%, 100% 94%, 8% 100%, 0 52%);
+  opacity: 0;
+  transform: scaleY(0.5);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.fuel-step-buttons button[aria-pressed="true"] {
+  transform: rotate(-0.5deg);
+}
+.fuel-step-buttons button[aria-pressed="true"]::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+.fuel-step-buttons button:hover:not([aria-pressed="true"]) {
+  transform: translateY(-2px);
+}
+@media (max-width: 767px) {
+  .fuel-intro-note {
+    min-height: 76px;
+  }
+  .fuel-intro-note svg {
+    display: block;
+    width: 146px;
+    height: 30px;
+    margin: -5px 0 0 auto;
+  }
+  .fuel-oily-anchor-welcome {
+    top: 1px;
+  }
+  .fuel-empty-ink {
+    right: 10px;
+    top: 15px;
+    width: 95px;
+    opacity: 0.12;
+  }
+  .fuel-paper-ink {
+    width: 80px;
+  }
+  .fuel-direction {
+    grid-template-columns: 38px minmax(0, 1fr) 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fuel-header-catalog::after,
+  .fuel-category-strip a::after,
+  .fuel-direction,
+  .fuel-direction::after,
+  .fuel-cover-ink,
+  .fuel-step-buttons button,
+  .fuel-step-buttons button::before {
+    transition: none;
+  }
+}
+[data-low-data="true"] .fuel-header-catalog::after,
+[data-low-data="true"] .fuel-category-strip a::after,
+[data-low-data="true"] .fuel-direction,
+[data-low-data="true"] .fuel-direction::after,
+[data-low-data="true"] .fuel-cover-ink,
+[data-low-data="true"] .fuel-step-buttons button,
+[data-low-data="true"] .fuel-step-buttons button::before {
+  transition: none;
+}

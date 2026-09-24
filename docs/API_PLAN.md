@@ -1365,3 +1365,29 @@ Envelope:
 Авторизованный пользователь передаёт title (2–80 символов), description (до 1000). Транзакционно добавляет собственную роль streamer и creator_profile со статусом draft. Повторный запрос возвращает существующий профиль без перезаписи. Ответ CurrentUser; стандартные unauthorized/validation/forbidden. Не принимает user_id, role или status.
 
 UX-TASK-031: обнаружена выдача draft авторов публичными GET и допустимость draft в разрешении адресата доната. В связи с созданием приватных черновиков разрешён только published; PublicProfile скрывает непубличный creator_profile. Provider/суммы/проведение платежей не меняются. Изменение доступа намеренное, чтобы черновик не был публичным до публикации.
+
+## UX-TASK-041 — commerce API v1
+
+- `GET /api/v1/seller/products/{id}`: чтение черновика только владельцем.
+- `GET /api/v1/seller/products/{id}/insights`: сравнение собственного черновика с опубликованными предложениями; черновики других продавцов не раскрываются. Quote возвращает fingerprint; checkout передаёт quote_fingerprint для проверки неизменности условий.
+- `POST /api/v1/media/uploads`: авторизованный автор запрашивает подписанный URL на 5 минут для `creator_avatar|creator_banner`; лимит размера 2 MiB, PNG/JPEG, ограничение пикселей. `PUT /api/v1/media/uploads/{id}?expires=&signature=`: одноразовая загрузка с проверкой подписи и повторным декодированием/перекодированием JPEG без metadata. `GET /api/v1/media/{id}`: владелец с auth либо изображение, используемое в опубликованной витрине. Произвольные внешние URL не принимаются.
+
+Локальный адаптер MediaStorage работает только вне production. Для production требуется S3/R2-адаптер с тем же контрактом; API не включает локальное хранилище молча.
+
+- `GET /api/v1/commerce/products/{idOrSlug}`: публичные строгие аналоги, ориентир цены, информация о варианте. Только опубликованные разрешённые предложения; bounded 1000 observations.
+- `GET /api/v1/commerce/quote?product_id=&quantity=&storefront=&promo_code=&attribution_choice=`: server quote; без побочного эффекта. При конфликте возвращаются оба кандидата и `choice_required=true`; заказ без выбора отвергается.
+- `GET|PUT /api/v1/studio/commerce`: авторизованный владелец creator profile; настройки, товары, статистика. PUT принимает ожидаемую revision, конфликт 409; валидация и audit log.
+- `GET /api/v1/commerce/creators/{slug}`: опубликованная витрина, независимо включённый промокод и безопасный design.
+- `GET /api/v1/commerce/search?query=&format=&platform=&region=&sort=&limit=&offset=`: структурированный поиск, FTS; форматы не смешиваются при явном фильтре.
+
+Поиск также принимает category и group_equivalent (по умолчанию true). Выдача объединяет точные варианты внутри валюты и выбирает минимальную цену, неизвестные атрибуты не объединяются. Кабинет автора передаёт false для выбора конкретного продавца. Русская морфология + simple FTS + pg_trgm для опечаток; комиссионная ставка не влияет на ранг.
+- `PUT /api/v1/seller/products/{id}/commerce`: seller ownership, только draft/rejected; identity и обе ставки. Категории/модерация сохраняются.
+- `POST /api/v1/orders`: дополнительно storefront, attribution_choice; существующие поля сохраняются. CreatorProfileID не позволяет назначить произвольного получателя: требуется подтверждённый источник.
+
+Ошибки используют стабильные code + i18n_key. Лимиты публичного поиска/quote, проверка длины и параметризованный SQL. Результат quote предварительный, заказ повторно проверяет условия и сохраняет snapshot.
+
+### Итог UX-TASK-041: совместимость и ошибки
+
+GET /api/v1/seller/products/{id} — авторизованный владелец; GET /api/v1/seller/products/{id}/insights — ориентиры для собственного draft/rejected. Публичный GET не раскрывает черновики. Product расширен необязательным cover_url из public image/preview product_media.
+
+Новый checkout передаёт quote_fingerprint; несовпадение условий — conflict 409. Без attribution_choice при конфликте двух авторов — attribution_choice_required; promo/storefront/none выбирает ровно один вариант поддержки. Legacy клиенты пока могут не передавать fingerprint, сервер всё равно пересчитывает условия. Новые idempotency keys scoped buyer, чтение старых ограничено тем же владельцем. Media GET проверяет ACL до условного ответа ETag/304, Cache-Control private,no-cache. Подробный алгоритмический контракт — MARKETPLACE_ALGORITHMS.md.

@@ -1,5 +1,17 @@
 # UX Implementation Status
 
+## UX-TASK-044 — опубликованная тестовая главная, 24.09.2026
+
+`PAGE-PLAYGROUND` на `https://playground.fanfuel.ru/`: `IMPLEMENTED`. Статический макет с фиктивными карточками и отключёнными торговыми действиями; карандашный Ойли, перетаскивание и настройки работают. `PAGE-HOME` и `PAGE-MARKETPLACE` не переписаны: их прежний статус `NEEDS_REWORK` сохраняется. Художественная оценка и перенос актора на реальные страницы ещё впереди.
+
+## UX-TASK-043 — новое требование к Ойли поверх сайта, 23.09.2026
+
+Дополнение: владелец запросил свободное перетаскивание Ойли на выбранную им карточку, скоростное растяжение и смятие самого векторного штриха. Слабое столкновение обрабатывается мягкой физикой, сильное по порогу скорости запускает авторский клип. Спецификация, tracker и задачи обновлены. В пакете `pencil-engine` создан изолированный стенд решётки и двух DOM-карточек; в production `OilyStage` этот механизм ещё не включён, художественная форма Ойли открыта для оценки.
+
+Пользователь уточнил: Ойли должен быть actor, визуально взаимодействующим с DOM сайта, например падать от хедера к нижней поверхности первого экрана или ударяться о карточку товара. Это проектный UI-пилот на существующих `/` и `/marketplace`, связанный с `UX-TASK-038`; полная World-страница остаётся FUTURE. Сначала обновлены `PAGE_SPECS`, `UI_UX_TRACKER`, `USER_FLOWS`, `TASKS` и технический план `PENCIL_ENGINE_WEB_STAGE`. Текущий код `OilyStage` умеет якоря и CSS-перемещение, но сцены падения/столкновения и новый карандашный actor пока не реализованы. Следующий срез: один `intro-fall`, затем `bump → recover`, с проверкой кликов, scroll/resize, reduced-motion и производительности.
+
+> Решение 2026-09-22: актуальный контракт — UX-TASK-040 (`docs/tasks/ui-ux/UX-TASK-040.md`), статус implemented_local; product review и интеграционная проверка ожидаются. / и /marketplace: три вкладки только гостям, после входа — marketplace. /for-streamers и /for-sellers: полноценные презентации в гостевых вкладках и самостоятельные страницы через footer/поиск. Утверждён графит/лайм #cafa39, SVG-Ойли, лёгкий motion и стабильные skeleton. Этот контракт заменяет противоречащие указания Aurora и вкладок для всех ниже. Полная игра World остаётся FUTURE.
+
 Рабочий документ для ручного обновления UX-логики. Если новая логика придумана текстом, сначала добавить её сюда, затем обновить `docs/UI_UX_TRACKER.md`, `docs/PAGE_SPECS.md`, `docs/USER_FLOWS.md` и `docs/TASKS.md`, и только потом менять код.
 
 ## Как пользоваться этим документом
@@ -19,7 +31,7 @@ UX-TASK-034: PAGE-GAMING `/gaming` реализована как скрытый 
 | ----------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | UX-IMPL-001 | Главная FanFuel                                      | `apps/web /`                                                                                                                                                                  | v0.2   | PARTIAL     | Есть landing, но нужен v0.3 role/marketplace update.                                                                                                                                                                                                                                                                                                                                                                                                          |
 | UX-IMPL-002 | Единая авторизация                                   | `apps/web /auth`, redirects `/auth/login`, `/auth/register`                                                                                                                   | v0.3.5 | IMPLEMENTED | Email-first flow: существующий email → пароль; новый → одноразовый код → новый пароль. Незаданное имя ведёт на `/auth/name`.                                                                                                                                                                                                                                                                                                                                  |
-| UX-IMPL-003 | Подтверждённая базовая регистрация                   | `apps/web /auth`, `/auth/name`                                                                                                                                                | v0.3.5 | IMPLEMENTED | Аккаунт создаётся только после email code и одноразового registration token; роль не выбирается, имя платформы задаётся следующим шагом.                                                                                                                                                                                                                                                                                                                     |
+| UX-IMPL-003 | Подтверждённая базовая регистрация                   | `apps/web /auth`, `/auth/name`                                                                                                                                                | v0.3.5 | IMPLEMENTED | Аккаунт создаётся только после email code и одноразового registration token; роль не выбирается, имя платформы задаётся следующим шагом.                                                                                                                                                                                                                                                                                                                      |
 | UX-IMPL-004 | Публичная страница автора с донатами                 | `apps/web /creators/[slug]`                                                                                                                                                   | v0.2   | PARTIAL     | Есть донат, цели, история, top donors.                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | UX-IMPL-005 | OBS donation alert widget                            | `apps/widget /?token=`                                                                                                                                                        | v0.2   | PARTIAL     | Есть reconnect/dedupe/theme, нет settings preview.                                                                                                                                                                                                                                                                                                                                                                                                            |
 | UX-IMPL-006 | Базовая admin users panel                            | `apps/admin /`                                                                                                                                                                | v0.3   | PARTIAL     | Есть list/block/activate, confirmation и вкладка moderation товаров; filters/details позже.                                                                                                                                                                                                                                                                                                                                                                   |
@@ -75,6 +87,10 @@ UX-TASK-034: PAGE-GAMING `/gaming` реализована как скрытый 
 | UX-UPDATE-012 | Подготовить настройки донатов                                      | PAGE-STUDIO-DONATION-SETTINGS, PAGE-CREATOR-DONATE, PAGE-WIDGET-ALERT                                                                                                                | P0        | FF-0359                                                           |
 | UX-UPDATE-013 | Подготовить продукты, подборки и каталог виджетов Studio           | PAGE-STUDIO-PRODUCTS, PAGE-STUDIO-COLLECTIONS, PAGE-STUDIO-WIDGETS                                                                                                                   | P0        | FF-0360, FF-0361                                                  |
 | UX-UPDATE-014 | Обновить текущий дизайн под FanFuel Aurora до новых v0.3.5 страниц | PAGE-HOME, PAGE-MARKETPLACE, PAGE-PRODUCT, PAGE-CHECKOUT, PAGE-BUYER-DASHBOARD, PAGE-SELLER-DASHBOARD, PAGE-ME-PROFILE, PAGE-CREATOR-PUBLIC, PAGE-ADMIN-DASHBOARD, PAGE-WIDGET-ALERT | P0        | FF-0348, FF-0349, FF-0350                                         |
+| UX-UPDATE-015 | Закрепить marketplace-first контракт главной                       | PAGE-HOME, PAGE-MARKETPLACE                                                                                                                                                          | P0        | UX-TASK-036; блокер широких изменений главной                     |
+| UX-UPDATE-016 | Выбрать живой визуальный язык вместо generic corporate UI          | Public/product/dashboard surfaces                                                                                                                                                    | P1        | UX-TASK-037; только после product review UX-TASK-036              |
+| UX-UPDATE-017 | Прототипировать контекстного маскота без экономики                 | CMP-MASCOT, selected public states                                                                                                                                                   | P1        | UX-TASK-038; после UX-TASK-037                                    |
+| UX-UPDATE-018 | Провести discovery FanFuel World                                   | PAGE-WORLD-HOME                                                                                                                                                                      | P2        | UX-TASK-039; FUTURE, production DO_NOT_BUILD_YET                  |
 
 ## Нужно спроектировать
 
@@ -111,12 +127,12 @@ UX-TASK-034: PAGE-GAMING `/gaming` реализована как скрытый 
 
 ## Заблокировано
 
-| ID             | Блок                        | Причина                      | Разблокировка                        |
-| -------------- | --------------------------- | ---------------------------- | ------------------------------------ |
-| UX-BLOCKED-001 | Password reset UI           | Нет backend reset token flow | Реализовать безопасный backend flow. |
-| UX-BLOCKED-002 | Phone/username auth         | Нет identifier/recovery model | Спроектировать уникальность, verification и recovery. |
-| UX-BLOCKED-003 | Real payment checkout UI    | Нет real provider review     | v0.5 provider/legal review.          |
-| UX-BLOCKED-004 | Payout screens              | Нет wallet/payout domain     | v0.6 ledger/payout tasks.            |
+| ID             | Блок                     | Причина                       | Разблокировка                                         |
+| -------------- | ------------------------ | ----------------------------- | ----------------------------------------------------- |
+| UX-BLOCKED-001 | Password reset UI        | Нет backend reset token flow  | Реализовать безопасный backend flow.                  |
+| UX-BLOCKED-002 | Phone/username auth      | Нет identifier/recovery model | Спроектировать уникальность, verification и recovery. |
+| UX-BLOCKED-003 | Real payment checkout UI | Нет real provider review      | v0.5 provider/legal review.                           |
+| UX-BLOCKED-004 | Payout screens           | Нет wallet/payout domain      | v0.6 ledger/payout tasks.                             |
 
 ## Требует юридической проверки
 
@@ -689,9 +705,31 @@ PAGE-HOME, PAGE-MARKETPLACE, PAGE-PRODUCT, PAGE-CHECKOUT, PAGE-BUYER-DASHBOARD, 
 ### Комментарии для агента
 ```
 
+## UX-TASK-036: marketplace-first контракт главной — 2026-09-20
+
+Статус: PLANNED
+Затрагивает: PAGE-HOME, PAGE-MARKETPLACE, FLOW-BUYER-HOME, FLOW-BUYER-SEARCH
+Приоритет: P0
+
+### Новая логика
+
+`/` и `/marketplace` считаются одной marketplace-first поверхностью для обычного покупателя. Покупатель всегда выбран по умолчанию; автор и продавец доступны вторичными вкладками. Общий каталог цифровых товаров не ограничивается creator/OBS use cases. Большие role/platform landing блоки не возвращаются в покупательский режим.
+
+### Текущее расхождение
+
+Структура и переключатель реализованы частично, но накопленные creator-commerce/landing решения позволяют странице снова читаться как лендинг или marketplace только для стримеров. Поэтому PAGE-HOME, PAGE-MARKETPLACE и связанные buyer flows переведены в `NEEDS_REWORK` до product review.
+
+### Что нужно изменить
+
+Обновить только главную marketplace-поверхность по `docs/tasks/ui-ux/UX-TASK-036.md`, добавить regression QA и не затрагивать несвязанные IMPLEMENTED страницы.
+
+### Следующие этапы
+
+После закрытия UX-TASK-036: UX-TASK-037 (живой визуальный язык), затем UX-TASK-038 (маскот). UX-TASK-039 (`world.fanfuel.ru`) остаётся FUTURE/discovery и не разрешает production route.
+
 ## UX-TASK-029: Главная с переключателем аудитории (v0.3.5)
 
-Актуальный spec для PAGE-HOME и PAGE-MARKETPLACE; заменяет прежнее требование общей презентации creator-commerce на первом экране. Статус: IMPLEMENTED.
+Исторический spec для PAGE-HOME и PAGE-MARKETPLACE. Статус: SUPERSEDED_BY_UX_TASK_036.
 
 - Под хэдером по центру расположен ползунок «Я покупатель / Я автор / Я продавец». По умолчанию покупатель, переключение меняет содержимое без навигации и назначения account roles.
 - Покупатель: компактный заголовок, категории, товары, затем авторские подборки; особенности платформы передаются спокойной подписью и деталями карточек. Большие объяснения, презентации ролей и общий CTA убраны из покупательского режима.
@@ -701,7 +739,7 @@ PAGE-HOME, PAGE-MARKETPLACE, PAGE-PRODUCT, PAGE-CHECKOUT, PAGE-BUYER-DASHBOARD, 
 
 ## UX-TASK-030: полная переработка режимов главной
 
-Статус: IMPLEMENTED. Версия: v0.3.5. Маршруты: `/`, `/marketplace`.
+Статус: SUPERSEDED_BY_UX_TASK_036. Версия: v0.3.5. Маршруты: `/`, `/marketplace`.
 Пользователь отклонил содержание и визуальную подачу всех трёх режимов UX-TASK-029, но одобрил переключатель. Разрешена полная переработка содержимого.
 
 - Сохранить переключатель аудитории и смену режимов на одном URL.
@@ -747,3 +785,16 @@ Acceptance criteria: ru/en, semantic light/dark, mobile/desktop, клавиат�
 ## UX-TASK-035 — единая авторизация и подтверждение email, 2026-09-17
 
 Реализованы PAGE-AUTH и встроенное PAGE-AUTH-VERIFY: email-first развилка, одноразовый код для нового адреса, одноразовый registration token и создание аккаунта только после подтверждения. Старые auth routes сохранены redirect-маршрутами. Mobile/desktop и light/dark проверены визуально; телефон и username остаются отдельной будущей задачей.
+
+
+## UX-TASK-041 — IN_PROGRESS
+
+Расхождение с утверждённым рисунком: гладкий SVG вместо графита, разреженная композиция, повторяющиеся плитки и чрезмерно высокий empty-state. Связанные specs/tasks обновлены перед реализацией. Согласованы источник отчислений (продавец) и выбор одного получателя.
+
+## UX-TASK-041 — IMPLEMENTED_LOCAL, 22.09.2026
+
+Выполнено по последнему запросу владельца и ответам о финансировании поддержки: дизайн, /studio, storefront media/design, независимый promo, seller editor, exact grouping/search, quote/один автор, cart attribution, проверяемый mock order snapshot. Specs/tracker/tasks обновлены до и после реализации. Production storage/settlement и полная игра не включены. Детали готовых алгоритмов и будущих адаптеров: MARKETPLACE_ALGORITHMS.md. Product review остаётся открытым.
+
+## UX-TASK-042 — новая обратная связь владельца
+
+NEEDS_REWORK: четыре маркетинговые карточки не соответствуют живому дизайну; направления каталога слишком узки; активная роль должна обводиться рукой; Ойли должен быть одним перемещаемым актёром, видимым сразу на главной. Сначала обновлены PAGE_SPECS, UI_UX_TRACKER и TASKS; реализация ограничена перечисленными блоками. Рискованные способы доставки остаются gated.

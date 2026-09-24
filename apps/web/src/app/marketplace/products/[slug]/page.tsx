@@ -8,8 +8,18 @@ import type { Product } from "@fanfuel/types";
 import { AppTopBar } from "../../../../components/app-chrome";
 import { ApiError, getProduct } from "../../../../lib/api";
 import { appLocale, dictionary } from "../../../../lib/i18n";
+import {
+  EquivalentOffers,
+  SupportPicker,
+  ProductVariant
+} from "../../../../components/commerce-shared";
+import { initialAttribution, attributionURL, type Quote } from "../../../../lib/commerce";
+import { ProductActions } from "../../../../components/market-lists";
+import { ProductCover } from "../../../../components/product-cover";
 
 export default function ProductPage() {
+  const [attribution, setAttribution] = useState(initialAttribution);
+  const [quote, setQuote] = useState<Quote | null>(null);
   const params = useParams<{ slug: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState("");
@@ -52,14 +62,17 @@ export default function ProductPage() {
                 <Badge tone="held">{dictionary.common.safeDealMockBadge}</Badge>
               </div>
               <h1 id="product-title">{product.title}</h1>
+              <ProductVariant product={product} />
+              <ProductActions product={product} attribution={attribution} />
               <p className="ff-meta">{product.description}</p>
-              <div className="ff-product-preview" aria-hidden="true">
-                <span>{kindLabel(product.kind)}</span>
+              <div className="ff-product-preview fuel-product-art">
+                <ProductCover product={product} />
               </div>
               <section className="ff-stack" aria-labelledby="product-terms">
                 <h2 id="product-terms">{dictionary.common.productTermsTitle}</h2>
                 <p>{product.terms}</p>
               </section>
+              <EquivalentOffers id={product.id} />
               <section className="ff-stack" aria-labelledby="product-reviews">
                 <h2 id="product-reviews">{dictionary.common.productReviewsTitle}</h2>
                 {product.reviews && product.reviews.length > 0 ? (
@@ -102,7 +115,17 @@ export default function ProductPage() {
                   </p>
                 </div>
                 <div className="ff-alert ff-alert-info">{dictionary.common.safeDealMockText}</div>
-                <a className="ff-button ff-button-primary" href={`/checkout/${product.id}`}>
+                <SupportPicker
+                  id={product.id}
+                  value={attribution}
+                  onChange={setAttribution}
+                  onResolved={setQuote}
+                />
+                <a
+                  className="ff-button ff-button-primary"
+                  aria-disabled={quote?.choice_required}
+                  href={attributionURL(`/checkout/${product.id}`, attribution)}
+                >
                   {dictionary.common.productBuyAction}
                 </a>
                 <a className="ff-button ff-button-secondary" href="/marketplace">

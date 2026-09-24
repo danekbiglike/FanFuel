@@ -2,7 +2,12 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Locale } from "@fanfuel/types";
-import { appLocale, getAppDictionary, getStoredLocalePreference, setStoredLocalePreference } from "../lib/i18n";
+import {
+  appLocale,
+  getAppDictionary,
+  getStoredLocalePreference,
+  setStoredLocalePreference
+} from "../lib/i18n";
 
 type AuthContextValue = {
   email: string;
@@ -23,7 +28,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStoredLocalePreference(value);
   }
 
-  return <AuthContext.Provider value={{ email, setEmail, locale, setLocale }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ email, setEmail, locale, setLocale }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

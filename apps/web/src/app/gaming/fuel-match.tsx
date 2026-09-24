@@ -719,12 +719,12 @@ export function FuelMatch() {
     nova: common["gaming.tileNova"]
   };
   const symbols: Record<TileKind, string> = {
-    spark: "✦",
+    spark: "◉",
     drop: "●",
     bolt: "ϟ",
     gem: "◆",
     heart: "♥",
-    nova: "✹"
+    nova: "▣"
   };
 
   return (
@@ -740,7 +740,7 @@ export function FuelMatch() {
             {common["gaming.localMode"]}
           </span>
           <a className={styles.backLink} href="/">
-            ← {common["gaming.back"]}
+            {common["gaming.back"]}
           </a>
         </div>
       </header>
@@ -855,7 +855,6 @@ export function FuelMatch() {
               onClick={() => setStatus(status === "paused" ? "playing" : "paused")}
               disabled={status === "won" || status === "lost"}
             >
-              {status === "paused" ? "▶" : "Ⅱ"}
               <span>{status === "paused" ? common["gaming.resume"] : common["gaming.pause"]}</span>
             </button>
           </div>
@@ -910,7 +909,7 @@ export function FuelMatch() {
             {status === "won" || status === "lost" ? (
               <div className={styles.overlay} role="dialog" aria-modal="true">
                 <span className={status === "won" ? styles.winMark : styles.loseMark}>
-                  {status === "won" ? "✦" : "↻"}
+                  {status === "won" ? "✓" : "!"}
                 </span>
                 <strong>{common[status === "won" ? "gaming.complete" : "gaming.failed"]}</strong>
                 <p>{common[status === "won" ? "gaming.completeLead" : "gaming.failedLead"]}</p>

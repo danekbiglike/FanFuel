@@ -1,49 +1,23 @@
-import { PublicLanding, type PublicLandingConfig } from "../../components/public-landing";
-
-const config: PublicLandingConfig = {
-  eyebrowKey: "forSellersEyebrow",
-  titleKey: "forSellersTitle",
-  leadKey: "forSellersLead",
-  primaryActionKey: "forSellersPrimaryAction",
-  primaryHref: "/auth",
-  secondaryActionKey: "openMarketplace",
-  secondaryHref: "/marketplace",
-  previewLabelKey: "forSellersPreviewLabel",
-  previewTitleKey: "forSellersPreviewTitle",
-  previewLeadKey: "forSellersPreviewLead",
-  cards: [
-    {
-      titleKey: "forSellersCardProductsTitle",
-      textKey: "forSellersCardProductsText"
-    },
-    {
-      titleKey: "forSellersCardModerationTitle",
-      textKey: "forSellersCardModerationText"
-    },
-    {
-      titleKey: "forSellersCardCreatorsTitle",
-      textKey: "forSellersCardCreatorsText"
-    }
-  ],
-  flow: [
-    {
-      labelKey: "forSellersFlowProduct",
-      valueKey: "statusDraft",
-      tone: "neutral"
-    },
-    {
-      labelKey: "forSellersFlowModeration",
-      valueKey: "statusModerationPending",
-      tone: "warning"
-    },
-    {
-      labelKey: "forSellersFlowOrder",
-      valueKey: "statusPaid",
-      tone: "success"
-    }
-  ]
+import type { Metadata } from "next";
+import { AppTopBar } from "../../components/app-chrome";
+import { ExperienceFooter } from "../../components/experience-footer";
+import { RolePresentation } from "../../components/role-presentation";
+import { dictionary } from "../../lib/i18n";
+// Next.js требует экспорт metadata из серверного модуля страницы.
+// eslint-disable-next-line react-refresh/only-export-components
+export const metadata: Metadata = {
+  title: dictionary.experience.roles.seller.title + " — FanFuel",
+  description: dictionary.experience.roles.seller.lead,
+  robots: { index: true, follow: true }
 };
-
-export default function ForSellersPage() {
-  return <PublicLanding config={config} />;
+export default function RolePage() {
+  return (
+    <main className="ff-page fuel-page">
+      <AppTopBar />
+      <div className="fuel-wrap fuel-standalone">
+        <RolePresentation audience="seller" />
+        <ExperienceFooter />
+      </div>
+    </main>
+  );
 }

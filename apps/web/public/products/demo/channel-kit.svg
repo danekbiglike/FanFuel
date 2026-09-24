@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" fill="none">
+  <rect width="960" height="600" fill="#E8E2D4"/>
+  <path d="M0 495c186-52 348-42 514 5 130 37 265 33 446-17v117H0V495Z" fill="#D2D8C9"/>
+  <rect x="82" y="92" width="330" height="386" rx="18" fill="#F4F0E5" stroke="#26362D" stroke-width="3"/>
+  <rect x="102" y="112" width="290" height="145" rx="12" fill="#C9FA39"/>
+  <circle cx="247" cy="185" r="52" fill="#26362D"/>
+  <path d="M226 187c13-27 28-36 45-29 10 4 17 16 17 28 0 21-18 36-41 36-22 0-39-14-39-34 0-9 4-17 11-24" stroke="#F4F0E5" stroke-width="5" stroke-linecap="round"/>
+  <rect x="103" y="278" width="288" height="46" rx="8" fill="#26362D"/><text x="127" y="308" fill="#F4F0E5" font-family="Arial,sans-serif" font-size="17" font-weight="700" letter-spacing="2">ABOUT THE CREATOR</text>
+  <rect x="103" y="342" width="288" height="46" rx="8" fill="#DFE4D9"/><text x="127" y="372" fill="#26362D" font-family="Arial,sans-serif" font-size="17" font-weight="700" letter-spacing="2">LATEST VIDEO</text>
+  <rect x="103" y="406" width="288" height="46" rx="8" fill="#DFE4D9"/><text x="127" y="436" fill="#26362D" font-family="Arial,sans-serif" font-size="17" font-weight="700" letter-spacing="2">SUPPORT LINKS</text>
+  <path d="m506 178 87-80 84 80-84 80-87-80Z" fill="#C9FA39" stroke="#26362D" stroke-width="3"/>
+  <path d="m624 344 62-57 61 57-61 57-62-57Z" fill="#AEBBAA" stroke="#26362D" stroke-width="3"/>
+  <path d="m787 193 49-44 48 44-48 45-49-45Z" fill="#F4F0E5" stroke="#26362D" stroke-width="3"/>
+  <path d="M593 178h196M686 344h-93M763 344V193" stroke="#26362D" stroke-width="3" stroke-dasharray="8 10"/>
+  <text x="490" y="465" fill="#26362D" font-family="Arial,sans-serif" font-size="68" font-weight="800" letter-spacing="-4">YOUR</text>
+  <text x="490" y="532" fill="#26362D" font-family="Arial,sans-serif" font-size="68" font-weight="800" letter-spacing="-4">CHANNEL KIT</text>
+  <path d="M487 552c139-7 260-5 379 2" stroke="#C9FA39" stroke-width="9" stroke-linecap="round"/>
+  <text x="546" y="68" fill="#526254" font-family="Arial,sans-serif" font-size="17" font-weight="700" letter-spacing="3">PROFILE SYSTEM  /  EDITABLE SVG</text>
+</svg>

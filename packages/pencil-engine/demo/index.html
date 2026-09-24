@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FanFuel Pencil</title>
+  </head>
+  <body>
+    <main>
+      <header><p class="eyebrow" id="eyebrow"></p><button id="theme" type="button"></button><h1 id="title"></h1><p id="subtitle"></p></header>
+      <div class="tabs" role="group"><button id="mascot" type="button"></button><button id="writing" type="button"></button></div>
+      <div class="stage-wrap"><canvas id="stage"></canvas></div>
+      <div class="controls">
+        <button id="play" type="button"></button><button id="pause" type="button"></button><button id="reset" type="button"></button>
+        <label for="scale" id="scale-label"></label><input id="scale" type="range" min="180" max="750" value="512" /><output id="scale-value">512 px</output>
+      </div>
+      <p class="note" id="note"></p>
+      <a id="study-link" href="./study.html"></a>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

@@ -45,7 +45,11 @@ export function getStoredToken(): string {
     return "";
   }
 
-  return window.localStorage.getItem("fanfuel_access_token") ?? "";
+  try {
+    return window.localStorage.getItem("fanfuel_access_token") ?? "";
+  } catch {
+    return "";
+  }
 }
 
 export function setStoredToken(token: string) {
@@ -62,6 +66,8 @@ export async function register(
   payload: {
     registration_token: string;
     password: string;
+    locale?: string;
+    time_zone?: string;
   },
   signal?: AbortSignal
 ): Promise<AuthResponse> {
@@ -204,7 +210,14 @@ export async function getCategories(
 }
 
 export async function getProducts(
-  params: { category?: string; query?: string; sort?: string } = {}
+  params: {
+    category?: string;
+    query?: string;
+    sort?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+  signal?: AbortSignal
 ): Promise<ProductListResponse> {
   const searchParams = new URLSearchParams();
   if (params.category) {
@@ -216,12 +229,14 @@ export async function getProducts(
   if (params.sort) {
     searchParams.set("sort", params.sort);
   }
+  if (params.limit !== undefined) searchParams.set("limit", String(params.limit));
+  if (params.offset !== undefined) searchParams.set("offset", String(params.offset));
   const query = searchParams.toString();
-  return apiFetch<ProductListResponse>(`/api/v1/products${query ? `?${query}` : ""}`);
+  return apiFetch<ProductListResponse>(`/api/v1/products${query ? `?${query}` : ""}`, { signal });
 }
 
-export async function getProduct(idOrSlug: string): Promise<Product> {
-  return apiFetch<Product>(`/api/v1/products/${encodeURIComponent(idOrSlug)}`);
+export async function getProduct(idOrSlug: string, signal?: AbortSignal): Promise<Product> {
+  return apiFetch<Product>(`/api/v1/products/${encodeURIComponent(idOrSlug)}`, { signal });
 }
 
 export async function createDonation(
@@ -372,13 +387,18 @@ export async function createOrder(
     product_id: string;
     quantity: number;
     creator_profile_id?: string;
+    storefront?: string;
+    attribution_choice?: string;
+    quote_fingerprint?: string;
     promo_code?: string;
     accepted_terms: boolean;
   },
-  idempotencyKey: string
+  idempotencyKey: string,
+  signal?: AbortSignal
 ): Promise<OrderDetail> {
   return apiFetch<OrderDetail>("/api/v1/orders", {
     method: "POST",
+    signal,
     headers: {
       ...authHeaders(token),
       "Idempotency-Key": idempotencyKey
@@ -422,7 +442,7 @@ function authHeaders(token: string): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (!headers.has("Content-Type") && init.body) {
     headers.set("Content-Type", "application/json");

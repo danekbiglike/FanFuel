@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"github.com/fanfuel/fanfuel/services/api/internal/commerce"
 	"time"
 )
 
@@ -41,11 +42,14 @@ type RejectProductRequest struct {
 }
 
 type CreateOrderRequest struct {
-	ProductID        string `json:"product_id"`
-	Quantity         int    `json:"quantity"`
-	CreatorProfileID string `json:"creator_profile_id"`
-	PromoCode        string `json:"promo_code"`
-	AcceptedTerms    bool   `json:"accepted_terms"`
+	QuoteFingerprint  string `json:"quote_fingerprint,omitempty"`
+	Storefront        string `json:"storefront,omitempty"`
+	AttributionChoice string `json:"attribution_choice,omitempty"`
+	ProductID         string `json:"product_id"`
+	Quantity          int    `json:"quantity"`
+	CreatorProfileID  string `json:"creator_profile_id"`
+	PromoCode         string `json:"promo_code"`
+	AcceptedTerms     bool   `json:"accepted_terms"`
 }
 
 type ReviewOrderRequest struct {
@@ -77,27 +81,33 @@ type SellerSummary struct {
 }
 
 type Product struct {
-	ID                  string           `json:"id"`
-	SellerProfileID     string           `json:"seller_profile_id"`
-	CategoryID          string           `json:"category_id"`
-	Kind                string           `json:"kind"`
-	Status              string           `json:"status"`
-	Title               string           `json:"title"`
-	Slug                string           `json:"slug"`
-	Description         string           `json:"description"`
-	Terms               string           `json:"terms"`
-	PriceAmountMinor    int64            `json:"price_amount_minor"`
-	Currency            string           `json:"currency"`
-	DeliveryType        string           `json:"delivery_type"`
-	AffiliatePercentBps int              `json:"affiliate_percent_bps"`
-	SafeDealRequired    bool             `json:"safe_deal_required"`
-	ModerationNote      string           `json:"moderation_note,omitempty"`
-	PublishedAt         *time.Time       `json:"published_at,omitempty"`
-	CreatedAt           time.Time        `json:"created_at"`
-	UpdatedAt           time.Time        `json:"updated_at"`
-	Category            *ProductCategory `json:"category,omitempty"`
-	Seller              *SellerSummary   `json:"seller,omitempty"`
-	Reviews             []Review         `json:"reviews,omitempty"`
+	CoverURL             string            `json:"cover_url,omitempty"`
+	Identity             commerce.Identity `json:"identity"`
+	VariantKey           string            `json:"variant_key"`
+	PromoBPS             int               `json:"promo_bps"`
+	StorefrontBPS        int               `json:"storefront_bps"`
+	CommissionConfigured bool              `json:"commission_configured"`
+	ID                   string            `json:"id"`
+	SellerProfileID      string            `json:"seller_profile_id"`
+	CategoryID           string            `json:"category_id"`
+	Kind                 string            `json:"kind"`
+	Status               string            `json:"status"`
+	Title                string            `json:"title"`
+	Slug                 string            `json:"slug"`
+	Description          string            `json:"description"`
+	Terms                string            `json:"terms"`
+	PriceAmountMinor     int64             `json:"price_amount_minor"`
+	Currency             string            `json:"currency"`
+	DeliveryType         string            `json:"delivery_type"`
+	AffiliatePercentBps  int               `json:"affiliate_percent_bps"`
+	SafeDealRequired     bool              `json:"safe_deal_required"`
+	ModerationNote       string            `json:"moderation_note,omitempty"`
+	PublishedAt          *time.Time        `json:"published_at,omitempty"`
+	CreatedAt            time.Time         `json:"created_at"`
+	UpdatedAt            time.Time         `json:"updated_at"`
+	Category             *ProductCategory  `json:"category,omitempty"`
+	Seller               *SellerSummary    `json:"seller,omitempty"`
+	Reviews              []Review          `json:"reviews,omitempty"`
 }
 
 type Order struct {

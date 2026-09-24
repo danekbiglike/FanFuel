@@ -7,7 +7,7 @@ import { useCreatorDraftMedia } from "../../lib/use-creator-draft-media";
 import type { CurrentUser } from "@fanfuel/types";
 import { AppTopBar } from "../../components/app-chrome";
 import { TypingActionLabel } from "../../components/typing-action-label";
-import { Arrow, DiscoveryArt } from "../../components/home-audience";
+import { DiscoveryArt } from "../../components/home-audience";
 import { ApiError, createCreatorDraft, getMe, getStoredToken } from "../../lib/api";
 import { creatorDraftKey, readCreatorDraft, type DraftProduct } from "../../lib/creator-draft";
 import { dictionary } from "../../lib/i18n";
@@ -230,8 +230,7 @@ export default function CreatePage() {
                       key={step}
                       label={actionLabel}
                       alternate={copy(hasStepContent ? "skip" : "next")}
-                    />{" "}
-                    <Arrow />
+                    />
                   </button>
                 </div>
                 <small className="ff-onboard-local-note">{copy("localNote")}</small>
@@ -244,7 +243,7 @@ export default function CreatePage() {
                       <p>{copy("localExtrasNote")}</p>
                     ) : null}
                     <a className="ff-button ff-button-primary" href="/me/profile">
-                      {copy("openProfile")} <Arrow />
+                      {copy("openProfile")}
                     </a>
                   </>
                 ) : busy ? (
@@ -262,7 +261,7 @@ export default function CreatePage() {
                       {copy("account")} <strong>{user.user.email}</strong>
                     </p>
                     <button className="ff-button ff-button-primary" onClick={save}>
-                      {copy("save")} <Arrow />
+                      {copy("save")}
                     </button>
                   </>
                 ) : (
@@ -275,7 +274,7 @@ export default function CreatePage() {
                         if (storageError) event.preventDefault();
                       }}
                     >
-                      {dictionary.common.createAccount} <Arrow />
+                      {dictionary.common.createAccount}
                     </a>
                     <p>
                       {copy("hasAccount")}{" "}
@@ -347,7 +346,7 @@ export default function CreatePage() {
                   {media.urls.avatar ? (
                     <Image src={media.urls.avatar} alt="" fill unoptimized sizes="64px" />
                   ) : (
-                    title.trim().slice(0, 1).toUpperCase() || "✦"
+                    title.trim().slice(0, 1).toUpperCase() || "F"
                   )}
                 </div>
                 <h2>{title.trim() || copy("previewName")}</h2>

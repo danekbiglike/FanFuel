@@ -134,7 +134,12 @@ export default function UnifiedAuthPage() {
       return;
     }
     await run(async () => {
-      const response = await register({ registration_token: registrationToken, password });
+      const response = await register({
+        registration_token: registrationToken,
+        password,
+        locale,
+        time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      });
       setStoredToken(response.access_token);
       window.location.href = authNameDestination();
     });

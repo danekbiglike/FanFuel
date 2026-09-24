@@ -147,7 +147,7 @@ func (a *App) handleVerifyEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	req.ChallengeID = strings.TrimSpace(req.ChallengeID)
 	req.Code = strings.TrimSpace(req.Code)
-	if req.ChallengeID == "" || !validVerificationCode(req.Code) {
+	if !validChallengeID(req.ChallengeID) || !validVerificationCode(req.Code) {
 		mapError(w, errValidation)
 		return
 	}

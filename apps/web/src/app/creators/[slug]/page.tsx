@@ -22,6 +22,7 @@ import {
   getPublicDonations,
   getPublicGoals
 } from "../../../lib/api";
+import { PublicStorefront } from "../../../components/storefront";
 import { appLocale, dictionary } from "../../../lib/i18n";
 
 const defaultCurrency = (process.env.NEXT_PUBLIC_DEFAULT_CURRENCY ?? "RUB") as CurrencyCode;
@@ -158,30 +159,16 @@ export default function CreatorPage() {
       <section className="ff-page-with-topbar ff-wide-page" aria-labelledby="creator-title">
         <div className="ff-creator-layout">
           <div className="ff-profile-main">
-            <div className="ff-creator-hero">
-              <div className="ff-avatar" aria-hidden="true">
-                {(creator.profile.display_name || creator.creator.creator_slug)
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </div>
-              <div className="ff-status">{dictionary.common.creatorPage}</div>
-              <h1 id="creator-title">{creator.creator.title || creator.profile.display_name}</h1>
-              <p>
-                {creator.creator.description ||
-                  creator.profile.bio ||
-                  dictionary.common.notAvailable}
-              </p>
-              <div className="ff-roles">
-                <span className="ff-chip">{dictionary.common.roleStreamer}</span>
-                <span className="ff-chip">{statusLabel(creator.creator.status)}</span>
-              </div>
-            </div>
+            <h1 id="creator-title" className="ff-sr-only">
+              {creator.creator.title || creator.profile.display_name}
+            </h1>
+            <PublicStorefront slug={params.slug} />
 
             <SupportGoals goals={goals} />
             <DonationHistory donations={donations} topDonors={topDonors} />
           </div>
 
-          <aside>
+          <aside id="donate" hidden={!creator.creator.donations_enabled}>
             <form className="ff-panel ff-form" onSubmit={handleDonationSubmit}>
               <div>
                 <h2>{dictionary.common.donateTitle}</h2>
@@ -393,21 +380,6 @@ function DonationHistory({
       ) : null}
     </section>
   );
-}
-
-function statusLabel(status: string): string {
-  switch (status) {
-    case "draft":
-      return dictionary.common.statusDraft;
-    case "published":
-      return dictionary.common.statusPublished;
-    case "hidden":
-      return dictionary.common.statusHidden;
-    case "blocked":
-      return dictionary.common.statusBlocked;
-    default:
-      return dictionary.common.notAvailable;
-  }
 }
 
 function paymentStatusLabel(status: string): string {

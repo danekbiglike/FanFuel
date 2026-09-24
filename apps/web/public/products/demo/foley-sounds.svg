@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" fill="none">
+  <rect width="960" height="600" fill="#E9E2D2"/>
+  <path d="M0 462c165-55 314-47 456 1 158 54 304 42 504-25v162H0V462Z" fill="#C7CFB9"/>
+  <path d="M0 518c163-47 307-42 458 4 177 53 322 40 502-12v90H0v-82Z" fill="#889B7F"/>
+  <rect x="62" y="56" width="50" height="50" rx="25" fill="#26362D"/><path d="M82 77v9m10-15v21m10-27v33" stroke="#C9FA39" stroke-width="4" stroke-linecap="round"/>
+  <text x="132" y="90" fill="#526254" font-family="Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="3">FIELD NOTES  /  SOUND LIBRARY</text>
+  <text x="62" y="212" fill="#26362D" font-family="Arial,sans-serif" font-size="77" font-weight="800" letter-spacing="-4">SOFT</text>
+  <text x="62" y="292" fill="#26362D" font-family="Arial,sans-serif" font-size="77" font-weight="800" letter-spacing="-4">FOOTSTEPS</text>
+  <text x="66" y="340" fill="#526254" font-family="Arial,sans-serif" font-size="22">A tiny foley library for game prototypes</text>
+  <path d="M70 427c17 0 17-53 34-53s17 76 34 76 17-119 34-119 17 161 34 161 17-94 34-94 17 31 34 31 17-65 34-65 17 103 34 103 17-49 34-49 17 22 34 22 17-66 34-66 17 83 34 83 17-37 34-37 17 19 34 19 17-51 34-51 17 83 34 83 17-26 34-26" stroke="#26362D" stroke-width="5" stroke-linecap="round"/>
+  <path d="M69 489h540" stroke="#C9FA39" stroke-width="10" stroke-linecap="round"/>
+  <g fill="#26362D"><circle cx="719" cy="251" r="68"/><circle cx="844" cy="350" r="42"/><circle cx="701" cy="438" r="25"/></g>
+  <g stroke="#E9E2D2" stroke-width="3" opacity=".7"><path d="M700 251h38m-19-19v38M822 350h44m-22-22v44M690 438h22m-11-11v22"/></g>
+  <g fill="#C9FA39"><circle cx="719" cy="251" r="8"/><circle cx="844" cy="350" r="7"/><circle cx="701" cy="438" r="5"/></g>
+  <text x="714" y="550" fill="#26362D" font-family="Arial,sans-serif" font-size="19" font-weight="700" letter-spacing="2">WAV  /  24 BIT  /  48 KHZ</text>
+</svg>
